@@ -1,4 +1,5 @@
-import { capitalize, escape as escapeHtml } from 'lodash';
+import capitalize from 'lodash-es/capitalize';
+import escapeHtml from 'lodash-es/escape';
 
 import { Ecosystem, NetworkConfig, RenderFormSchema } from '@openzeppelin/ui-types';
 import type { ContractSchema } from '@openzeppelin/ui-types';

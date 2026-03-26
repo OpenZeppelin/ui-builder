@@ -95,5 +95,5 @@ jobs:
           git checkout "$BRANCH_NAME"
           # Add both versions.ts and any updated snapshot files
           git add apps/builder/src/export/versions.ts apps/builder/src/export/__tests__/__snapshots__/
-          git commit -m "chore: update export versions and test snapshots"
+          git commit -m "chore: sync export versions from published npm metadata"
           git push origin "$BRANCH_NAME"

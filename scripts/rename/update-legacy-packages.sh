@@ -59,10 +59,10 @@ NEW_PKGS=(
   "@openzeppelin/ui-builder-storage"
   "@openzeppelin/ui-builder-ui"
   "@openzeppelin/ui-builder-utils"
-  "@openzeppelin/ui-builder-adapter-evm"
-  "@openzeppelin/ui-builder-adapter-solana"
-  "@openzeppelin/ui-builder-adapter-stellar"
-  "@openzeppelin/ui-builder-adapter-midnight"
+  "@openzeppelin/adapter-evm"
+  "@openzeppelin/adapter-solana"
+  "@openzeppelin/adapter-stellar"
+  "@openzeppelin/adapter-midnight"
 )
 
 run() {

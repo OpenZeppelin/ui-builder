@@ -1,5 +1,5 @@
 import { deepEqual } from 'fast-equals';
-import { debounce } from 'lodash';
+import debounce from 'lodash-es/debounce';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 

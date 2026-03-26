@@ -4,6 +4,11 @@ const { execSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
+const {
+  adapterPackageNames,
+  resolveLocalAdapterPackageRoot,
+  resolveAdapterPatchesDir,
+} = require('../shared/adapterPathResolver.cjs');
 
 // Enable debug mode via environment variable
 const DEBUG = process.env.DEBUG === 'true';
@@ -179,6 +184,16 @@ function packMonorepoPackages() {
   console.log(`${colors.green}✓ Build complete${colors.reset}\n`);
 
   const packagesDir = path.join(monorepoRoot, 'packages');
+  if (!fs.existsSync(packagesDir)) {
+    console.log(
+      `${colors.yellow}⚠${colors.reset} No local workspace packages directory found at ${packagesDir}.`
+    );
+    console.log(
+      `${colors.yellow}  Skipping tarball packing and using published package versions instead.${colors.reset}\n`
+    );
+    return { packDir, packedMap: {} };
+  }
+
   const packageDirs = fs
     .readdirSync(packagesDir)
     .map((dir) => path.join(packagesDir, dir))
@@ -250,8 +265,11 @@ function configureForPackedMode(extractDir, packedMap) {
   const hasMidnight = Object.keys(allDeps).some((k) => k.startsWith('@midnight-ntwrk/'));
 
   if (hasMidnight) {
-    const adapterPatchesDir = path.join(monorepoRoot, 'packages/adapter-midnight/patches');
-    if (fs.existsSync(adapterPatchesDir)) {
+    const adapterPatchesDir = resolveAdapterPatchesDir(
+      monorepoRoot,
+      '@openzeppelin/adapter-midnight'
+    );
+    if (adapterPatchesDir) {
       console.log(`\n${colors.blue}Configuring Midnight SDK patches...${colors.reset}`);
       const targetPatchesDir = path.join(extractDir, 'patches');
       fs.mkdirSync(targetPatchesDir, { recursive: true });
@@ -346,9 +364,11 @@ function exportAppSimple(options) {
     debug(`Builder package dir: ${builderPackageDir}`);
     debug(`Test path: ${testPath}`);
 
-    const configFilePath = path.join(builderPackageDir, 'vitest.config.cli-export.ts');
+    const configFilePath = 'vitest.config.cli-export.ts';
     const testFileRelativePath = path.relative(builderPackageDir, testPath);
-    const vitestCommand = `npx vitest run --config ${configFilePath} ${testFileRelativePath} --silent`;
+    // Use pnpm's local binary resolution instead of npx to avoid broken nested
+    // node_modules lookups when this CLI is launched from the monorepo root.
+    const vitestCommand = `pnpm exec vitest run --config ${configFilePath} ${testFileRelativePath} --silent`;
 
     try {
       console.log(`\n${colors.blue}Running export test via Vitest...${colors.reset}`);
@@ -391,12 +411,16 @@ function exportAppSimple(options) {
       try {
         const packageJsonPath = path.join(extractDir, 'package.json');
         const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+        const adapterOverrides = Object.fromEntries(
+          adapterPackageNames
+            .map((packageName) => {
+              const packageRoot = resolveLocalAdapterPackageRoot(monorepoRoot, packageName);
+              return packageRoot ? [packageName, `file:${packageRoot}`] : null;
+            })
+            .filter(Boolean)
+        );
         const packageOverrides = {
-          '@openzeppelin/ui-builder-adapter-evm': `file:${path.join(monorepoRoot, 'packages/adapter-evm')}`,
-          '@openzeppelin/ui-builder-adapter-midnight': `file:${path.join(monorepoRoot, 'packages/adapter-midnight')}`,
-          '@openzeppelin/ui-builder-adapter-polkadot': `file:${path.join(monorepoRoot, 'packages/adapter-polkadot')}`,
-          '@openzeppelin/ui-builder-adapter-solana': `file:${path.join(monorepoRoot, 'packages/adapter-solana')}`,
-          '@openzeppelin/ui-builder-adapter-stellar': `file:${path.join(monorepoRoot, 'packages/adapter-stellar')}`,
+          ...adapterOverrides,
           '@openzeppelin/ui-renderer': `file:${path.join(monorepoRoot, 'packages/renderer')}`,
           '@openzeppelin/ui-react': `file:${path.join(monorepoRoot, 'packages/react-core')}`,
           '@openzeppelin/ui-types': `file:${path.join(monorepoRoot, 'packages/types')}`,

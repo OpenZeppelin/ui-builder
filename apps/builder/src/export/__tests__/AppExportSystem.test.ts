@@ -101,7 +101,7 @@ describe('AppExportSystem', () => {
             '@openzeppelin/ui-renderer': 'workspace:*', // Use consistent placeholder version
             '@openzeppelin/ui-types': 'workspace:*', // Use consistent placeholder version
           };
-          const adapterDep = `@openzeppelin/ui-builder-adapter-${ecosystem}`;
+          const adapterDep = `@openzeppelin/adapter-${ecosystem}`;
           return Promise.resolve({ ...baseDeps, [adapterDep]: 'workspace:*' });
         }),
       updatePackageJson: vi
@@ -202,7 +202,7 @@ describe('AppExportSystem', () => {
       // Check PRESENCE only, as applyVersioningStrategy might change value
       expect(result.dependencies).toHaveProperty('@openzeppelin/ui-renderer');
       expect(result.dependencies).toHaveProperty('@openzeppelin/ui-types');
-      expect(result.dependencies).toHaveProperty('@openzeppelin/ui-builder-adapter-evm');
+      expect(result.dependencies).toHaveProperty('@openzeppelin/adapter-evm');
       // Check a base dependency from the mock config is still present
       expect(result.dependencies).toHaveProperty('react', '^19.0.0');
     });
@@ -235,10 +235,10 @@ describe('AppExportSystem', () => {
         funcId
       );
       expect(solanaResult.dependencies).toHaveProperty(
-        '@openzeppelin/ui-builder-adapter-solana',
+        '@openzeppelin/adapter-solana',
         'workspace:*'
       );
-      expect(solanaResult.dependencies).not.toHaveProperty('@openzeppelin/ui-builder-adapter-evm');
+      expect(solanaResult.dependencies).not.toHaveProperty('@openzeppelin/adapter-evm');
 
       // Test with EVM config (use the mock defined at top level)
       const evmResult = await system.exportApp(
@@ -247,11 +247,8 @@ describe('AppExportSystem', () => {
         mockEvmNetworkConfig,
         funcId
       );
-      expect(evmResult.dependencies).toHaveProperty(
-        '@openzeppelin/ui-builder-adapter-evm',
-        'workspace:*'
-      );
-      expect(evmResult.dependencies).not.toHaveProperty('@openzeppelin/ui-builder-adapter-solana');
+      expect(evmResult.dependencies).toHaveProperty('@openzeppelin/adapter-evm', 'workspace:*');
+      expect(evmResult.dependencies).not.toHaveProperty('@openzeppelin/adapter-solana');
     });
 
     it('should include field-specific dependencies based on form fields', async () => {

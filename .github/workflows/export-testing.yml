@@ -1,5 +1,7 @@
 # Public npm export testing workflow
 # ==================================
+# Export tests validate PackageManager + versions.ts. Adapter entries in versions.ts must stay
+# aligned with published @openzeppelin/adapter-* metadata (refreshed by scripts/update-export-versions.cjs).
 
 name: Export Testing
 

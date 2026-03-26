@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "cacheDir": ".packed-packages/local-dev",
+  "families": {
+    "ui": {},
+    "adapters": {
+      "envNames": ["LOCAL_ADAPTERS_PATH"]
+    }
+  }
+}

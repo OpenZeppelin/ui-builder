@@ -1,0 +1,21 @@
+{
+  "packageNames": [
+    "@openzeppelin/adapter-evm",
+    "@openzeppelin/adapter-midnight",
+    "@openzeppelin/adapter-polkadot",
+    "@openzeppelin/adapter-solana",
+    "@openzeppelin/adapter-stellar"
+  ],
+  "packageDirectoryByName": {
+    "@openzeppelin/adapter-evm": "adapter-evm",
+    "@openzeppelin/adapter-midnight": "adapter-midnight",
+    "@openzeppelin/adapter-polkadot": "adapter-polkadot",
+    "@openzeppelin/adapter-solana": "adapter-solana",
+    "@openzeppelin/adapter-stellar": "adapter-stellar"
+  },
+  "patchSourceDescriptions": [
+    "sibling openzeppelin-adapters checkout",
+    "installed @openzeppelin/adapter-* package",
+    "legacy ui-builder workspace fallback"
+  ]
+}

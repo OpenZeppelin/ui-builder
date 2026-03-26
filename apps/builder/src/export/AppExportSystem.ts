@@ -6,7 +6,8 @@
  * and ZipGenerator to produce a downloadable ZIP archive containing a
  * standalone app project.
  */
-import { ContractAdapter, ContractSchema, NetworkConfig } from '@openzeppelin/ui-types';
+import { ContractSchema, NetworkConfig } from '@openzeppelin/ui-types';
+import type { ContractAdapter } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
 // Lazy import types for dependency management

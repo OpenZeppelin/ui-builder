@@ -2,24 +2,42 @@ import type { Ecosystem } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
 import { AdapterConfigLoader } from '../AdapterConfigLoader';
+import { adapterPatchSourceDescriptions } from '../shared/adapterPackageSources';
 
 const LOG_SYSTEM = 'File Assembly (copyAdapterPatchFiles)';
+
+const siblingAdapterPatchModules = import.meta.glob<string>(
+  '../../../../../../openzeppelin-adapters/packages/adapter-*/patches/*.patch',
+  {
+    query: '?raw',
+    import: 'default',
+    eager: true,
+  }
+);
+
+const installedAdapterPatchModules = import.meta.glob<string>(
+  '../../../../../node_modules/@openzeppelin/adapter-*/patches/*.patch',
+  {
+    query: '?raw',
+    import: 'default',
+    eager: true,
+  }
+);
+
+/**
+ * Pre-load patch files from all supported adapter-package locations.
+ *
+ * Resolution order matters:
+ * 1. sibling `openzeppelin-adapters` checkout for local extraction work
+ * 2. installed `node_modules/@openzeppelin/adapter-*` packages
+ */
+const patchModuleSources = [siblingAdapterPatchModules, installedAdapterPatchModules] as const;
 
 /**
  * Pre-load all patch files from adapter packages using Vite's glob import.
  * This is required because Vite needs static analysis of imports at build time.
- *
- * The glob pattern matches all .patch files in any adapter package's patches directory.
- *
- * NOTE: During local development, patches must be synced to adapter packages before
- * testing export functionality. Run `pnpm sync-patches` (or `pnpm build` which includes it)
- * to ensure patch files are available in adapter package `patches/` directories.
  */
-const patchModules = import.meta.glob<string>('../../../../packages/adapter-*/patches/*.patch', {
-  query: '?raw',
-  import: 'default',
-  eager: true,
-});
+const patchModules = patchModuleSources.flatMap((modules) => Object.entries(modules));
 
 /**
  * Copies patch files from the adapter package to the exported project.
@@ -63,7 +81,10 @@ export async function copyAdapterPatchFiles(
       projectFiles[destPath] = patchContent;
       logger.debug(LOG_SYSTEM, `Copied patch file: ${destPath}`);
     } else {
-      logger.warn(LOG_SYSTEM, `Patch file not found: ${patchFileName}`);
+      logger.warn(
+        LOG_SYSTEM,
+        `Patch file not found: ${patchFileName}. Checked ${adapterPatchSourceDescriptions.join(', ')}.`
+      );
     }
   }
 }
@@ -75,9 +96,8 @@ export async function copyAdapterPatchFiles(
  * @returns The patch file content as a string, or null if not found
  */
 function findPatchContent(patchFileName: string): string | null {
-  // Search through pre-loaded patch modules for the matching file
-  for (const [path, content] of Object.entries(patchModules)) {
-    if (path.endsWith(`/${patchFileName}`)) {
+  for (const [modulePath, content] of patchModules) {
+    if (modulePath.endsWith(`/${patchFileName}`)) {
       return content;
     }
   }
