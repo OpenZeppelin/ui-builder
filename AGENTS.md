@@ -11,7 +11,6 @@ OpenZeppelin UI Builder — a pnpm monorepo (Node ≥20.19.0, pnpm 10.28.2) cont
 | Service | Command | Port | Notes |
 |---|---|---|---|
 | Vite dev server | `pnpm dev` | 5173 | Main app; requires `pnpm build` first to build adapter packages |
-| Storybook | `pnpm storybook` | 6006 | Optional; component docs |
 
 ### Key commands
 
