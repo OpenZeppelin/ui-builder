@@ -7,8 +7,6 @@
     "src/**/*.jsx",
     "src/**/*.cjs",
     "src/**/*.mjs",
-    "src/**/*.stories.ts",
-    "src/**/*.stories.tsx",
     "src/**/*.test.ts",
     "src/**/*.test.tsx",
     "./*.js",
@@ -21,6 +19,6 @@
     "allowJs": true,
     "checkJs": true,
     "noEmit": true,
-    "types": ["vitest/globals", "@testing-library/jest-dom", "node", "@storybook/react"]
+    "types": ["vitest/globals", "@testing-library/jest-dom", "node"]
   }
 }

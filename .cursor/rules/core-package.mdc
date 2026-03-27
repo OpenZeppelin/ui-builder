@@ -91,7 +91,7 @@ alwaysApply: false
 ## 6. Dependencies & Build
 
 - **Key Runtime Dependencies:** `react`, `react-dom`, `react-hook-form`, `jszip`, `@openzeppelin/ui-builder-renderer`, `@openzeppelin/ui-builder-styles`, `@openzeppelin/ui-builder-react-core`, and various `@openzeppelin/ui-builder-adapter-*` packages.
-- **Key Dev Dependencies:** `vite`, `typescript`, `@vitejs/plugin-react`, `tailwindcss`, `vitest`, `@testing-library/react`, `eslint`, `storybook`.
+- **Key Dev Dependencies:** `vite`, `typescript`, `@vitejs/plugin-react`, `tailwindcss`, `vitest`, `@testing-library/react`, `eslint`.
 - **Build Process:** `pnpm --filter @openzeppelin/ui-builder-app build` executes `vite build`.
 - **Development Server:** `pnpm --filter @openzeppelin/ui-builder-app dev` executes `vite`.
 - **Testing:** `pnpm --filter @openzeppelin/ui-builder-app test` executes `vitest run`.
