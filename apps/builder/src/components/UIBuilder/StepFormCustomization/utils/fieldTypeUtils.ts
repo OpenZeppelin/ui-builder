@@ -1,4 +1,4 @@
-import { capitalize } from 'lodash';
+import capitalize from 'lodash-es/capitalize';
 
 import type { ContractAdapter } from '@openzeppelin/ui-types';
 import { FieldType } from '@openzeppelin/ui-types';

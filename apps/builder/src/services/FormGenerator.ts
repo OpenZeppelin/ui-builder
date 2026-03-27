@@ -4,7 +4,7 @@
  * Generates form configurations based on contract functions.
  * Uses chain-specific adapters for field type mapping and other chain-specific details.
  */
-import { startCase } from 'lodash';
+import startCase from 'lodash-es/startCase';
 
 import { createTransformForFieldType } from '@openzeppelin/ui-renderer';
 import {

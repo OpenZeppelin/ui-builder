@@ -183,14 +183,6 @@ const baseConfig = [
     },
   },
 
-  // Story files override: allow console usage in Storybook stories
-  {
-    files: ['**/*.stories.tsx', '**/*.stories.jsx', '**/*.stories.ts', '**/*.stories.js'],
-    rules: {
-      'no-console': 'off',
-    },
-  },
-
   // Adapter Stellar scripts override: allow console usage in Node scripts
   {
     files: ['packages/adapter-stellar/scripts/**/*.js'],

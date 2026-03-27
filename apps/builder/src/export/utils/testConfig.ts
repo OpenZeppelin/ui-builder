@@ -1,4 +1,4 @@
-import { capitalize } from 'lodash';
+import capitalize from 'lodash-es/capitalize';
 
 import type { ContractSchema, Ecosystem, FieldType } from '@openzeppelin/ui-types';
 import { generateId } from '@openzeppelin/ui-utils';

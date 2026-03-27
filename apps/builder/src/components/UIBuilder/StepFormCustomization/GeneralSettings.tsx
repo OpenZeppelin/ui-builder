@@ -1,4 +1,4 @@
-import { debounce } from 'lodash';
+import debounce from 'lodash-es/debounce';
 import React, { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 

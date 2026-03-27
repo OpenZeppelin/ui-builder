@@ -39,9 +39,20 @@ RUN npm install -g pnpm
 # Copy all source code first, which is necessary for pnpm workspaces
 COPY . .
 
-# Install dependencies directly from the public npm registry
+# Step 1: Install dependencies from frozen lockfile (exact production dependency tree)
 # Retry once on failure after clearing possible corrupted caches to avoid node-gyp issues
 RUN pnpm install --frozen-lockfile || (echo "Install failed, clearing caches and retrying..." && rm -rf /root/.cache/node-gyp /root/.npm /root/.node-gyp && pnpm install --frozen-lockfile)
+
+# Step 2: Surgically override adapter packages for staging builds.
+# When ADAPTER_DIST_TAG is set (e.g. "rc"), the resolution script queries npm for
+# both the requested dist-tag and "latest", picks the newer version per adapter, and
+# runs `pnpm add --save-exact` for only those packages. All non-adapter dependencies
+# remain byte-for-byte identical to the frozen lockfile from Step 1.
+# When ADAPTER_DIST_TAG is unset (production), this step is a no-op.
+ARG ADAPTER_DIST_TAG
+RUN if [ -n "$ADAPTER_DIST_TAG" ]; then \
+      node scripts/resolve-staging-adapters.cjs "$ADAPTER_DIST_TAG"; \
+    fi
 
 # Build all packages in the correct order
 # This step now uses Docker BuildKit secrets to securely pass API keys

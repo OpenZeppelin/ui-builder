@@ -11,7 +11,11 @@
   "exclude": [
     "**/*.test.ts",
     "**/*.test.tsx",
+    "**/*.stories.ts",
     "**/*.stories.tsx",
+    "**/*.stories.js",
+    "**/*.stories.jsx",
+    "**/*.stories.mdx",
     "**/node_modules/**",
     "**/dist/**"
   ]

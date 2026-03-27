@@ -15,7 +15,6 @@ permissions:
 
 jobs:
   check-versions:
-    if: ${{ !startsWith(github.head_ref, 'changeset-release/') }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -76,8 +75,9 @@ jobs:
       - name: Check for changes
         run: |
           if ! git diff --exit-code apps/builder/src/export/versions.ts; then
-            echo "❌ Error: versions.ts is out of sync with package.json versions"
-            echo "Please run 'pnpm run update-export-versions' and commit the changes"
+            echo "❌ Error: apps/builder/src/export/versions.ts is out of sync with resolved npm versions"
+            echo "Adapter lines are sourced from published npm metadata (or LOCAL_ADAPTERS_PATH when set locally)."
+            echo "Run 'pnpm run update-export-versions' (with registry access) and commit the changes."
             exit 1
           fi
-          echo "✅ versions.ts is synchronized with package.json versions"
+          echo "✅ versions.ts matches resolved published versions (adapters + @openzeppelin/ui-*)"

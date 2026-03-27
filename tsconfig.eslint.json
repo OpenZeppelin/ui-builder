@@ -3,5 +3,5 @@
   "compilerOptions": {
     "noEmit": true
   },
-  "include": ["src", ".storybook", "*.ts", "*.tsx", "vite.config.ts", "vitest.config.ts"]
+  "include": ["src", "*.ts", "*.tsx", "vite.config.ts", "vitest.config.ts"]
 }

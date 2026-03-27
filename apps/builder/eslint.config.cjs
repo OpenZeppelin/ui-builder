@@ -46,7 +46,7 @@ module.exports = [
         {
           patterns: [
             {
-              group: ['@openzeppelin/ui-builder-adapter-*'],
+              group: ['@openzeppelin/adapter-*'],
               message:
                 'Do not import adapter packages directly in the builder. Use dynamic loading via src/core/ecosystemManager.ts.',
             },

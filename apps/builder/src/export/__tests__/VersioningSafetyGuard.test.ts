@@ -110,6 +110,18 @@ describe('Versioning Safety Guard', () => {
         ).toHaveProperty(adapterPkg as keyof typeof packageVersions);
       }
     });
+
+    it('should not retain any legacy ui-builder adapter package names', () => {
+      const unexpectedAdapterPackages = Object.keys(packageVersions).filter(
+        (packageName) =>
+          packageName.includes('adapter-') && !packageName.startsWith('@openzeppelin/adapter-')
+      );
+
+      expect(
+        unexpectedAdapterPackages,
+        'versions.ts must only manage extracted @openzeppelin/adapter-* package names'
+      ).toEqual([]);
+    });
   });
 
   describe('workspace:* fallback to latest', () => {
@@ -188,6 +200,52 @@ describe('Versioning Safety Guard', () => {
         }
       }
     );
+  });
+
+  describe('Builder release-channel resolution (published adapters)', () => {
+    it('uses npm rc dist-tag for staging when versions.ts holds a stable semver', async () => {
+      const versionsModule = await import('../versions');
+      const original = { ...versionsModule.packageVersions };
+      const testAdapter = adapterPackageMap['evm'];
+      (versionsModule.packageVersions as Record<string, string>)[testAdapter] = '1.2.3';
+
+      try {
+        const packageManager = new PackageManager(mockRendererConfig);
+        const updated = await packageManager.updatePackageJson(
+          basePackageJson,
+          minimalFormConfig,
+          'evm',
+          'testFunction',
+          { env: 'staging' }
+        );
+        const deps = JSON.parse(updated).dependencies || {};
+        expect(deps[testAdapter]).toBe('rc');
+      } finally {
+        Object.assign(versionsModule.packageVersions, original);
+      }
+    });
+
+    it('uses caret stable range in production when versions.ts holds a plain semver', async () => {
+      const versionsModule = await import('../versions');
+      const original = { ...versionsModule.packageVersions };
+      const testAdapter = adapterPackageMap['evm'];
+      (versionsModule.packageVersions as Record<string, string>)[testAdapter] = '1.2.3';
+
+      try {
+        const packageManager = new PackageManager(mockRendererConfig);
+        const updated = await packageManager.updatePackageJson(
+          basePackageJson,
+          minimalFormConfig,
+          'evm',
+          'testFunction',
+          { env: 'production' }
+        );
+        const deps = JSON.parse(updated).dependencies || {};
+        expect(deps[testAdapter]).toBe('^1.2.3');
+      } finally {
+        Object.assign(versionsModule.packageVersions, original);
+      }
+    });
   });
 
   describe('no workspace:* in staging exports', () => {
