@@ -24,9 +24,7 @@
     "test:watch": "NODE_OPTIONS='--max-old-space-size=8192' vitest",
     "test:coverage": "NODE_OPTIONS='--max-old-space-size=8192' vitest run --coverage",
     "test:report": "NODE_OPTIONS='--max-old-space-size=8192' vitest run --reporter=json --outputFile=./test-results/export-tests.json src/export/__tests__/",
-    "export-app": "node src/export/cli/export-app.cjs",
-    "storybook": "cd ../.. && pnpm storybook",
-    "build-storybook": "cd ../.. && pnpm build-storybook"
+    "export-app": "node src/export/cli/export-app.cjs"
   },
   "dependencies": {
     "@creit.tech/stellar-wallets-kit": "^1.8.0",

@@ -8,14 +8,12 @@ This project is currently in development.
 
 [![CI](https://github.com/OpenZeppelin/ui-builder/actions/workflows/ci.yml/badge.svg)](https://github.com/OpenZeppelin/ui-builder/actions/workflows/ci.yml)
 [![Coverage](https://github.com/OpenZeppelin/ui-builder/actions/workflows/coverage.yml/badge.svg)](https://github.com/OpenZeppelin/ui-builder/actions/workflows/coverage.yml)
-[![Release](https://github.com/OpenZeppelin/ui-builder/actions/workflows/publish.yml/badge.svg)](https://github.com/OpenZeppelin/ui-builder/actions/workflows/publish.yml)
 [![Dependencies](https://github.com/OpenZeppelin/ui-builder/actions/workflows/dependencies.yml/badge.svg)](https://github.com/OpenZeppelin/ui-builder/actions/workflows/dependencies.yml)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/OpenZeppelin/ui-builder/badge)](https://api.securityscorecards.dev/projects/github.com/OpenZeppelin/ui-builder)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-brightgreen.svg)](https://conventionalcommits.org)
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
-[![Storybook](https://img.shields.io/badge/Storybook-FF4785?logo=storybook&logoColor=white)](https://storybook.js.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB)](https://reactjs.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
@@ -46,7 +44,6 @@ This project is currently in development.
 - [Build System](#build-system)
 - [Component Architecture](#component-architecture)
   - [Renderer Components](#renderer-components)
-  - [Storybook Integration](#storybook-integration)
 - [Code Style](#code-style)
   - [Git Hooks](#git-hooks)
   - [CSS Class Name Sorting](#css-class-name-sorting)
@@ -130,7 +127,6 @@ published under the `@openzeppelin/adapter-*` namespace.
 - Configure transaction execution methods (EOA, Relayer, Multisig) via a powerful Execution Strategy pattern
 - Type-safe with TypeScript
 - Fast development with Vite
-- Component documentation with Storybook
 - Comprehensive test suite with Vitest
 - Automated dependency management and security checks
 
@@ -143,12 +139,11 @@ published under the `@openzeppelin/adapter-*` namespace.
 - **shadcn/ui**: Unstyled, accessible component system built on Radix UI
 - **pnpm (v9 or higher)**: Fast, disk-efficient package manager
 - **Vitest**: Testing framework integrated with Vite
-- **Storybook 8**: Component documentation and visual testing
 - **Zustand**: Lightweight, performant state management for React
-- **Changesets**: Automated versioning and package releases
+- **GitHub Actions**: CI plus Docker deploys for staging and production (see `.github/workflows`)
 - **ESLint 9**: Modern linting with improved TypeScript support
-- **tsup**: Fast, modern bundler for TypeScript libraries
-- **Vite**: Used for the builder application's dev server
+- **tsup**: Used for root/tooling bundles where applicable
+- **Vite**: Builder application dev server and production build
 - **Dexie.js**: Modern IndexedDB wrapper for local storage and offline capabilities
 - **@openzeppelin/relayer-sdk**: For gasless transaction support via the Relayer execution method.
 
@@ -219,10 +214,7 @@ For a consistent and reliable development environment, it is highly recommended 
 - `pnpm test` - Run tests
 - `pnpm test:watch` - Run tests in watch mode
 - `pnpm test:coverage` - Run tests with coverage report
-- `pnpm storybook` - Start Storybook development server
-- `pnpm build-storybook` - Build Storybook for production
 - `pnpm commit` - Run commitizen for guided commits
-- `pnpm changeset` - Create a changeset for your changes
 - `pnpm update-deps` - Update all monorepo dependencies to their latest versions
 - `pnpm update-deps:major` - Update dependencies including major versions
 - `pnpm check-deps` - Check for deprecated dependencies
@@ -251,7 +243,6 @@ This repository contains the Builder application and repository-level tooling.
 ```text
 ui-builder/
 ├── .github/             # GitHub workflows and templates
-├── .storybook/          # Storybook configuration
 ├── .husky/              # Git hooks
 ├── test/                # Shared test setup and utilities
 ├── packages/            # Monorepo packages (see individual READMEs for detailed structure)
@@ -342,24 +333,6 @@ The [`@openzeppelin/ui-renderer`](https://github.com/OpenZeppelin/openzeppelin-u
 - **DynamicFormField**: Renders form fields dynamically based on field type configuration
 
 The actual UI primitives (like `TextField`, `AddressField`, `Button`, `Input`) are sourced from the `@openzeppelin/ui-components` package and work exclusively with React Hook Form.
-
-### Storybook Integration
-
-The project uses Storybook 8 for component documentation and development:
-
-```bash
-# Start Storybook at the root level
-pnpm storybook
-```
-
-Storybook stories are organized to:
-
-- Document component usage and API
-- Showcase different component states and variations
-- Provide interactive examples for development
-- Serve as visual regression tests
-
-Stories are located in the `stories` directory of each package.
 
 ## Code Style
 
@@ -502,40 +475,13 @@ This project is licensed under the GNU Affero General Public License v3.0 - see 
 
 This project uses GitHub Actions for continuous integration and delivery:
 
-- **CI Workflow**: Runs tests, linting, and type checking for all packages
+- **CI Workflow**: Runs tests, linting, and type checking
 - **Coverage Workflow**: Generates and uploads test coverage reports
-- **Release Workflow**: Manages versioning and releases using Changesets
+- **Staging / production**: Docker images are built and deployed via `.github/workflows/docker-stg.yaml` and `docker-prod.yaml`
 - **Security Workflow**: Checks for security vulnerabilities
 - **Dependencies Workflow**: Checks for outdated dependencies
 
-### Package Publishing
-
-The project uses [Changesets](https://github.com/changesets/changesets) for managing package versions and releases. All public packages in the monorepo are published to the npm registry.
-
-The publishing process:
-
-1. Developers create changesets for their changes using `pnpm changeset`
-2. Changesets are committed alongside the code changes
-3. When changes are pushed to the main branch, the GitHub Action:
-   - Creates a "Version Packages" PR that aggregates all changesets
-   - Updates package versions according to the changesets
-   - Updates changelogs for affected packages
-4. When the Version Packages PR is merged:
-   - Packages are automatically published to npm
-   - Git tags are created for each published package version
-   - GitHub releases are created with changelogs
-
-To create a changeset for your changes:
-
-```bash
-pnpm changeset
-```
-
-This will prompt you to:
-
-- Select which packages have changed
-- Specify the type of change (major, minor, patch)
-- Provide a description of the changes for the changelog
+Shared libraries (`@openzeppelin/ui-*`, `@openzeppelin/adapter-*`, etc.) are published from their own repositories; this repo ships the Builder web app only.
 
 ## Monorepo Configuration
 

@@ -27,12 +27,10 @@ Key technologies include:
 - Tailwind CSS v4 - Utility-first CSS framework with new HSL theme syntax
 - shadcn/ui - Unstyled, accessible component system built on Radix UI
 - Vitest - Testing framework integrated with Vite
-- Storybook 8 - Component documentation and visual testing
 - pnpm - Fast, disk-efficient package manager
 - ESLint 9 + Prettier - Code quality and formatting tools
 - Husky + lint-staged - Git hooks for quality assurance
-- Conventional Commits - Structured commit message format for automated releases
-- Changesets - Versioning and release management
+- Conventional Commits - Structured commit message format
 
 # Framework-Specific Rules
 
@@ -163,7 +161,7 @@ Testing strategy:
 - Test component behavior, not implementation details
 - Use test coverage reporting to identify untested code
 - Create test fixtures for reusable test data
-- For complex UI, supplement with Storybook visual testing
+- For complex UI, prefer focused component tests with Testing Library
 - Test cross-package integration points
 
 # Quality & Standards

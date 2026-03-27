@@ -15,7 +15,6 @@ builder/
 │   ├── docs/         # Internal documentation files relevant to the builder package
 │   ├── export/       # The complete form export system
 │   ├── services/     # Application-level services (e.g., ContractLoader)
-│   ├── stories/      # Storybook stories for core components
 │   ├── test/         # Vitest test setup and configuration for this package
 │   ├── types/        # TypeScript type declaration files for virtual modules/environment
 │   ├── App.tsx       # Main application component and layout
