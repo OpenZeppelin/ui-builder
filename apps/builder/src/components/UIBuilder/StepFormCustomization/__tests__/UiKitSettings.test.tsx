@@ -7,6 +7,25 @@ import type { AvailableUiKit, ContractAdapter } from '@openzeppelin/ui-types';
 
 import { UiKitSettings } from '../components/UiKitSettings';
 
+vi.mock('../../../../hooks/useBuilderAnalytics', () => ({
+  useBuilderAnalytics: () => ({
+    trackUiKitChanged: vi.fn(),
+    trackEcosystemSelection: vi.fn(),
+    trackExportAction: vi.fn(),
+    trackWizardStep: vi.fn(),
+    trackSidebarInteraction: vi.fn(),
+    trackPageView: vi.fn(),
+    trackNetworkSelection: vi.fn(),
+    isEnabled: () => true,
+    initialize: vi.fn(),
+    tagId: '',
+    trackTransactionExecuted: vi.fn(),
+    trackContractUiCreated: vi.fn(),
+    trackRelayerServiceConfigured: vi.fn(),
+    trackAddressBookOpened: vi.fn(),
+  }),
+}));
+
 // Mock the logger with partial mocking to keep other exports
 vi.mock('@openzeppelin/ui-utils', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@openzeppelin/ui-utils')>();

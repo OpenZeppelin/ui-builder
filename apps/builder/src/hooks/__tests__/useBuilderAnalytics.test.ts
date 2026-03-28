@@ -134,4 +134,72 @@ describe('useBuilderAnalytics', () => {
       expect(mockTrackEvent).toHaveBeenCalledTimes(3);
     });
   });
+
+  describe('trackTransactionExecuted', () => {
+    it('should track transaction_executed with network, ecosystem, execution method', () => {
+      const { result } = renderHook(() => useBuilderAnalytics());
+
+      result.current.trackTransactionExecuted('ethereum-mainnet', 'evm', 'relayer');
+
+      expect(mockTrackEvent).toHaveBeenCalledWith('transaction_executed', {
+        network_id: 'ethereum-mainnet',
+        ecosystem: 'evm',
+        execution_method: 'relayer',
+      });
+    });
+  });
+
+  describe('trackContractUiCreated', () => {
+    it('should track contract_ui_created with total_records', () => {
+      const { result } = renderHook(() => useBuilderAnalytics());
+
+      result.current.trackContractUiCreated('stellar-testnet', 'stellar', 4);
+
+      expect(mockTrackEvent).toHaveBeenCalledWith('contract_ui_created', {
+        network_id: 'stellar-testnet',
+        ecosystem: 'stellar',
+        total_records: 4,
+      });
+    });
+  });
+
+  describe('trackRelayerServiceConfigured', () => {
+    it('should track relayer_service_configured', () => {
+      const { result } = renderHook(() => useBuilderAnalytics());
+
+      result.current.trackRelayerServiceConfigured('polygon-mainnet', 'evm');
+
+      expect(mockTrackEvent).toHaveBeenCalledWith('relayer_service_configured', {
+        network_id: 'polygon-mainnet',
+        ecosystem: 'evm',
+      });
+    });
+  });
+
+  describe('trackUiKitChanged', () => {
+    it('should track uikit_changed with uikit_name', () => {
+      const { result } = renderHook(() => useBuilderAnalytics());
+
+      result.current.trackUiKitChanged('ethereum-mainnet', 'evm', 'rainbowkit');
+
+      expect(mockTrackEvent).toHaveBeenCalledWith('uikit_changed', {
+        network_id: 'ethereum-mainnet',
+        ecosystem: 'evm',
+        uikit_name: 'rainbowkit',
+      });
+    });
+  });
+
+  describe('trackAddressBookOpened', () => {
+    it('should track address_book_opened', () => {
+      const { result } = renderHook(() => useBuilderAnalytics());
+
+      result.current.trackAddressBookOpened('stellar-testnet', 'stellar');
+
+      expect(mockTrackEvent).toHaveBeenCalledWith('address_book_opened', {
+        network_id: 'stellar-testnet',
+        ecosystem: 'stellar',
+      });
+    });
+  });
 });

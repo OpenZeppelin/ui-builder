@@ -7,6 +7,7 @@ import type { ContractAdapter } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
 import { useContractUIStorage } from '../../../../contexts/useContractUIStorage';
+import { useBuilderAnalytics } from '../../../../hooks/useBuilderAnalytics';
 import { useStorageOperations } from '../../../../hooks/useStorageOperations';
 import { contractUIStorage, ContractUIStorage, type ContractUIRecord } from '../../../../storage';
 import { uiBuilderStore, type UIBuilderState } from '../uiBuilderStore';
@@ -130,7 +131,8 @@ async function prepareRecordWithDefinition(
 }
 
 export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): AutoSaveHookReturn {
-  const { updateContractUI, saveContractUI } = useContractUIStorage();
+  const { updateContractUI, contractUIs } = useContractUIStorage();
+  const { trackContractUiCreated } = useBuilderAnalytics();
   const storageOperations = useStorageOperations();
   const { activeAdapter } = useWalletState();
 
@@ -236,6 +238,14 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): 
         autoSaveCache.updateConfigCache(newConfigId, configToSave);
 
         logger.info('Auto-save: New record created', `ID: ${newConfigId}`);
+
+        const networkId =
+          currentState.selectedNetworkConfigId ?? activeAdapter?.networkConfig.id ?? 'unknown';
+        const ecosystem =
+          currentState.selectedEcosystem ?? activeAdapter?.networkConfig.ecosystem ?? 'unknown';
+        const totalRecords = (contractUIs?.length ?? 0) + 1;
+        trackContractUiCreated(networkId, ecosystem, totalRecords);
+
         return;
       }
 
@@ -306,7 +316,14 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): 
       }
       globalAutoSaveState.releaseLock();
     }
-  }, [isLoadingSavedConfigRef, updateContractUI, saveContractUI, storageOperations]);
+  }, [
+    isLoadingSavedConfigRef,
+    updateContractUI,
+    storageOperations,
+    activeAdapter,
+    contractUIs,
+    trackContractUiCreated,
+  ]);
 
   // Update the ref whenever autoSave changes
   useEffect(() => {
