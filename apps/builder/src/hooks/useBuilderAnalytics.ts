@@ -60,6 +60,44 @@ export function useBuilderAnalytics() {
       trackSidebarInteraction: (action: string) => {
         analytics.trackEvent('sidebar_interaction', { action });
       },
+
+      trackTransactionExecuted: (networkId: string, ecosystem: string, executionMethod: string) => {
+        analytics.trackEvent('transaction_executed', {
+          network_id: networkId,
+          ecosystem,
+          execution_method: executionMethod,
+        });
+      },
+
+      trackContractUiCreated: (networkId: string, ecosystem: string, totalRecords: number) => {
+        analytics.trackEvent('contract_ui_created', {
+          network_id: networkId,
+          ecosystem,
+          total_records: totalRecords,
+        });
+      },
+
+      trackRelayerServiceConfigured: (networkId: string, ecosystem: string) => {
+        analytics.trackEvent('relayer_service_configured', {
+          network_id: networkId,
+          ecosystem,
+        });
+      },
+
+      trackUiKitChanged: (networkId: string, ecosystem: string, uikitName: string) => {
+        analytics.trackEvent('uikit_changed', {
+          network_id: networkId,
+          ecosystem,
+          uikit_name: uikitName,
+        });
+      },
+
+      trackAddressBookOpened: (networkId: string, ecosystem: string) => {
+        analytics.trackEvent('address_book_opened', {
+          network_id: networkId,
+          ecosystem,
+        });
+      },
     }),
     [analytics]
   );
