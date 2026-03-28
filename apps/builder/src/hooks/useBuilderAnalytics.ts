@@ -61,6 +61,12 @@ export function useBuilderAnalytics() {
         analytics.trackEvent('sidebar_interaction', { action });
       },
 
+      /**
+       * Fires when a transaction succeeds from the form preview (e.g. relayer or wallet).
+       * @param networkId - Active network id, or `'unknown'` if not yet determined
+       * @param ecosystem - Ecosystem id (e.g. `evm`, `stellar`)
+       * @param executionMethod - How the tx was sent (e.g. `relayer`, `wallet`)
+       */
       trackTransactionExecuted: (networkId: string, ecosystem: string, executionMethod: string) => {
         analytics.trackEvent('transaction_executed', {
           network_id: networkId,
@@ -69,6 +75,12 @@ export function useBuilderAnalytics() {
         });
       },
 
+      /**
+       * Fires once when a new Contract UI record is first persisted (CREATE auto-save path).
+       * @param networkId - Selected or adapter network id, or `'unknown'`
+       * @param ecosystem - Selected or adapter ecosystem, or `'unknown'`
+       * @param totalRecords - Count of Contract UIs after this create (approximate for analytics)
+       */
       trackContractUiCreated: (networkId: string, ecosystem: string, totalRecords: number) => {
         analytics.trackEvent('contract_ui_created', {
           network_id: networkId,
@@ -77,6 +89,11 @@ export function useBuilderAnalytics() {
         });
       },
 
+      /**
+       * Fires when the relayer URL, API key, and relayer selection are all set.
+       * @param networkId - Active network id
+       * @param ecosystem - Active ecosystem id
+       */
       trackRelayerServiceConfigured: (networkId: string, ecosystem: string) => {
         analytics.trackEvent('relayer_service_configured', {
           network_id: networkId,
@@ -84,6 +101,12 @@ export function useBuilderAnalytics() {
         });
       },
 
+      /**
+       * Fires when the user selects a UI kit in builder settings.
+       * @param networkId - Active network id
+       * @param ecosystem - Active ecosystem id
+       * @param uikitName - Selected kit identifier (e.g. `rainbowkit`)
+       */
       trackUiKitChanged: (networkId: string, ecosystem: string, uikitName: string) => {
         analytics.trackEvent('uikit_changed', {
           network_id: networkId,
@@ -92,6 +115,11 @@ export function useBuilderAnalytics() {
         });
       },
 
+      /**
+       * Fires once when the address book dialog opens (false → true), not on network changes while open.
+       * @param networkId - Active network id, or `'unknown'`
+       * @param ecosystem - Active ecosystem id, or `'unknown'`
+       */
       trackAddressBookOpened: (networkId: string, ecosystem: string) => {
         analytics.trackEvent('address_book_opened', {
           network_id: networkId,

@@ -131,7 +131,7 @@ async function prepareRecordWithDefinition(
 }
 
 export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): AutoSaveHookReturn {
-  const { updateContractUI, saveContractUI, contractUIs } = useContractUIStorage();
+  const { updateContractUI, contractUIs } = useContractUIStorage();
   const { trackContractUiCreated } = useBuilderAnalytics();
   const storageOperations = useStorageOperations();
   const { activeAdapter } = useWalletState();
@@ -240,9 +240,9 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): 
         logger.info('Auto-save: New record created', `ID: ${newConfigId}`);
 
         const networkId =
-          currentState.selectedNetworkConfigId ?? activeAdapter?.networkConfig.id ?? '';
+          currentState.selectedNetworkConfigId ?? activeAdapter?.networkConfig.id ?? 'unknown';
         const ecosystem =
-          currentState.selectedEcosystem ?? activeAdapter?.networkConfig.ecosystem ?? '';
+          currentState.selectedEcosystem ?? activeAdapter?.networkConfig.ecosystem ?? 'unknown';
         const totalRecords = (contractUIs?.length ?? 0) + 1;
         trackContractUiCreated(networkId, ecosystem, totalRecords);
 
@@ -319,7 +319,6 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): 
   }, [
     isLoadingSavedConfigRef,
     updateContractUI,
-    saveContractUI,
     storageOperations,
     activeAdapter,
     contractUIs,
