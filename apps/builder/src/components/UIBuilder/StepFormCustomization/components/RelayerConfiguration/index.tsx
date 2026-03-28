@@ -1,8 +1,9 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { useWatch } from 'react-hook-form';
 
 import type { RelayerDetails } from '@openzeppelin/ui-types';
 
+import { useBuilderAnalytics } from '../../../../../hooks/useBuilderAnalytics';
 import type { RelayerConfigurationProps } from '../../types';
 import {
   RelayerCredentialsCard,
@@ -17,6 +18,9 @@ export function RelayerConfiguration({
   adapter,
   setValue,
 }: RelayerConfigurationProps): React.ReactElement {
+  const { trackRelayerServiceConfigured } = useBuilderAnalytics();
+  const hasTrackedConfiguredRef = useRef(false);
+
   const { setupStep, setSetupStep, localControl, sessionApiKey } = useRelayerConfiguration({
     control,
     adapter,
@@ -76,6 +80,31 @@ export function RelayerConfiguration({
       setValue('selectedRelayerDetails', selected, { shouldValidate: true });
     }
   }, [selectedRelayerId, fetchedRelayers, setValue]);
+
+  useEffect(() => {
+    if (hasTrackedConfiguredRef.current || !adapter) {
+      return;
+    }
+    const fullyConfigured =
+      relayerServiceUrl.trim().length > 0 &&
+      !!sessionApiKey &&
+      !!selectedRelayerId &&
+      fetchedRelayers.length > 0;
+
+    if (!fullyConfigured) {
+      return;
+    }
+
+    hasTrackedConfiguredRef.current = true;
+    trackRelayerServiceConfigured(adapter.networkConfig.id, adapter.networkConfig.ecosystem);
+  }, [
+    adapter,
+    relayerServiceUrl,
+    sessionApiKey,
+    selectedRelayerId,
+    fetchedRelayers.length,
+    trackRelayerServiceConfigured,
+  ]);
 
   const handleFetchRelayers = () => {
     clearError();

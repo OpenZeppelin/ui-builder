@@ -15,6 +15,7 @@ import {
 } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
+import { useBuilderAnalytics } from '../../../../hooks/useBuilderAnalytics';
 import { type SelectableOption } from '../../../Common/OptionSelector';
 import { TitledSection } from '../../../Common/TitledSection';
 import { ResponsiveUiKitSelector } from '../ResponsiveUiKitSelector';
@@ -31,6 +32,7 @@ interface UiKitOption extends SelectableOption {
 }
 
 export function UiKitSettings({ adapter, onUpdateConfig, currentConfig }: UiKitSettingsProps) {
+  const { trackUiKitChanged } = useBuilderAnalytics();
   const [availableKits, setAvailableKits] = useState<AvailableUiKit[]>([]);
   const [selectedKitId, setSelectedKitId] = useState<UiKitName | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -203,6 +205,11 @@ export function UiKitSettings({ adapter, onUpdateConfig, currentConfig }: UiKitS
           };
 
           onUpdateConfig(newConfig);
+
+          const nc = adapter.networkConfig;
+          if (nc) {
+            trackUiKitChanged(nc.id, nc.ecosystem, id);
+          }
         }}
         configContent={configContent}
         isLoading={isLoading}

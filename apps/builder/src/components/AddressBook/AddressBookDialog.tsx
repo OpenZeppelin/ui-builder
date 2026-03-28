@@ -1,5 +1,5 @@
 import { toast } from 'sonner';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   Dialog,
@@ -15,6 +15,7 @@ import type { NetworkConfig } from '@openzeppelin/ui-types';
 
 import { getAdapter, getEcosystemMetadata } from '../../core/ecosystemManager';
 import { useAllNetworks } from '../../hooks/useAllNetworks';
+import { useBuilderAnalytics } from '../../hooks/useBuilderAnalytics';
 import { db } from '../../storage/database';
 
 const ECOSYSTEM_ADDRESS_PATH: Record<string, string> = {
@@ -32,6 +33,15 @@ export function AddressBookDialog({ open, onOpenChange }: AddressBookDialogProps
   const { activeNetworkConfig, activeAdapter } = useWalletState();
   const { networks } = useAllNetworks();
   const [filterNetworkIds, setFilterNetworkIds] = useState<string[]>([]);
+  const { trackAddressBookOpened } = useBuilderAnalytics();
+
+  useEffect(() => {
+    if (!open) return;
+    const networkId = activeNetworkConfig?.id ?? activeAdapter?.networkConfig.id ?? '';
+    const ecosystem =
+      activeAdapter?.networkConfig.ecosystem ?? activeNetworkConfig?.ecosystem ?? '';
+    trackAddressBookOpened(networkId, ecosystem);
+  }, [open, activeNetworkConfig, activeAdapter, trackAddressBookOpened]);
 
   const widgetProps = useAddressBookWidgetProps(db, {
     networkId: activeNetworkConfig?.id,

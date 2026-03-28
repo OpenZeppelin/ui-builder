@@ -7,6 +7,7 @@ import type { ContractFunction, ContractSchema } from '@openzeppelin/ui-types';
 
 import { formSchemaFactory } from '../../../core/factories/FormSchemaFactory';
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
+import { useBuilderAnalytics } from '../../../hooks/useBuilderAnalytics';
 
 interface FormPreviewProps {
   formConfig: BuilderFormConfig;
@@ -26,6 +27,7 @@ export function FormPreview({ formConfig, functionDetails, contractSchema }: For
   } = useWalletState();
 
   const { isConnected: isWalletConnected } = useDerivedAccountStatus();
+  const { trackTransactionExecuted } = useBuilderAnalytics();
 
   // Convert BuilderFormConfig to RenderFormSchema using the FormSchemaFactory
   const renderSchema = useMemo(() => {
@@ -77,6 +79,9 @@ export function FormPreview({ formConfig, functionDetails, contractSchema }: For
             contractSchema={contractSchema}
             isWalletConnected={isWalletConnected}
             executionConfig={formConfig.executionConfig}
+            onTransactionSuccess={({ network_id, ecosystem, execution_method }) => {
+              trackTransactionExecuted(network_id, ecosystem, execution_method);
+            }}
           />
         </CardContent>
       </Card>
