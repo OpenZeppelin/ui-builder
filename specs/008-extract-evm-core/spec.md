@@ -111,7 +111,7 @@ The `adapter-evm-core` package is an internal implementation detail. It should n
 
 ## Assumptions
 
-- The extraction follows the existing adapter architecture patterns documented in `docs/ADAPTER_ARCHITECTURE.md`
+- The extraction follows the existing adapter architecture patterns documented in the `openzeppelin-adapters` [Adapter Architecture Guide](https://github.com/OpenZeppelin/openzeppelin-adapters/blob/main/docs/ADAPTER_ARCHITECTURE.md)
 - Core modules will use the shared `@openzeppelin/ui-types` for type definitions
 - The existing monorepo tooling (pnpm, tsup, TypeScript) supports internal non-published packages
 - React UI components (EvmWalletUiRoot, RainbowKit components, etc.) remain in the main EVM adapter (not extracted to core)

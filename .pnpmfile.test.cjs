@@ -58,10 +58,16 @@ function createUiRepo(name) {
 function createAdaptersRepo(name) {
   const repoRoot = createTemporaryDirectory(`${name}-`);
   const packageRoot = path.join(repoRoot, 'packages', 'adapter-evm');
+  const vitePackageRoot = path.join(repoRoot, 'packages', 'adapters-vite');
   fs.mkdirSync(packageRoot, { recursive: true });
+  fs.mkdirSync(vitePackageRoot, { recursive: true });
   fs.writeFileSync(
     path.join(packageRoot, 'package.json'),
     JSON.stringify({ name: '@openzeppelin/adapter-evm', version: '1.0.0' }, null, 2)
+  );
+  fs.writeFileSync(
+    path.join(vitePackageRoot, 'package.json'),
+    JSON.stringify({ name: '@openzeppelin/adapters-vite', version: '1.0.0' }, null, 2)
   );
   return repoRoot;
 }
@@ -76,6 +82,7 @@ function createPackage() {
   return {
     dependencies: {
       '@openzeppelin/ui-components': '^1.0.0',
+      '@openzeppelin/adapters-vite': '^1.0.0',
       '@openzeppelin/adapter-evm': '^1.0.0',
     },
   };
@@ -165,6 +172,10 @@ test('rewrites both UI and adapter dependencies during dev:local flows', () => {
       updated.dependencies['@openzeppelin/adapter-evm'],
       `file:${fs.realpathSync(path.join(adaptersRepo, 'packages', 'adapter-evm'))}`
     );
+    assert.equal(
+      updated.dependencies['@openzeppelin/adapters-vite'],
+      `file:${fs.realpathSync(path.join(adaptersRepo, 'packages', 'adapters-vite'))}`
+    );
   });
 });
 
@@ -185,6 +196,10 @@ test('supports adapter-only overrides with LOCAL_ADAPTERS_PATH', () => {
     assert.equal(
       updated.dependencies['@openzeppelin/adapter-evm'],
       `file:${fs.realpathSync(path.join(preferredRepo, 'packages', 'adapter-evm'))}`
+    );
+    assert.equal(
+      updated.dependencies['@openzeppelin/adapters-vite'],
+      `file:${fs.realpathSync(path.join(preferredRepo, 'packages', 'adapters-vite'))}`
     );
   });
 });
@@ -235,12 +250,22 @@ test('prefers packed local tarballs when a manifest is present', () => {
     );
 
     assert.equal(updated.dependencies['@openzeppelin/adapter-evm'], `file:${tarballPath}`);
+    assert.equal(
+      updated.dependencies['@openzeppelin/adapters-vite'],
+      `file:${fs.realpathSync(path.join(adaptersRepo, 'packages', 'adapters-vite'))}`
+    );
   });
 });
 
 test('throws a clear error when a configured package directory is missing package.json', () => {
   const adaptersRepo = createTemporaryDirectory('ui-builder-adapters-missing-package-json-');
+  const vitePackageRoot = path.join(adaptersRepo, 'packages', 'adapters-vite');
   fs.mkdirSync(path.join(adaptersRepo, 'packages', 'adapter-evm'), { recursive: true });
+  fs.mkdirSync(vitePackageRoot, { recursive: true });
+  fs.writeFileSync(
+    path.join(vitePackageRoot, 'package.json'),
+    JSON.stringify({ name: '@openzeppelin/adapters-vite', version: '1.0.0' }, null, 2)
+  );
   withTestConfig(() => {
     const { hooks } = loadHook();
 
@@ -270,10 +295,16 @@ test('resolves default family paths from the workspace root instead of context.d
   fs.mkdirSync(workspaceRoot, { recursive: true });
 
   const packageRoot = path.join(adaptersRepo, 'packages', 'adapter-evm');
+  const vitePackageRoot = path.join(adaptersRepo, 'packages', 'adapters-vite');
   fs.mkdirSync(packageRoot, { recursive: true });
+  fs.mkdirSync(vitePackageRoot, { recursive: true });
   fs.writeFileSync(
     path.join(packageRoot, 'package.json'),
     JSON.stringify({ name: '@openzeppelin/adapter-evm', version: '1.0.0' }, null, 2)
+  );
+  fs.writeFileSync(
+    path.join(vitePackageRoot, 'package.json'),
+    JSON.stringify({ name: '@openzeppelin/adapters-vite', version: '1.0.0' }, null, 2)
   );
   fs.mkdirSync(nestedContextDir, { recursive: true });
 
@@ -310,6 +341,10 @@ test('resolves default family paths from the workspace root instead of context.d
   assert.equal(
     pkg.dependencies['@openzeppelin/adapter-evm'],
     `file:${fs.realpathSync(path.join(adaptersRepo, 'packages', 'adapter-evm'))}`
+  );
+  assert.equal(
+    pkg.dependencies['@openzeppelin/adapters-vite'],
+    `file:${fs.realpathSync(path.join(adaptersRepo, 'packages', 'adapters-vite'))}`
   );
 });
 
@@ -397,7 +432,20 @@ test('canonicalizes symlinked repository roots before rewriting file dependencie
     );
 
     const canonicalPackageRoot = fs.realpathSync(path.join(actualRepo, 'packages', 'adapter-evm'));
+    const canonicalVitePackageRoot = fs.realpathSync(
+      path.join(actualRepo, 'packages', 'adapters-vite')
+    );
     assert.equal(pkg.dependencies['@openzeppelin/adapter-evm'], `file:${canonicalPackageRoot}`);
-    assert.match(logs[0], new RegExp(canonicalPackageRoot.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+    assert.equal(pkg.dependencies['@openzeppelin/adapters-vite'], `file:${canonicalVitePackageRoot}`);
+    assert.ok(
+      logs.some((message) =>
+        new RegExp(canonicalPackageRoot.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(message)
+      )
+    );
+    assert.ok(
+      logs.some((message) =>
+        new RegExp(canonicalVitePackageRoot.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(message)
+      )
+    );
   });
 });

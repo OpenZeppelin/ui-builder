@@ -11,7 +11,7 @@ This guide covers using the Polkadot adapter to interact with EVM-compatible net
 
 - Node.js 20+
 - pnpm 9+
-- Familiarity with the [Adapter Architecture Guide](../../docs/ADAPTER_ARCHITECTURE.md)
+- Familiarity with the [Adapter Architecture Guide](https://github.com/OpenZeppelin/openzeppelin-adapters/blob/main/docs/ADAPTER_ARCHITECTURE.md)
 - Reference: [Official Polkadot Wagmi Guide](https://docs.polkadot.com/smart-contracts/libraries/wagmi/)
 
 ## Installation

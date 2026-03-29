@@ -11,7 +11,7 @@ This guide covers creating a new EVM-compatible adapter using `adapter-evm-core`
 
 - Node.js 20+
 - pnpm 9+
-- Familiarity with the [Adapter Architecture Guide](../../docs/ADAPTER_ARCHITECTURE.md)
+- Familiarity with the [Adapter Architecture Guide](https://github.com/OpenZeppelin/openzeppelin-adapters/blob/main/docs/ADAPTER_ARCHITECTURE.md)
 
 ## Creating a New EVM-Compatible Adapter
 

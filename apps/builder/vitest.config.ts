@@ -1,95 +1,30 @@
-import fs from 'node:fs';
-import { createRequire } from 'node:module';
 import path from 'path';
 import react from '@vitejs/plugin-react';
+import { createOpenZeppelinAdapterIntegration } from '@openzeppelin/adapters-vite';
 import { defineConfig, mergeConfig } from 'vitest/config';
+import topLevelAwait from 'vite-plugin-top-level-await';
+import wasm from 'vite-plugin-wasm';
 
+import { supportedAdapterEcosystems } from './adapter-ecosystems';
 import { sharedVitestConfig } from '../../vitest.shared.config';
 
-const require = createRequire(import.meta.url);
+const builderVitestSharedPackages = [
+  '@openzeppelin/ui-renderer',
+  '@openzeppelin/ui-types',
+  '@openzeppelin/ui-react',
+  '@openzeppelin/ui-components',
+];
 
-function resolveAdapterImportEntry(
-  packageName: string,
-  exportPath: '.' | './metadata' | './networks'
-) {
-  const installedEntryPath = require.resolve(packageName);
-  const packageDir = path.resolve(path.dirname(installedEntryPath), '..');
-  const packageJsonPath = path.join(packageDir, 'package.json');
-  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8')) as {
-    exports?: Record<string, { import?: string }>;
-  };
-
-  const entry = packageJson.exports?.[exportPath]?.import;
-  if (!entry) {
-    throw new Error(`Missing import export "${exportPath}" in ${packageName}/package.json`);
-  }
-
-  return path.resolve(packageDir, entry);
-}
-
-/**
- * Adapter package paths for test resolution.
- * Maps package names to their dist entry points.
- * This is needed because Vite 7.2+ has stricter resolution for dynamic imports.
- */
-const adapterPackagePaths: Record<string, string> = {
-  '@openzeppelin/adapter-evm/metadata': resolveAdapterImportEntry(
-    '@openzeppelin/adapter-evm',
-    './metadata'
-  ),
-  '@openzeppelin/adapter-evm/networks': resolveAdapterImportEntry(
-    '@openzeppelin/adapter-evm',
-    './networks'
-  ),
-  '@openzeppelin/adapter-evm': resolveAdapterImportEntry('@openzeppelin/adapter-evm', '.'),
-  '@openzeppelin/adapter-solana/metadata': resolveAdapterImportEntry(
-    '@openzeppelin/adapter-solana',
-    './metadata'
-  ),
-  '@openzeppelin/adapter-solana/networks': resolveAdapterImportEntry(
-    '@openzeppelin/adapter-solana',
-    './networks'
-  ),
-  '@openzeppelin/adapter-solana': resolveAdapterImportEntry('@openzeppelin/adapter-solana', '.'),
-  '@openzeppelin/adapter-stellar/metadata': resolveAdapterImportEntry(
-    '@openzeppelin/adapter-stellar',
-    './metadata'
-  ),
-  '@openzeppelin/adapter-stellar/networks': resolveAdapterImportEntry(
-    '@openzeppelin/adapter-stellar',
-    './networks'
-  ),
-  '@openzeppelin/adapter-stellar': resolveAdapterImportEntry('@openzeppelin/adapter-stellar', '.'),
-  '@openzeppelin/adapter-midnight/metadata': resolveAdapterImportEntry(
-    '@openzeppelin/adapter-midnight',
-    './metadata'
-  ),
-  '@openzeppelin/adapter-midnight/networks': resolveAdapterImportEntry(
-    '@openzeppelin/adapter-midnight',
-    './networks'
-  ),
-  '@openzeppelin/adapter-midnight': resolveAdapterImportEntry(
-    '@openzeppelin/adapter-midnight',
-    '.'
-  ),
-  '@openzeppelin/adapter-polkadot/metadata': resolveAdapterImportEntry(
-    '@openzeppelin/adapter-polkadot',
-    './metadata'
-  ),
-  '@openzeppelin/adapter-polkadot/networks': resolveAdapterImportEntry(
-    '@openzeppelin/adapter-polkadot',
-    './networks'
-  ),
-  '@openzeppelin/adapter-polkadot': resolveAdapterImportEntry(
-    '@openzeppelin/adapter-polkadot',
-    '.'
-  ),
-};
-
-const adapterAliasEntries = Object.entries(adapterPackagePaths).map(([find, replacement]) => ({
-  find,
-  replacement,
-}));
+const adapters = createOpenZeppelinAdapterIntegration({
+  ecosystems: supportedAdapterEcosystems,
+  pluginFactories: {
+    midnight: {
+      wasm,
+      topLevelAwait,
+    },
+  },
+  importMetaUrl: import.meta.url,
+});
 
 /**
  * Virtual module mocks for testing
@@ -122,6 +57,82 @@ const virtualModuleMocks: Record<string, string> = {
   // 'virtual:templates-config': `export const templateConfig = { /* mock data */ };`,
 };
 
+const adapterVitestConfig = await adapters.vitest({
+  plugins: [
+    // Include React plugin from shared config
+    react(),
+
+    /**
+     * TEST-SPECIFIC VIRTUAL MODULE PROVIDER
+     *
+     * This plugin provides mock implementations of virtual modules
+     * used in the dev/build environment.
+     *
+     * In the real application, these modules are provided by a plugin in vite.config.ts
+     * that imports the actual files from other packages. For tests, we
+     * provide basic mock implementations here.
+     */
+    {
+      name: 'test-virtual-modules-provider',
+      resolveId(id: string) {
+        if (id in virtualModuleMocks) {
+          return `\0${id}`;
+        }
+        return null;
+      },
+      load(id: string) {
+        // Extract the original ID without the null byte prefix
+        const originalId = id.startsWith('\0') ? id.slice(1) : id;
+
+        if (originalId in virtualModuleMocks) {
+          // Return the mock implementation
+          return virtualModuleMocks[originalId];
+        }
+        return null;
+      },
+    },
+  ],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+    dedupe: [...builderVitestSharedPackages, 'react', 'react-dom'],
+  },
+  // App-level optimizeDeps entries. Adapter-specific includes/excludes are merged by
+  // createOpenZeppelinAdapterIntegration().
+  optimizeDeps: {
+    include: builderVitestSharedPackages,
+  },
+  ssr: {
+    noExternal: builderVitestSharedPackages,
+  },
+  test: {
+    // Include all test settings from shared config
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: [path.resolve(__dirname, './src/test/setup.ts')],
+    passWithNoTests: true,
+    // Increase timeouts to avoid flakes in heavy export tests under Vite 7
+    // EVM adapter initialization takes ~12s, needs buffer for parallel contention
+    testTimeout: 30000,
+    hookTimeout: 30000,
+    teardownTimeout: 30000,
+    // Run export tests sequentially to avoid resource contention during
+    // heavy EVM adapter dynamic imports (which take ~12s each)
+    poolOptions: {
+      threads: {
+        singleThread: false,
+      },
+    },
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html', 'json-summary'],
+      reportsDirectory: './coverage',
+      exclude: ['**/node_modules/**', '**/dist/**', '**/src/test/**'],
+    },
+  },
+});
+
 /**
  * Vitest Configuration
  *
@@ -151,133 +162,5 @@ const virtualModuleMocks: Record<string, string> = {
  * "Failed to resolve import 'virtual:module-name' from 'src/path/to/file.ts'"
  */
 export default defineConfig(
-  mergeConfig(sharedVitestConfig, {
-    plugins: [
-      // Include React plugin from shared config
-      react(),
-
-      /**
-       * TEST-SPECIFIC VIRTUAL MODULE PROVIDER
-       *
-       * This plugin provides mock implementations of virtual modules
-       * used in the dev/build environment.
-       *
-       * In the real application, these modules are provided by a plugin in vite.config.ts
-       * that imports the actual files from other packages. For tests, we
-       * provide basic mock implementations here.
-       */
-      {
-        name: 'test-virtual-modules-provider',
-        resolveId(id: string) {
-          if (id in virtualModuleMocks) {
-            return `\0${id}`;
-          }
-          return null;
-        },
-        load(id: string) {
-          // Extract the original ID without the null byte prefix
-          const originalId = id.startsWith('\0') ? id.slice(1) : id;
-
-          if (originalId in virtualModuleMocks) {
-            // Return the mock implementation
-            return virtualModuleMocks[originalId];
-          }
-          return null;
-        },
-      },
-
-      /**
-       * ADAPTER PACKAGE RESOLVER
-       *
-       * This plugin resolves adapter packages to their dist entry points.
-       * Required because Vite 7.2+ has stricter resolution for dynamic imports
-       * and the standard resolve.alias doesn't work reliably for dynamic imports
-       * like: await import("@openzeppelin/adapter-evm")
-       */
-      {
-        name: 'test-adapter-package-resolver',
-        enforce: 'pre',
-        resolveId(id: string) {
-          if (id in adapterPackagePaths) {
-            return adapterPackagePaths[id];
-          }
-          return null;
-        },
-      },
-    ],
-    resolve: {
-      alias: {
-        '@': path.resolve(__dirname, './src'),
-        // Adapter packages - required for export tests that use ecosystemManager.
-        // Resolve from installed package exports so tests keep working after Phase 7
-        // removes the in-repo adapter workspaces.
-        ...adapterAliasEntries,
-      },
-      dedupe: [
-        '@openzeppelin/ui-renderer',
-        '@openzeppelin/ui-types',
-        '@openzeppelin/ui-react',
-        '@openzeppelin/ui-components',
-        '@openzeppelin/adapter-evm',
-        '@openzeppelin/adapter-solana',
-        '@openzeppelin/adapter-stellar',
-        '@openzeppelin/adapter-midnight',
-        '@openzeppelin/adapter-polkadot',
-        'react',
-        'react-dom',
-      ],
-    },
-    // Add optimizeDeps for Vite to correctly process these linked workspace packages
-    optimizeDeps: {
-      include: [
-        '@openzeppelin/ui-renderer',
-        '@openzeppelin/ui-types',
-        '@openzeppelin/ui-react',
-        '@openzeppelin/ui-components',
-        '@openzeppelin/adapter-evm',
-        '@openzeppelin/adapter-solana',
-        '@openzeppelin/adapter-stellar',
-        '@openzeppelin/adapter-midnight',
-        '@openzeppelin/adapter-polkadot',
-      ],
-    },
-    ssr: {
-      noExternal: [
-        '@openzeppelin/ui-renderer',
-        '@openzeppelin/ui-types',
-        '@openzeppelin/ui-react',
-        '@openzeppelin/ui-components',
-        '@openzeppelin/adapter-evm',
-        '@openzeppelin/adapter-solana',
-        '@openzeppelin/adapter-stellar',
-        '@openzeppelin/adapter-midnight',
-        '@openzeppelin/adapter-polkadot',
-      ],
-    },
-    test: {
-      // Include all test settings from shared config
-      globals: true,
-      environment: 'jsdom',
-      setupFiles: [path.resolve(__dirname, './src/test/setup.ts')],
-      passWithNoTests: true,
-      // Increase timeouts to avoid flakes in heavy export tests under Vite 7
-      // EVM adapter initialization takes ~12s, needs buffer for parallel contention
-      testTimeout: 30000,
-      hookTimeout: 30000,
-      teardownTimeout: 30000,
-      // Run export tests sequentially to avoid resource contention during
-      // heavy EVM adapter dynamic imports (which take ~12s each)
-      poolOptions: {
-        threads: {
-          singleThread: false,
-        },
-      },
-      coverage: {
-        provider: 'v8',
-        reporter: ['text', 'json', 'html', 'json-summary'],
-        reportsDirectory: './coverage',
-        exclude: ['**/node_modules/**', '**/dist/**', '**/src/test/**'],
-      },
-    },
-  })
+  mergeConfig(sharedVitestConfig, adapterVitestConfig)
 );
