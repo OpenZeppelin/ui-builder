@@ -104,7 +104,6 @@ export default adapters.vite({
       '@openzeppelin/ui-storage',
       '@openzeppelin/ui-types',
       '@openzeppelin/ui-utils',
-      '@openzeppelin/relayer-sdk',
 
       // Large icon libraries - pre-bundle to avoid slow discovery
       'lucide-react',
