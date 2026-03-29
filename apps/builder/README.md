@@ -110,4 +110,4 @@ The builder package uses an adapter pattern to support multiple blockchain ecosy
 
 This architecture allows for easy extension to support additional blockchain ecosystems by creating new adapter packages and registering them in `ecosystemManager.ts`. The provider model (from `@openzeppelin/ui-react`) ensures consistent state and adapter access throughout the application.
 
-For more detailed documentation about the adapter pattern, see the main project [README.md](../../README.md#adding-new-adapters) and the [Adapter Architecture Guide](../../docs/ADAPTER_ARCHITECTURE.md).
+For more detailed documentation about the adapter pattern, see the main project [README.md](../../README.md#adding-new-adapters) and the [Adapter Architecture Guide](https://github.com/OpenZeppelin/openzeppelin-adapters/blob/main/docs/ADAPTER_ARCHITECTURE.md).

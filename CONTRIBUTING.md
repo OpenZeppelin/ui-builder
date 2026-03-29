@@ -19,7 +19,7 @@ If you are contributing support for a new blockchain ecosystem, please follow th
 
 Key steps include:
 
-1.  **Familiarize Yourself:** Read the **[Adapter Architecture Guide](./docs/ADAPTER_ARCHITECTURE.md)** to understand the modular structure and responsibilities.
+1.  **Familiarize Yourself:** Read the **[Adapter Architecture Guide](https://github.com/OpenZeppelin/openzeppelin-adapters/blob/main/docs/ADAPTER_ARCHITECTURE.md)** to understand the modular structure and responsibilities.
 2.  **Package Setup**: Create a new `packages/adapter-<chain-name>` package with appropriate `package.json` (depending on `@openzeppelin/ui-types`) and `tsconfig.json`.
 3.  **Network Configurations**: Define `YourEcosystemNetworkConfig` objects in `src/networks/`, ensuring they provide all necessary details (RPC URLs, chain IDs, etc.). Export a combined list (e.g., `export const suiNetworks = [...]`) and individual configurations from `src/networks/index.ts`.
 4.  **Adapter Implementation**: Implement the `ContractAdapter` interface from `@openzeppelin/ui-types` in `src/adapter.ts`. The constructor must accept its specific `NetworkConfig` (e.g., `constructor(networkConfig: SuiNetworkConfig)`) and use `this.networkConfig` internally.

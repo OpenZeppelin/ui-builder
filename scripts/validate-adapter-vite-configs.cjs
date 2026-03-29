@@ -94,7 +94,7 @@ function validateAdapter(adapter) {
 
     if (!exports['./vite-config']) {
       errors.push(
-        `${name}: package.json must export './vite-config' (see ADAPTER_ARCHITECTURE.md § 11.2.2)`
+        `${name}: package.json must export './vite-config' (see openzeppelin-adapters/docs/ADAPTER_ARCHITECTURE.md)`
       );
     } else {
       // Validate export structure
@@ -161,7 +161,7 @@ function validateAllAdapters() {
     console.error('❌ Validation failed with the following errors:\n');
     allErrors.forEach((error) => console.error(`  ${error}`));
     console.error(
-      '\nSee docs/ADAPTER_ARCHITECTURE.md § 11.2 for the required vite-config pattern.'
+      '\nSee https://github.com/OpenZeppelin/openzeppelin-adapters/blob/main/docs/ADAPTER_ARCHITECTURE.md for the required vite-config pattern.'
     );
     process.exit(1);
   }

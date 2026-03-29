@@ -99,7 +99,8 @@ For more details, see the [Builder README](./apps/builder/README.md).
 
 Adapter implementations live in the
 [openzeppelin-adapters](https://github.com/OpenZeppelin/openzeppelin-adapters) repository and are
-published under the `@openzeppelin/adapter-*` namespace.
+published under the `@openzeppelin/adapter-*` namespace. Shared Vite/Vitest
+integration for consuming apps is provided by `@openzeppelin/adapters-vite`.
 
 #### Public Adapter Packages
 
@@ -108,6 +109,7 @@ published under the `@openzeppelin/adapter-*` namespace.
 - `@openzeppelin/adapter-polkadot`
 - `@openzeppelin/adapter-solana`
 - `@openzeppelin/adapter-stellar`
+- `@openzeppelin/adapters-vite` (shared build-time integration helper)
 
 #### Internal Adapter Package
 
@@ -259,7 +261,7 @@ For detailed application structure, see the Builder README linked above.
 
 ## Architecture
 
-The application uses a modular, domain-driven adapter pattern to support multiple blockchain ecosystems. For a detailed explanation of the adapter architecture and module responsibilities, please see the **[Adapter Architecture Guide](./docs/ADAPTER_ARCHITECTURE.md)**.
+The application uses a modular, domain-driven adapter pattern to support multiple blockchain ecosystems. For the adapter source-of-truth, please see the **[Adapter Architecture Guide](https://github.com/OpenZeppelin/openzeppelin-adapters/blob/main/docs/ADAPTER_ARCHITECTURE.md)** in the `openzeppelin-adapters` repository.
 
 **Key Components:**
 

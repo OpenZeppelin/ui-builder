@@ -234,7 +234,7 @@ The adapter architecture should be designed to accommodate future non-EVM parach
 
 ## Assumptions
 
-- The Polkadot adapter follows the existing adapter architecture patterns documented in `docs/ADAPTER_ARCHITECTURE.md`
+- The Polkadot adapter follows the existing adapter architecture patterns documented in the `openzeppelin-adapters` [Adapter Architecture Guide](https://github.com/OpenZeppelin/openzeppelin-adapters/blob/main/docs/ADAPTER_ARCHITECTURE.md)
 - Polkadot Hub and Kusama Hub use Blockscout explorers with Etherscan V1 API format for contract verification (no changes to `adapter-evm-core` needed)
 - Moonbeam/Moonriver use Moonscan which is Etherscan V2 API compatible
 - Standard EVM wallets (MetaMask, WalletConnect) can be configured to connect to Polkadot networks
