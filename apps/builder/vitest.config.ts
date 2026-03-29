@@ -17,10 +17,6 @@ const builderVitestSharedPackages = [
 
 const adapters = createOpenZeppelinAdapterIntegration({
   ecosystems: supportedAdapterEcosystems,
-  // Put subpath aliases ahead of the package root so Vitest resolves
-  // `@openzeppelin/adapter-*/metadata` and `/networks` before the broader
-  // `@openzeppelin/adapter-*` prefix alias.
-  exportPaths: ['./metadata', './networks', '.'],
   pluginFactories: {
     midnight: {
       wasm,

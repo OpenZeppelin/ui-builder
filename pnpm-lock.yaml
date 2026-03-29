@@ -321,8 +321,8 @@ importers:
         specifier: 4.0.0
         version: 4.0.0
       '@openzeppelin/adapters-vite':
-        specifier: ^1.3.0
-        version: 1.3.0(299839496f253c1dbf078e2e9e7fefbf)
+        specifier: ^1.3.1
+        version: 1.3.1(299839496f253c1dbf078e2e9e7fefbf)
       '@tailwindcss/vite':
         specifier: ^4.1.11
         version: 4.1.18(vite@7.3.1(@types/node@24.10.13)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(yaml@2.8.2))
@@ -1585,8 +1585,8 @@ packages:
       react-dom: ^19.0.0
       react-hook-form: ^7.62.0
 
-  '@openzeppelin/adapters-vite@1.3.0':
-    resolution: {integrity: sha512-kKrCDb+U2fZV/gjca8YZsc4mKdlJpeqPGvWhyfBdBfPe/amxLQSJr7GAzNwXtV+4AThTFSfqSoZPNwW1R4nkvA==}
+  '@openzeppelin/adapters-vite@1.3.1':
+    resolution: {integrity: sha512-DMz5A3XV/NzdbZh0YnfPTLlbVPw5N+7Kt++u2yvn85+/sJgZvWWnpwawjgxG4B+GxR1MYFPRcnYEt1qp7SzF5g==}
     peerDependencies:
       '@openzeppelin/adapter-evm': ^1.1.0
       '@openzeppelin/adapter-midnight': ^1.1.0
@@ -11057,7 +11057,7 @@ snapshots:
       - utf-8-validate
       - ws
 
-  '@openzeppelin/adapters-vite@1.3.0(299839496f253c1dbf078e2e9e7fefbf)':
+  '@openzeppelin/adapters-vite@1.3.1(299839496f253c1dbf078e2e9e7fefbf)':
     dependencies:
       vite: 7.3.1(@types/node@24.10.13)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(yaml@2.8.2)
     optionalDependencies:
