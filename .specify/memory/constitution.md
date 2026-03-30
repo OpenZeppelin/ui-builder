@@ -163,7 +163,7 @@ string, addressType?: string)` supports chain-specific behavior.
 
 - Use `pnpm` for all tasks (`pnpm dev`, `pnpm build`, `pnpm test`,
   `pnpm -r format:check`, `pnpm fix-all`).
-- **Local UI development**: Run `pnpm dev:local` to use the shared `oz-dev`
+- **Local UI development**: Run `pnpm dev:local` to use the shared `oz-ui-dev`
   workflow backed by the checked-in `.openzeppelin-dev.json` and
   `.pnpmfile.cjs` files. Run `pnpm dev:npm` to switch back to published npm
   packages without rewriting committed dependencies.
