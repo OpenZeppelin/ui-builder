@@ -29,7 +29,7 @@ pnpm dev
 
 ## How It Works
 
-The local development setup uses the published `oz-dev` CLI plus a small config-driven `.pnpmfile.cjs` hook in this repo. The CLI builds and packs local families from your checked-out source repos, while the pnpm hook rewrites dependencies to those packed tarballs when `LOCAL_UI=true` and `LOCAL_ADAPTERS=true` are enabled for install.
+The local development setup uses the published `oz-ui-dev` CLI plus a small config-driven `.pnpmfile.cjs` hook in this repo. The CLI builds and packs local families from your checked-out source repos, while the pnpm hook rewrites dependencies to those packed tarballs when `LOCAL_UI=true` and `LOCAL_ADAPTERS=true` are enabled for install.
 
 ### Directory Structure
 
@@ -62,7 +62,7 @@ The local development setup uses the published `oz-dev` CLI plus a small config-
 pnpm dev:local
 ```
 
-This command delegates to the published `oz-dev` CLI. It builds the selected package families from your local `openzeppelin-ui` and `openzeppelin-adapters` checkouts, packs them into tarballs under `.packed-packages/local-dev`, and reinstalls ui-builder against those packed artifacts.
+This command delegates to the published `oz-ui-dev` CLI. It builds the selected package families from your local `openzeppelin-ui` and `openzeppelin-adapters` checkouts, packs them into tarballs under `.packed-packages/local-dev`, and reinstalls ui-builder against those packed artifacts.
 
 ### Switch to Local UI Kit Only
 
@@ -92,7 +92,7 @@ LOCAL_UI_PATH=/path/to/openzeppelin-ui pnpm dev:uikit:local
 pnpm dev:npm
 ```
 
-This delegates to `oz-dev use remote`, which removes local manifests and reinstalls against published npm packages.
+This delegates to `oz-ui-dev use remote`, which removes local manifests and reinstalls against published npm packages.
 
 ## Development Workflow
 
@@ -157,7 +157,7 @@ That script reads **stable** adapter versions from the public npm registry unles
 pnpm dev:adapters:local
 ```
 
-This command uses the shared `oz-dev` CLI to build and pack the adapter family only, then reinstalls ui-builder against the packed adapter tarballs while leaving UI packages on published dependencies.
+This command uses the shared `oz-ui-dev` CLI to build and pack the adapter family only, then reinstalls ui-builder against the packed adapter tarballs while leaving UI packages on published dependencies.
 
 If your adapter checkout is elsewhere, use the canonical path variable:
 

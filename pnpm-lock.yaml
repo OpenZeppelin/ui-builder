@@ -74,8 +74,8 @@ importers:
         specifier: ^0.1.6
         version: 0.1.6
       '@openzeppelin/ui-dev-cli':
-        specifier: ^0.2.2
-        version: 0.2.2
+        specifier: ^0.5.0
+        version: 0.5.0
       '@tailwindcss/postcss':
         specifier: ^4.1.17
         version: 4.1.18
@@ -1620,8 +1620,8 @@ packages:
       react: ^19.0.0
       react-dom: ^19.0.0
 
-  '@openzeppelin/ui-dev-cli@0.2.2':
-    resolution: {integrity: sha512-P4Bj/WLUfZ06Rzt/CjIY5GybyGLOjQnLgmoz4tr3rKl77FhLGJkhtku69wqM4meU1Zc3VSyPvrI55C86Fjdasg==}
+  '@openzeppelin/ui-dev-cli@0.5.0':
+    resolution: {integrity: sha512-9Tw7y19SHng4Spo9KJeDH/BYRBSs7F+hs0wHFC0swhlBnpFbv4yZwc9BD68/2DG8PoPMtT+5UkKut6aBRJSXog==}
     engines: {node: '>=20.19.0'}
     hasBin: true
 
@@ -11125,7 +11125,7 @@ snapshots:
       - tailwindcss
       - typescript
 
-  '@openzeppelin/ui-dev-cli@0.2.2':
+  '@openzeppelin/ui-dev-cli@0.5.0':
     dependencies:
       '@clack/prompts': 0.10.1
       commander: 13.1.0
