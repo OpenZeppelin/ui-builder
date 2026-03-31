@@ -3,12 +3,13 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm, UseFormReturn, WatchObserver } from 'react-hook-form';
 
 import type {
-  ContractAdapter,
   ExecutionConfig,
   ExecutionMethodDetail,
   ExecutionMethodType,
 } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
+
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
 
 import type { ExecutionMethodFormData } from '../types';
 import {
@@ -24,7 +25,7 @@ import {
 
 interface UseExecutionMethodStateArgs {
   currentConfig?: ExecutionConfig;
-  adapter: ContractAdapter | null;
+  adapter: BuilderAdapter | null;
   // Combined callback for config and validity
   onUpdateConfig: (config: ExecutionConfig | undefined, isValid: boolean) => void;
 }

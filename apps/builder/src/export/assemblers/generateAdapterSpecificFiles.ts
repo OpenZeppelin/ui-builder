@@ -1,5 +1,6 @@
-import { ContractAdapter } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
+
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
 
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 
@@ -7,12 +8,12 @@ import type { BuilderFormConfig } from '../../core/types/FormTypes';
  * Generates and adds adapter-specific files (e.g., UI kit configs) to the project.
  *
  * @param projectFiles - The current map of project files to be modified.
- * @param adapter - The active ContractAdapter instance.
+ * @param adapter - The active BuilderAdapter instance.
  * @param formConfig - The form configuration, containing the uiKitConfig.
  */
 export async function generateAdapterSpecificFiles(
   projectFiles: Record<string, string | Uint8Array | Blob>,
-  adapter: ContractAdapter,
+  adapter: BuilderAdapter,
   formConfig: BuilderFormConfig
 ): Promise<void> {
   const logSystem = 'File Assembly (generateAdapterSpecificFiles)';

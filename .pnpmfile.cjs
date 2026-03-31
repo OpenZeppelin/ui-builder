@@ -36,6 +36,7 @@ const STANDARD_FAMILIES = {
       '@openzeppelin/adapter-evm': 'packages/adapter-evm',
       '@openzeppelin/adapter-midnight': 'packages/adapter-midnight',
       '@openzeppelin/adapter-polkadot': 'packages/adapter-polkadot',
+      '@openzeppelin/adapter-runtime-utils': 'packages/adapter-runtime-utils',
       '@openzeppelin/adapter-solana': 'packages/adapter-solana',
       '@openzeppelin/adapter-stellar': 'packages/adapter-stellar',
     },

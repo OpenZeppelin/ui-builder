@@ -1,11 +1,13 @@
 import { useCallback, useRef, useState } from 'react';
 
-import type { ContractAdapter, FormValues } from '@openzeppelin/ui-types';
+import type { FormValues } from '@openzeppelin/ui-types';
 import {
   buildRequiredInputSnapshot,
   hasMissingRequiredContractInputs,
   simpleHash,
 } from '@openzeppelin/ui-utils';
+
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
 
 import { loadContractDefinitionWithMetadata } from '../../../../services/ContractLoader';
 import { uiBuilderStore } from '../../hooks/uiBuilderStore';
@@ -21,7 +23,7 @@ interface CircuitBreakerState {
 }
 
 interface UseContractLoaderProps {
-  adapter: ContractAdapter | null;
+  adapter: BuilderAdapter | null;
   ignoreProxy: boolean;
 }
 

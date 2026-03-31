@@ -37,7 +37,7 @@ export function EoaConfiguration({
             label="Specific EOA Address"
             name="specificEoaAddress"
             control={control}
-            adapter={adapter ?? undefined}
+            addressing={adapter ?? undefined}
             validation={{ required: true }}
             placeholder="Enter the required EOA address (e.g., 0x...)"
           />

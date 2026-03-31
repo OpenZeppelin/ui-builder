@@ -2,9 +2,7 @@ import { FormInput } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { EmptyState, Tabs, TabsContent, TabsList, TabsTrigger } from '@openzeppelin/ui-components';
-import { useWalletState } from '@openzeppelin/ui-react';
 import {
-  ContractAdapter,
   ContractSchema,
   ExecutionConfig,
   NetworkConfig,
@@ -13,7 +11,9 @@ import {
 
 import { ensureCompleteConfig } from './utils/executionUtils';
 
+import type { BuilderAdapter } from '../../../core/runtimeAdapter';
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
+import { useBuilderWalletState } from '../../../hooks/useBuilderWalletState';
 import { ActionBar } from '../../Common/ActionBar';
 import { useWizardStepUiState } from '../hooks/useWizardStepUiState';
 import { FunctionNoteSection, RuntimeSecretButton, UiKitSettings } from './components';
@@ -45,7 +45,7 @@ interface StepFormCustomizationProps {
   onUiKitConfigUpdated: (config: UiKitConfiguration) => void;
   currentUiKitConfig?: UiKitConfiguration;
   currentFormConfig?: BuilderFormConfig | null;
-  adapter?: ContractAdapter;
+  adapter?: BuilderAdapter;
 }
 
 export function StepFormCustomization({
@@ -72,7 +72,7 @@ export function StepFormCustomization({
     bannerDismissed: false,
   });
 
-  const { activeAdapter: adapter, isAdapterLoading: adapterLoading } = useWalletState();
+  const { activeAdapter: adapter, isAdapterLoading: adapterLoading } = useBuilderWalletState();
 
   // Find the selected function details using memoization
   const selectedFunctionDetails = useMemo(() => {

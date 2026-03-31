@@ -1,8 +1,8 @@
 import { useCallback, useMemo } from 'react';
 
-import { useWalletState } from '@openzeppelin/ui-react';
 import { logger } from '@openzeppelin/ui-utils';
 
+import { useBuilderWalletState } from '../../../../hooks/useBuilderWalletState';
 import { STEP_INDICES } from '../../constants/stepIndices';
 import { uiBuilderStore } from '../uiBuilderStore';
 
@@ -11,7 +11,7 @@ import { uiBuilderStore } from '../uiBuilderStore';
  * @returns An object with functions to handle definition loading and function selection.
  */
 export function useBuilderContract() {
-  const { activeAdapter } = useWalletState();
+  const { activeAdapter } = useBuilderWalletState();
 
   const handleFunctionSelected = useCallback(
     async (functionId: string | null) => {

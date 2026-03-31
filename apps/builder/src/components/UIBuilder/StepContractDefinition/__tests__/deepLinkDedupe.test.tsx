@@ -1,15 +1,27 @@
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { ContractAdapter, ContractSchema, FormValues } from '@openzeppelin/ui-types';
+import type { ContractSchema, FormValues } from '@openzeppelin/ui-types';
+
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
 
 import { useContractDefinition } from '../../../../hooks/useContractDefinition';
 import { uiBuilderStore } from '../../hooks/uiBuilderStore';
 
-let mockAdapter: ContractAdapter;
+let mockAdapter: BuilderAdapter;
 
-vi.mock('@openzeppelin/ui-react', () => ({
-  useWalletState: () => ({ activeAdapter: mockAdapter }),
+vi.mock('../../../../hooks/useBuilderWalletState', () => ({
+  useBuilderWalletState: () => ({
+    activeAdapter: mockAdapter,
+    activeRuntime: null,
+    activeNetworkConfig: mockAdapter?.networkConfig ?? null,
+    isAdapterLoading: false,
+    isRuntimeLoading: false,
+    walletFacadeHooks: null,
+    reconfigureActiveAdapterUiKit: undefined,
+    reconfigureActiveUiKit: undefined,
+    setActiveNetworkId: undefined,
+  }),
 }));
 
 describe('Deep link auto-load deduplication', () => {
@@ -45,7 +57,6 @@ describe('Deep link auto-load deduplication', () => {
 
     mockAdapter = {
       networkConfig: mockNetworkConfig,
-      initialAppServiceKitName: 'custom',
       loadContract: vi.fn().mockResolvedValue(mockSchema),
       loadContractWithMetadata: loadSpy,
       getWritableFunctions: () => [],
@@ -79,7 +90,7 @@ describe('Deep link auto-load deduplication', () => {
         paused: false,
         systemDisabled: false,
       }),
-    } as unknown as ContractAdapter;
+    } as unknown as BuilderAdapter;
   });
 
   afterEach(() => {

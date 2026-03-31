@@ -1,9 +1,11 @@
 import { useState } from 'react';
 
-import type { ContractAdapter, RelayerDetails } from '@openzeppelin/ui-types';
+import type { RelayerDetails } from '@openzeppelin/ui-types';
+
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
 
 interface UseRelayerFetchParams {
-  adapter: ContractAdapter | null;
+  adapter: BuilderAdapter | null;
   onRelayersFetched?: (relayers: RelayerDetails[]) => void;
 }
 

@@ -1,10 +1,10 @@
 import { shallow } from 'zustand/shallow';
 import { useCallback, useEffect } from 'react';
 
-import { useWalletState } from '@openzeppelin/ui-react';
 import { Ecosystem } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
+import { useBuilderWalletState } from '../../../../hooks/useBuilderWalletState';
 import { STEP_INDICES } from '../../constants/stepIndices';
 import { uiBuilderStore } from '../uiBuilderStore';
 import { useUIBuilderStore } from '../useUIBuilderStore';
@@ -14,7 +14,7 @@ import { useUIBuilderStore } from '../useUIBuilderStore';
  * @returns An object with functions to handle network selection and clear switch state.
  */
 export function useBuilderNetwork() {
-  const { setActiveNetworkId, activeAdapter, isAdapterLoading } = useWalletState();
+  const { activeAdapter, isAdapterLoading, setActiveNetworkId } = useBuilderWalletState();
 
   // Subscribe to store state for reactive auto-advance
   const { pendingNetworkId, currentStepIndex } = useUIBuilderStore(

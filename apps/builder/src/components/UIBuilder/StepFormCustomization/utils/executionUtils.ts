@@ -1,5 +1,4 @@
 import type {
-  ContractAdapter,
   EoaExecutionConfig,
   ExecutionConfig,
   ExecutionMethodType,
@@ -7,6 +6,8 @@ import type {
   RelayerExecutionConfig,
 } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
+
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
 
 import { ExecutionMethodFormData } from '../types';
 
@@ -18,7 +19,7 @@ import { ExecutionMethodFormData } from '../types';
  */
 const _validateEoaForBuilder = (
   config: ExecutionConfig,
-  adapter: ContractAdapter
+  adapter: BuilderAdapter
 ): string | null => {
   const eoaConfig = config as EoaExecutionConfig;
   if (!eoaConfig.allowAny) {
@@ -39,7 +40,7 @@ const _validateEoaForBuilder = (
  */
 const _validateRelayerForBuilder = (
   config: ExecutionConfig,
-  _adapter: ContractAdapter
+  _adapter: BuilderAdapter
 ): string | null => {
   const relayerConfig = config as RelayerExecutionConfig;
   if (!relayerConfig.serviceUrl) {
@@ -57,7 +58,7 @@ const _validateRelayerForBuilder = (
  */
 export const executionMethodValidatorMap: Record<
   ExecutionMethodType,
-  (config: ExecutionConfig, adapter: ContractAdapter) => string | null
+  (config: ExecutionConfig, adapter: BuilderAdapter) => string | null
 > = {
   eoa: _validateEoaForBuilder,
   relayer: _validateRelayerForBuilder,

@@ -1,8 +1,10 @@
 import { deepEqual } from 'fast-equals';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import type { ContractAdapter, ContractSchema, FormFieldType } from '@openzeppelin/ui-types';
+import type { ContractSchema, FormFieldType } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
+
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
 
 import type { BuilderFormConfig } from '../../../../core/types/FormTypes';
 import {
@@ -15,7 +17,7 @@ import { buildInitialMetadata, type ExtendedRuntimeBinding } from '../utils/runt
 interface UseFormConfigProps {
   contractSchema: ContractSchema | null;
   selectedFunction: string | null;
-  adapter: ContractAdapter | null;
+  adapter: BuilderAdapter | null;
   onFormConfigUpdated: (config: BuilderFormConfig) => void;
   existingFormConfig?: BuilderFormConfig | null;
 }

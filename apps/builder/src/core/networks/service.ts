@@ -1,5 +1,7 @@
-import { ContractAdapter, Ecosystem, NetworkConfig } from '@openzeppelin/ui-types';
+import { Ecosystem, NetworkConfig } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
+
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
 
 import { getAdapter, getNetworkById, getNetworksByEcosystem } from '../ecosystemManager';
 
@@ -12,7 +14,7 @@ import { getAdapter, getNetworkById, getNetworksByEcosystem } from '../ecosystem
  */
 export class NetworkService {
   // Cache to promote adapter reuse outside React context
-  private adapterCache: Record<string, ContractAdapter> = {};
+  private adapterCache: Record<string, BuilderAdapter> = {};
 
   /**
    * Get network configurations for a specific ecosystem using lazy loading.
@@ -43,7 +45,7 @@ export class NetworkService {
    */
   async getNetworkAndAdapter(
     networkConfigId: string
-  ): Promise<{ network: NetworkConfig; adapter: ContractAdapter } | null> {
+  ): Promise<{ network: NetworkConfig; adapter: BuilderAdapter } | null> {
     const network = await this.getNetworkById(networkConfigId);
     if (!network) {
       logger.error('NetworkService', `Network configuration not found for ID: ${networkConfigId}`);

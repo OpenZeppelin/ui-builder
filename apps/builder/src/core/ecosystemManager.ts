@@ -9,13 +9,16 @@ import { ecosystemMetadata as solanaMetadata } from '@openzeppelin/adapter-solan
 import { ecosystemMetadata as stellarMetadata } from '@openzeppelin/adapter-stellar/metadata';
 import type {
   AdapterConfig,
-  ContractAdapter,
+  ComposerEcosystemRuntime,
   Ecosystem,
   EcosystemExport,
   EcosystemMetadata,
   NetworkConfig,
 } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
+
+import { createLegacyComposerRuntime } from './legacyComposerRuntime';
+import { toBuilderAdapter, type BuilderAdapter } from './runtimeAdapter';
 
 // =============================================================================
 // Metadata Registry (synchronous — available from first render)
@@ -36,7 +39,7 @@ const ecosystemMetadataRegistry: Record<Ecosystem, EcosystemMetadata> = {
 const adapterPromiseCache: Partial<Record<Ecosystem, Promise<EcosystemExport>>> = {};
 
 /**
- * Loads the full adapter module (networks, createAdapter, adapterConfig).
+ * Loads the full adapter module (networks, createRuntime, adapterConfig).
  * This is the "heavy" import — only called when the adapter is actually needed.
  * Caches the in-flight promise to deduplicate concurrent calls and clears the
  * cache entry on failure so transient errors can be retried.
@@ -215,18 +218,62 @@ export async function getAdapterConfig(ecosystem: Ecosystem): Promise<AdapterCon
 }
 
 // =============================================================================
-// Adapter Instantiation
+// Runtime Instantiation
 // =============================================================================
 
-export async function getAdapter(networkConfig: NetworkConfig): Promise<ContractAdapter> {
-  const logSystem = 'EcosystemManager(getAdapter)';
+type LegacyEcosystemExport = Pick<EcosystemExport, 'networks'> & {
+  createAdapter?: (config: NetworkConfig) => Parameters<typeof createLegacyComposerRuntime>[0];
+};
+
+function createComposerRuntime(
+  def: EcosystemExport,
+  networkConfig: NetworkConfig
+): ComposerEcosystemRuntime {
+  if (typeof def.createRuntime === 'function') {
+    return def.createRuntime('composer', networkConfig) as ComposerEcosystemRuntime;
+  }
+
+  const legacyDefinition = def as LegacyEcosystemExport;
+  if (typeof legacyDefinition.createAdapter === 'function') {
+    logger.warn(
+      'EcosystemManager(getRuntime)',
+      `Falling back to legacy createAdapter() for ecosystem ${networkConfig.ecosystem}.`
+    );
+    return createLegacyComposerRuntime(
+      legacyDefinition.createAdapter(networkConfig),
+      legacyDefinition.networks
+    );
+  }
+
+  throw new Error(
+    `No runtime or adapter factory available for ecosystem ${networkConfig.ecosystem}`
+  );
+}
+
+export async function getRuntime(networkConfig: NetworkConfig): Promise<ComposerEcosystemRuntime> {
+  const logSystem = 'EcosystemManager(getRuntime)';
   logger.info(
     logSystem,
-    `Creating adapter for network: ${networkConfig.name} (ID: ${networkConfig.id}).`
+    `Creating composer runtime for network: ${networkConfig.name} (ID: ${networkConfig.id}).`
   );
 
   const def = await loadAdapterModule(networkConfig.ecosystem);
-  return def.createAdapter(networkConfig);
+  return createComposerRuntime(def, networkConfig);
+}
+
+/**
+ * Compatibility helper for builder-only callsites that still expect a flattened adapter surface.
+ * New provider-driven code should prefer `getRuntime`.
+ */
+export async function getAdapter(networkConfig: NetworkConfig): Promise<BuilderAdapter> {
+  const runtime = await getRuntime(networkConfig);
+  const adapter = toBuilderAdapter(runtime);
+
+  if (!adapter) {
+    throw new Error(`Failed to construct builder adapter for network ${networkConfig.id}`);
+  }
+
+  return adapter;
 }
 
 // =============================================================================
@@ -242,7 +289,7 @@ export function getEcosystemMetadata(ecosystem: Ecosystem): EcosystemMetadata {
 }
 
 /**
- * Returns the full ecosystem definition including networks and adapter factory.
+ * Returns the full ecosystem definition including networks and runtime factory.
  * Triggers full adapter module loading.
  */
 export async function getEcosystemDefinition(ecosystem: Ecosystem): Promise<EcosystemExport> {

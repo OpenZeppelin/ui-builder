@@ -2,12 +2,12 @@ import { toast } from 'sonner';
 import useDeepCompareEffect from 'use-deep-compare-effect';
 import { useCallback, useEffect, useRef } from 'react';
 
-import { useWalletState } from '@openzeppelin/ui-react';
-import type { ContractAdapter } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
 import { useContractUIStorage } from '../../../../contexts/useContractUIStorage';
+import type { BuilderAdapter } from '../../../../core/runtimeAdapter';
 import { useBuilderAnalytics } from '../../../../hooks/useBuilderAnalytics';
+import { useBuilderWalletState } from '../../../../hooks/useBuilderWalletState';
 import { useStorageOperations } from '../../../../hooks/useStorageOperations';
 import { contractUIStorage, ContractUIStorage, type ContractUIRecord } from '../../../../storage';
 import { uiBuilderStore, type UIBuilderState } from '../uiBuilderStore';
@@ -49,7 +49,7 @@ async function prepareRecordWithDefinition(
   currentState: UIBuilderState,
   configToSave: Omit<ContractUIRecord, 'id' | 'createdAt' | 'updatedAt'>,
   configId: string,
-  adapter?: ContractAdapter
+  adapter?: BuilderAdapter
 ): Promise<Partial<ContractUIRecord>> {
   const existingConfig = await contractUIStorage.get(configId);
 
@@ -134,7 +134,7 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): 
   const { updateContractUI, contractUIs } = useContractUIStorage();
   const { trackContractUiCreated } = useBuilderAnalytics();
   const storageOperations = useStorageOperations();
-  const { activeAdapter } = useWalletState();
+  const { activeAdapter } = useBuilderWalletState();
 
   // Subscribe to store state changes with our new, clean hook
   const state = useUIBuilderStore((s) => s);

@@ -3,12 +3,13 @@ import { useMemo, useState } from 'react';
 
 import { Alert, AlertDescription, AlertTitle, Button } from '@openzeppelin/ui-components';
 import type {
-  ContractAdapter,
   ContractDefinitionComparisonResult,
   ContractSchema,
   ProxyInfo,
 } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
+
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
 
 import { useContractUIStorage } from '../../../../contexts/useContractUIStorage';
 import {
@@ -34,7 +35,7 @@ interface ContractSuccessStatusProps {
     comparisonResult: ContractDefinitionComparisonResult;
   } | null;
   loadedConfigurationId: string | null;
-  adapter: ContractAdapter;
+  adapter: BuilderAdapter;
   onIgnoreProxy: () => void;
   requiresManualReload: boolean;
   onManualReload: () => void;

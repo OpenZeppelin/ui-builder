@@ -7,14 +7,15 @@
  * standalone app project.
  */
 import { ContractSchema, NetworkConfig } from '@openzeppelin/ui-types';
-import type { ContractAdapter } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
+
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
 
 // Lazy import types for dependency management
 import type { AppCodeGenerator } from './generators/AppCodeGenerator';
 import type { TemplateProcessor } from './generators/TemplateProcessor';
 
-import { getAdapter } from '../core/ecosystemManager';
+import { getAdapter, getEcosystemDefinition } from '../core/ecosystemManager';
 import type { ExportOptions, ExportResult } from '../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../core/types/FormTypes';
 import {
@@ -153,8 +154,11 @@ export class AppExportSystem {
       logger.info('Export System', 'Starting export process...');
       logger.info('Export System', 'Options:', exportOptions);
 
-      // Get the adapter instance for the selected network
-      const adapter = await getAdapter(networkConfig);
+      // Get the builder adapter and build-time ecosystem definition for the selected network.
+      const [adapter, ecosystemDefinition] = await Promise.all([
+        getAdapter(networkConfig),
+        getEcosystemDefinition(networkConfig.ecosystem),
+      ]);
 
       // 1. Generate all necessary code components
       logger.info('Export System', 'Generating code components...');
@@ -186,7 +190,8 @@ export class AppExportSystem {
         functionId,
         exportOptions,
         customFiles,
-        adapter
+        adapter,
+        ecosystemDefinition
       );
       logger.info('Export System', `Project files assembled: ${Object.keys(projectFiles).length}`);
 
@@ -226,7 +231,8 @@ export class AppExportSystem {
     functionId: string,
     exportOptions: ExportOptions,
     customFiles: Record<string, string>,
-    adapter: ContractAdapter
+    adapter: BuilderAdapter,
+    ecosystemDefinition: Awaited<ReturnType<typeof getEcosystemDefinition>>
   ): Promise<Record<string, string | Uint8Array | Blob>> {
     logger.info('File Assembly', 'Starting file assembly process...');
 
@@ -242,7 +248,7 @@ export class AppExportSystem {
     // Generate adapter bootstrap files if the adapter supports it
     const bootstrapInfo = await generateAdapterBootstrapFiles(
       projectFiles as unknown as Record<string, string>,
-      adapter,
+      ecosystemDefinition,
       {
         formConfig,
         contractSchema,

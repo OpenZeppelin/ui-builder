@@ -1,9 +1,9 @@
 import { useCallback } from 'react';
 
-import { useWalletState } from '@openzeppelin/ui-react';
 import { ExecutionConfig, UiKitConfiguration } from '@openzeppelin/ui-types';
 
 import { BuilderFormConfig } from '@/core/types/FormTypes';
+import { useBuilderWalletState } from '@/hooks/useBuilderWalletState';
 
 import { uiBuilderStore } from '../uiBuilderStore';
 
@@ -12,7 +12,7 @@ import { uiBuilderStore } from '../uiBuilderStore';
  * @returns An object with functions to update form, execution, and UI kit configurations.
  */
 export function useBuilderConfig() {
-  const { reconfigureActiveAdapterUiKit } = useWalletState();
+  const { reconfigureActiveAdapterUiKit } = useBuilderWalletState();
 
   const handleFormConfigUpdated = useCallback((config: Partial<BuilderFormConfig>) => {
     uiBuilderStore.updateState((s) => ({

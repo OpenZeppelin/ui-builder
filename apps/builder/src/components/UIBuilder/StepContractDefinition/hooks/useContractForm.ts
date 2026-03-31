@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-import type { ContractAdapter, FormValues } from '@openzeppelin/ui-types';
+import type { FormValues } from '@openzeppelin/ui-types';
+
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
 
 import { useDebounce } from '../../hooks';
 import { uiBuilderStore } from '../../hooks/uiBuilderStore';
 
 interface UseContractFormProps {
-  adapter: ContractAdapter | null;
+  adapter: BuilderAdapter | null;
   existingFormValues: FormValues | null;
   loadedConfigurationId: string | null;
   networkId: string | null;

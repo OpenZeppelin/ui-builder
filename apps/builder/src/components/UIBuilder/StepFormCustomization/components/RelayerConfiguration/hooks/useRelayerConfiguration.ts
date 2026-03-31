@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useForm, UseFormReturn } from 'react-hook-form';
 
-import type { ContractAdapter } from '@openzeppelin/ui-types';
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
 
 import { ExecutionMethodFormData } from '../../../types';
 
@@ -15,7 +15,7 @@ export type SetupStep = 'credentials' | 'selection' | 'configuration';
 
 interface UseRelayerConfigurationParams {
   control: UseFormReturn<ExecutionMethodFormData>['control'];
-  adapter: ContractAdapter | null;
+  adapter: BuilderAdapter | null;
   setValue: UseFormReturn<ExecutionMethodFormData>['setValue'];
 }
 

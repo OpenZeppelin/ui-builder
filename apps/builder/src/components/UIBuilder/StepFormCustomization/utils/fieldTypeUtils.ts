@@ -1,7 +1,8 @@
 import capitalize from 'lodash-es/capitalize';
 
-import type { ContractAdapter } from '@openzeppelin/ui-types';
 import { FieldType } from '@openzeppelin/ui-types';
+
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
 
 /**
  * Field type option with display label
@@ -106,7 +107,7 @@ export function shouldShowFieldTypeSelector(fieldType?: string): boolean {
  * Generate field type groups based on adapter and parameter type
  */
 export function getFieldTypeGroups(
-  adapter?: ContractAdapter,
+  adapter?: BuilderAdapter,
   originalParameterType?: string
 ): OptionGroup[] {
   // Get compatible field types

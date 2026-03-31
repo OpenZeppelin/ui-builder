@@ -2,7 +2,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type {
-  ContractAdapter,
   ContractSchema,
   Ecosystem,
   EvmNetworkConfig,
@@ -12,6 +11,8 @@ import type {
   RelayerDetailsRich,
 } from '@openzeppelin/ui-types';
 import { generateId } from '@openzeppelin/ui-utils';
+
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
 
 import type { BuilderFormConfig } from '../../types/FormTypes';
 import { FormSchemaFactory } from '../FormSchemaFactory';
@@ -31,9 +32,8 @@ const mockTestEvmConfig: EvmNetworkConfig = {
   apiUrl: '',
 };
 
-// Mock adapter instance (ensure it fulfills ContractAdapter)
-const mockAdapterInstance: ContractAdapter = {
-  initialAppServiceKitName: 'custom',
+// Mock adapter instance (ensure it fulfills BuilderAdapter)
+const mockAdapterInstance = {
   networkConfig: mockTestEvmConfig,
   mapParameterTypeToFieldType: vi.fn((type: string): FieldType => {
     if (type === 'address') return 'blockchain-address';
@@ -63,7 +63,7 @@ const mockAdapterInstance: ContractAdapter = {
     if (type === 'uint256') return ['number', 'text'] as FieldType[];
     return ['text'] as FieldType[];
   }),
-  // Add dummy implementations for ALL methods in ContractAdapter
+  // Add dummy implementations for ALL methods in BuilderAdapter
   loadContract: vi.fn().mockResolvedValue({} as ContractSchema),
   getWritableFunctions: vi.fn(() => []),
   formatTransactionData: vi.fn(() => ({})),
@@ -106,7 +106,7 @@ const mockAdapterInstance: ContractAdapter = {
       },
     ],
   })),
-};
+} as unknown as BuilderAdapter;
 
 describe('FormSchemaFactory', () => {
   const factory = new FormSchemaFactory();

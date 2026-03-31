@@ -7,12 +7,12 @@
 import { toast } from 'sonner';
 import { useCallback, useEffect, useState } from 'react';
 
-import { useWalletState } from '@openzeppelin/ui-react';
 import { ContractDefinitionMetadata, ContractSchema, FormValues } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
 import { contractDefinitionService } from '../services/ContractDefinitionService';
 import { ContractLoadResult } from '../services/ContractLoader';
+import { useBuilderWalletState } from './useBuilderWalletState';
 
 interface UseContractDefinitionOptions {
   /**
@@ -62,7 +62,7 @@ export function useContractDefinition(
   options: UseContractDefinitionOptions = {}
 ): UseContractDefinitionReturn {
   const { onLoaded, onError } = options;
-  const { activeAdapter } = useWalletState();
+  const { activeAdapter } = useBuilderWalletState();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 

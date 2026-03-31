@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import type { ContractAdapter, NetworkConfig } from '@openzeppelin/ui-types';
+import type { NetworkConfig } from '@openzeppelin/ui-types';
 import {
   filterEnabledServiceForms,
   logger,
   userNetworkServiceConfigService,
 } from '@openzeppelin/ui-utils';
+
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
 
 export interface ServiceHealthStatus {
   serviceId: string;
@@ -35,7 +37,7 @@ export interface NetworkHealthCheckResult {
  * @returns Health check results including any unhealthy services
  */
 export function useNetworkServiceHealthCheck(
-  adapter: ContractAdapter | null,
+  adapter: BuilderAdapter | null,
   networkConfig: NetworkConfig | null
 ): NetworkHealthCheckResult {
   const [isChecking, setIsChecking] = useState(false);

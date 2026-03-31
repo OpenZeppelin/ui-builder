@@ -9,11 +9,12 @@ import {
   CardHeader,
   CardTitle,
 } from '@openzeppelin/ui-components';
-import type { ContractAdapter } from '@openzeppelin/ui-types';
+
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
 
 interface RelayerGasConfigurationCardProps {
   isActive: boolean;
-  adapter: ContractAdapter | null;
+  adapter: BuilderAdapter | null;
   transactionOptions: Record<string, unknown>;
   onSetupStepChange: (step: 'configuration') => void;
   onTransactionOptionsChange: (options: Record<string, unknown>) => void;

@@ -9,7 +9,6 @@ import startCase from 'lodash-es/startCase';
 import { createTransformForFieldType } from '@openzeppelin/ui-renderer';
 import {
   CommonFormProperties,
-  ContractAdapter,
   ContractFunction,
   ContractSchema,
   FieldType,
@@ -17,6 +16,8 @@ import {
   FunctionParameter,
 } from '@openzeppelin/ui-types';
 import { generateId } from '@openzeppelin/ui-utils';
+
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
 
 import type { BuilderFormConfig } from '../core/types/FormTypes';
 
@@ -33,7 +34,7 @@ import type { BuilderFormConfig } from '../core/types/FormTypes';
  * @returns A complete form configuration object with enhanced fields and transforms
  */
 export function generateFormConfig(
-  adapter: ContractAdapter,
+  adapter: BuilderAdapter,
   contractSchema: ContractSchema,
   functionId: string
 ): BuilderFormConfig {
@@ -93,7 +94,7 @@ export function generateFormConfig(
  * @returns An array of form fields with enhanced metadata and original parameter type information
  */
 export function generateFieldsFromFunction(
-  adapter: ContractAdapter,
+  adapter: BuilderAdapter,
   functionDetails: ContractFunction,
   contractSchema?: ContractSchema
 ): FormFieldType[] {
@@ -134,7 +135,7 @@ export function generateFieldsFromFunction(
  * @returns A form field appropriate for the complex type with enhanced UI metadata
  */
 function handleComplexTypeField(
-  adapter: ContractAdapter,
+  adapter: BuilderAdapter,
   parameter: FunctionParameter,
   contractSchema?: ContractSchema
 ): FormFieldType {

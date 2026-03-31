@@ -11,8 +11,10 @@ import {
   RelayerDetailsCard,
   SelectField,
 } from '@openzeppelin/ui-components';
-import type { ContractAdapter, RelayerDetails, RelayerDetailsRich } from '@openzeppelin/ui-types';
+import type { RelayerDetails, RelayerDetailsRich } from '@openzeppelin/ui-types';
 import { truncateMiddle } from '@openzeppelin/ui-utils';
+
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
 
 import type { ExecutionMethodFormData } from '../../../types';
 
@@ -26,7 +28,7 @@ interface RelayerSelectionCardProps {
   loadingEnhancedDetails: boolean;
   isLoading: boolean;
   onEdit: () => void;
-  adapter?: ContractAdapter | null;
+  adapter?: BuilderAdapter | null;
 }
 
 export function RelayerSelectionCard({

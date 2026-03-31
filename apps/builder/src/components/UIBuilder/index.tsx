@@ -183,7 +183,8 @@ export function UIBuilder() {
     <ContractStateWidget
       contractSchema={widget.sidebar.contractSchema}
       contractAddress={widget.sidebar.contractAddress}
-      adapter={widget.sidebar.adapter}
+      query={widget.sidebar.adapter}
+      schema={widget.sidebar.adapter}
       isVisible={widget.sidebar.isVisible}
       onToggle={widget.sidebar.onToggle}
     />
@@ -283,7 +284,8 @@ export function UIBuilder() {
     <>
       {shouldMountNetworkSwitcher && state.selectedAdapter && state.networkToSwitchTo && (
         <NetworkSwitchManager
-          adapter={state.selectedAdapter}
+          wallet={state.selectedAdapter}
+          networkCatalog={state.selectedAdapter}
           targetNetworkId={state.networkToSwitchTo}
           onNetworkSwitchComplete={handleNetworkSwitchComplete}
         />

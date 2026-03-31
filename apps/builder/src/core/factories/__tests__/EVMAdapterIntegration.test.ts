@@ -1,6 +1,8 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 
-import type { ContractAdapter, ContractSchema, EvmNetworkConfig } from '@openzeppelin/ui-types';
+import type { ContractSchema, EvmNetworkConfig } from '@openzeppelin/ui-types';
+
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
 
 import { TEST_FIXTURES } from './fixtures/evm-test-fixtures';
 
@@ -36,7 +38,7 @@ const mockEvmNetworkConfig: EvmNetworkConfig = {
 
 describe('EVM Adapter Integration Tests', () => {
   const factory = new FormSchemaFactory();
-  let adapter: ContractAdapter; // Type it as ContractAdapter
+  let adapter: BuilderAdapter; // Type it as BuilderAdapter
   let erc20Schema: ContractSchema;
   let inputTesterSchema: ContractSchema;
 

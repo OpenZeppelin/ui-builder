@@ -1,7 +1,9 @@
 import { useCallback, useRef } from 'react';
 
-import { FullContractAdapter, NetworkConfig } from '@openzeppelin/ui-types';
+import { NetworkConfig } from '@openzeppelin/ui-types';
 import type { ContractSchema } from '@openzeppelin/ui-types';
+
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
 
 import { useWizardStepUiState } from './useWizardStepUiState';
 
@@ -52,7 +54,7 @@ export function useContractWidgetState() {
     (
       contractSchema: ContractSchema | null,
       contractAddress: string | null,
-      adapter: FullContractAdapter,
+      adapter: BuilderAdapter,
       networkConfig: NetworkConfig | null
     ) => {
       if (!contractAddress || !networkConfig) return null;
@@ -91,7 +93,7 @@ export function useContractWidgetState() {
     (
       contractSchema: ContractSchema | null,
       contractAddress: string | null,
-      adapter: FullContractAdapter | null
+      adapter: BuilderAdapter | null
     ) => {
       if (!contractSchema || !contractAddress || !adapter) return;
 

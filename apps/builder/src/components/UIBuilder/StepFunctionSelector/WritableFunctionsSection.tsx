@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 
-import type { ContractAdapter, FunctionDecorationsMap } from '@openzeppelin/ui-types';
+import type { FunctionDecorationsMap } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
+
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
 
 import { WritableFunctionsSectionProps } from './types';
 import { WritableFunctionRow } from './WritableFunctionRow';
@@ -11,7 +13,7 @@ export function WritableFunctionsSection({
   selectedFunction,
   onSelectFunction,
   adapter,
-}: WritableFunctionsSectionProps & { adapter?: ContractAdapter }) {
+}: WritableFunctionsSectionProps & { adapter?: BuilderAdapter }) {
   const [decorations, setDecorations] = useState<FunctionDecorationsMap | undefined>();
 
   // Fetch function decorations when adapter is available

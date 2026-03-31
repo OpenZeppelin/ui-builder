@@ -1,5 +1,6 @@
-import type { ContractAdapter } from '@openzeppelin/ui-types';
 import { FieldType } from '@openzeppelin/ui-types';
+
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
 
 import { TypeConversionWarning } from './TypeConversionWarning';
 
@@ -12,7 +13,7 @@ interface TypeWarningSectionProps {
   /**
    * The contract adapter for the selected blockchain
    */
-  adapter?: ContractAdapter;
+  adapter?: BuilderAdapter;
 
   /**
    * The original blockchain parameter type

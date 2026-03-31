@@ -1,10 +1,8 @@
 import React from 'react';
 
-import type {
-  ContractAdapter,
-  ExecutionConfig,
-  ExecutionMethodDetail,
-} from '@openzeppelin/ui-types';
+import type { ExecutionConfig, ExecutionMethodDetail } from '@openzeppelin/ui-types';
+
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
 
 import { PrimaryMethodSelector } from './components/PrimaryMethodSelector';
 import { useExecutionMethodState } from './hooks/useExecutionMethodState';
@@ -12,7 +10,7 @@ import { useExecutionMethodState } from './hooks/useExecutionMethodState';
 export interface ExecutionMethodSettingsProps {
   currentConfig?: ExecutionConfig;
   onUpdateConfig: (config: ExecutionConfig | undefined, isValid: boolean) => void;
-  adapter: ContractAdapter | null;
+  adapter: BuilderAdapter | null;
   isWidgetExpanded?: boolean;
 }
 

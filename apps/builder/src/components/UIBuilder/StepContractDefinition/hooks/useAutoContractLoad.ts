@@ -1,7 +1,9 @@
 import { useEffect } from 'react';
 
-import type { ContractAdapter, ContractSchema, FormValues } from '@openzeppelin/ui-types';
+import type { ContractSchema, FormValues } from '@openzeppelin/ui-types';
 import { hasMissingRequiredContractInputs } from '@openzeppelin/ui-utils';
+
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
 
 import { contractDefinitionService } from '../../../../services/ContractDefinitionService';
 import { uiBuilderStore } from '../../hooks/uiBuilderStore';
@@ -17,7 +19,7 @@ interface UseAutoContractLoadProps {
   canAttemptLoad: (values: FormValues) => boolean;
   markAttempted: (values: FormValues) => void;
   loadContract: (values: FormValues) => Promise<void>;
-  adapter?: ContractAdapter | null;
+  adapter?: BuilderAdapter | null;
 }
 
 /**

@@ -3,9 +3,10 @@ import debounce from 'lodash-es/debounce';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 
-import type { ContractAdapter } from '@openzeppelin/ui-types';
 import { FieldType, FormFieldType } from '@openzeppelin/ui-types';
 import { getDefaultValueForType } from '@openzeppelin/ui-utils';
+
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
 
 import { coerceHardcodedValue } from './utils/fieldEditorUtils';
 
@@ -27,7 +28,7 @@ interface FieldEditorProps {
   /**
    * Chain-specific adapter for type validation and mapping
    */
-  adapter?: ContractAdapter;
+  adapter?: BuilderAdapter;
   /**
    * Original parameter type from the contract schema for validation warnings
    */

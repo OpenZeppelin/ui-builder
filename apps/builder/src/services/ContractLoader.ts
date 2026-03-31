@@ -4,8 +4,10 @@
  * Handles loading contract definitions across different blockchain platforms.
  * Uses the appropriate adapter based on the selected chain type.
  */
-import { ContractAdapter, ContractSchema, FormValues, ProxyInfo } from '@openzeppelin/ui-types';
+import { ContractSchema, FormValues, ProxyInfo } from '@openzeppelin/ui-types';
 import { getMissingRequiredContractInputs, logger } from '@openzeppelin/ui-utils';
+
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
 
 /**
  * Loads a contract definition using the provided chain adapter.
@@ -16,7 +18,7 @@ import { getMissingRequiredContractInputs, logger } from '@openzeppelin/ui-utils
  * @returns A Promise resolving to the ContractSchema or null if loading fails.
  */
 export async function loadContractDefinition(
-  adapter: ContractAdapter,
+  adapter: BuilderAdapter,
   artifacts: FormValues
 ): Promise<ContractSchema | null> {
   logger.info('ContractLoader', `Loading contract definition with provided artifacts...`);
@@ -65,7 +67,7 @@ export interface ContractLoadResult {
  * @returns A Promise resolving to ContractLoadResult with schema and metadata.
  */
 export async function loadContractDefinitionWithMetadata(
-  adapter: ContractAdapter,
+  adapter: BuilderAdapter,
   artifacts: FormValues
 ): Promise<ContractLoadResult> {
   logger.info('ContractLoader', `Loading contract definition with metadata...`);

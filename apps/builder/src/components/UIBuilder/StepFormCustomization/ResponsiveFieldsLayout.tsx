@@ -1,4 +1,6 @@
-import type { ContractAdapter, FormFieldType } from '@openzeppelin/ui-types';
+import type { FormFieldType } from '@openzeppelin/ui-types';
+
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
 
 import { useMediaQuery } from '../../../hooks/useMediaQuery';
 import { FieldEditor } from './FieldEditor';
@@ -24,7 +26,7 @@ interface ResponsiveFieldsLayoutProps {
   /**
    * Chain-specific adapter for type validation and mapping
    */
-  adapter: ContractAdapter;
+  adapter: BuilderAdapter;
 
   /**
    * Callback fired when field properties are updated

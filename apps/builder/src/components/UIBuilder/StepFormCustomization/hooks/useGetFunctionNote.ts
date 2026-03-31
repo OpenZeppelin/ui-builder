@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 
-import type { ContractAdapter, ContractFunction } from '@openzeppelin/ui-types';
+import type { ContractFunction } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
+
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
 
 /**
  * Custom hook to fetch function decoration notes from the adapter.
@@ -13,7 +15,7 @@ import { logger } from '@openzeppelin/ui-utils';
  * @returns The function note or undefined if not found/not required
  */
 export function useGetFunctionNote(
-  adapter: ContractAdapter | undefined,
+  adapter: BuilderAdapter | undefined,
   selectedFunction: string | null,
   selectedFunctionDetails: ContractFunction | null
 ): { title?: string; body: string } | undefined {

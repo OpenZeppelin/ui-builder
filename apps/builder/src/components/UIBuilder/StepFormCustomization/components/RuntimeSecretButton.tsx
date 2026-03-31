@@ -1,11 +1,13 @@
 import { Button } from '@openzeppelin/ui-components';
-import type { ContractAdapter, FormFieldType } from '@openzeppelin/ui-types';
+import type { FormFieldType } from '@openzeppelin/ui-types';
+
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
 
 import type { BuilderFormConfig } from '../../../../core/types/FormTypes';
 import { buildInitialMetadata, type ExtendedRuntimeBinding } from '../utils/runtime-secret-helpers';
 
 interface RuntimeSecretButtonProps {
-  adapter: ContractAdapter;
+  adapter: BuilderAdapter;
   formConfig: BuilderFormConfig;
   onFormConfigUpdated: (config: Partial<BuilderFormConfig>) => void;
 }

@@ -2,12 +2,14 @@ import { Loader2 } from 'lucide-react';
 import { Control } from 'react-hook-form';
 
 import { DynamicFormField } from '@openzeppelin/ui-renderer';
-import type { ContractAdapter, FormFieldType, FormValues } from '@openzeppelin/ui-types';
+import type { FormFieldType, FormValues } from '@openzeppelin/ui-types';
+
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
 
 interface ContractFormFieldsProps {
   contractDefinitionInputs: FormFieldType[];
   control: Control<FormValues>;
-  adapter: ContractAdapter;
+  adapter: BuilderAdapter;
   isLoading: boolean;
 }
 
@@ -25,7 +27,13 @@ export function ContractFormFields({
       {/* Form Fields */}
       <div className="space-y-4">
         {contractDefinitionInputs.map((field) => (
-          <DynamicFormField key={field.id} field={field} control={control} adapter={adapter} />
+          <DynamicFormField
+            key={field.id}
+            field={field}
+            control={control}
+            addressing={adapter}
+            typeMapping={adapter}
+          />
         ))}
       </div>
 

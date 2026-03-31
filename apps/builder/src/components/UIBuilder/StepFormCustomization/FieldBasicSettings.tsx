@@ -3,7 +3,9 @@ import { Control, useFormState, useWatch } from 'react-hook-form';
 
 import { Banner, BooleanField, SelectGroupedField, TextField } from '@openzeppelin/ui-components';
 import { DynamicFormField } from '@openzeppelin/ui-renderer';
-import { ContractAdapter, FormFieldType } from '@openzeppelin/ui-types';
+import { FormFieldType } from '@openzeppelin/ui-types';
+
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
 
 import { OptionGroup, shouldShowFieldTypeSelector } from './utils/fieldTypeUtils';
 
@@ -28,7 +30,7 @@ interface FieldBasicSettingsProps {
   /**
    * The adapter for chain-specific type mapping and validation
    */
-  adapter?: ContractAdapter;
+  adapter?: BuilderAdapter;
 
   /**
    * The original field being edited.
@@ -202,7 +204,8 @@ export function FieldBasicSettings({
             key={`hardcoded-${field.id}-${fieldType}`}
             field={hardcodedFieldConfig}
             control={control}
-            adapter={adapter}
+            addressing={adapter}
+            typeMapping={adapter}
           />
           <BooleanField
             id="is-read-only"

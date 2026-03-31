@@ -1,13 +1,14 @@
 import { useMemo } from 'react';
 
 import { Card, CardContent } from '@openzeppelin/ui-components';
-import { useDerivedAccountStatus, useWalletState } from '@openzeppelin/ui-react';
+import { useDerivedAccountStatus } from '@openzeppelin/ui-react';
 import { TransactionForm } from '@openzeppelin/ui-renderer';
 import type { ContractFunction, ContractSchema } from '@openzeppelin/ui-types';
 
 import { formSchemaFactory } from '../../../core/factories/FormSchemaFactory';
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 import { useBuilderAnalytics } from '../../../hooks/useBuilderAnalytics';
+import { useBuilderWalletState } from '../../../hooks/useBuilderWalletState';
 
 interface FormPreviewProps {
   formConfig: BuilderFormConfig;
@@ -22,9 +23,9 @@ interface FormPreviewProps {
 export function FormPreview({ formConfig, functionDetails, contractSchema }: FormPreviewProps) {
   const {
     activeAdapter: adapter,
-    isAdapterLoading: adapterLoading,
     activeNetworkConfig: networkConfig,
-  } = useWalletState();
+    isAdapterLoading: adapterLoading,
+  } = useBuilderWalletState();
 
   const { isConnected: isWalletConnected } = useDerivedAccountStatus();
   const { trackTransactionExecuted } = useBuilderAnalytics();

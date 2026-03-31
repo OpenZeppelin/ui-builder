@@ -1,7 +1,8 @@
 import { Control } from 'react-hook-form';
 
 import { BooleanField, TextAreaField, TextField } from '@openzeppelin/ui-components';
-import type { ContractAdapter } from '@openzeppelin/ui-types';
+
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
 
 import { shouldShowFieldTypeSelector } from './utils/fieldTypeUtils';
 
@@ -20,7 +21,7 @@ interface FieldAdvancedSettingsProps {
   /**
    * Optional adapter to drive adapter-specific settings (e.g., runtimeSecret extras)
    */
-  adapter?: ContractAdapter;
+  adapter?: BuilderAdapter;
 }
 
 /**

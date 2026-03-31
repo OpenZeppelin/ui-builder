@@ -3,7 +3,9 @@ import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import type { AvailableUiKit, ContractAdapter } from '@openzeppelin/ui-types';
+import type { AvailableUiKit } from '@openzeppelin/ui-types';
+
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
 
 import { UiKitSettings } from '../components/UiKitSettings';
 
@@ -56,7 +58,7 @@ Object.defineProperty(window, 'matchMedia', {
 });
 
 describe('UiKitSettings', () => {
-  const mockAdapter: Partial<ContractAdapter> = {
+  const mockAdapter: Partial<BuilderAdapter> = {
     getAvailableUiKits: vi.fn().mockResolvedValue([
       {
         id: 'rainbowkit',
@@ -80,7 +82,7 @@ describe('UiKitSettings', () => {
 
     render(
       <UiKitSettings
-        adapter={mockAdapter as ContractAdapter}
+        adapter={mockAdapter as BuilderAdapter}
         onUpdateConfig={onUpdateConfig}
         currentConfig={{ kitName: 'rainbowkit', kitConfig: {} }}
       />
@@ -112,7 +114,7 @@ describe('UiKitSettings', () => {
 
     render(
       <UiKitSettings
-        adapter={mockAdapter as ContractAdapter}
+        adapter={mockAdapter as BuilderAdapter}
         onUpdateConfig={onUpdateConfig}
         currentConfig={{ kitName: 'rainbowkit', kitConfig: {} }}
       />
@@ -141,7 +143,7 @@ describe('UiKitSettings', () => {
 
     render(
       <UiKitSettings
-        adapter={mockAdapter as ContractAdapter}
+        adapter={mockAdapter as BuilderAdapter}
         onUpdateConfig={onUpdateConfig}
         currentConfig={{
           kitName: 'rainbowkit',
@@ -166,7 +168,7 @@ describe('UiKitSettings', () => {
 
     render(
       <UiKitSettings
-        adapter={mockAdapter as ContractAdapter}
+        adapter={mockAdapter as BuilderAdapter}
         onUpdateConfig={onUpdateConfig}
         currentConfig={{ kitName: 'rainbowkit', kitConfig: {} }}
       />

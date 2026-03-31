@@ -6,7 +6,9 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import type { ContractAdapter, NetworkConfig, NetworkServiceForm } from '@openzeppelin/ui-types';
+import type { NetworkConfig, NetworkServiceForm } from '@openzeppelin/ui-types';
+
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
 
 import { useNetworkServiceHealthCheck } from '../hooks/useNetworkServiceHealthCheck';
 
@@ -60,7 +62,7 @@ function createMockServiceForms(): NetworkServiceForm[] {
 }
 
 // Helper to create mock adapter
-function createMockAdapter(): Partial<ContractAdapter> {
+function createMockAdapter(): Partial<BuilderAdapter> {
   return {
     networkConfig: createMockNetworkConfig(),
     getNetworkServiceForms: vi.fn().mockReturnValue(createMockServiceForms()),
@@ -89,7 +91,7 @@ describe('useNetworkServiceHealthCheck', () => {
     const mockAdapter = createMockAdapter();
 
     const { result } = renderHook(() =>
-      useNetworkServiceHealthCheck(mockAdapter as ContractAdapter, createMockNetworkConfig())
+      useNetworkServiceHealthCheck(mockAdapter as BuilderAdapter, createMockNetworkConfig())
     );
 
     await waitFor(() => {
@@ -109,7 +111,7 @@ describe('useNetworkServiceHealthCheck', () => {
     });
 
     const { result } = renderHook(() =>
-      useNetworkServiceHealthCheck(mockAdapter as ContractAdapter, createMockNetworkConfig())
+      useNetworkServiceHealthCheck(mockAdapter as BuilderAdapter, createMockNetworkConfig())
     );
 
     await waitFor(() => {
@@ -128,7 +130,7 @@ describe('useNetworkServiceHealthCheck', () => {
       .mockRejectedValue(new Error('Network failure'));
 
     const { result } = renderHook(() =>
-      useNetworkServiceHealthCheck(mockAdapter as ContractAdapter, createMockNetworkConfig())
+      useNetworkServiceHealthCheck(mockAdapter as BuilderAdapter, createMockNetworkConfig())
     );
 
     await waitFor(() => {

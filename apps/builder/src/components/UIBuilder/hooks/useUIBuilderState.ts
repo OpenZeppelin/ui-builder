@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
-import { useWalletState } from '@openzeppelin/ui-react';
-import type { ContractAdapter, FormValues } from '@openzeppelin/ui-types';
+import type { FormValues } from '@openzeppelin/ui-types';
 import {
   buildRequiredInputSnapshot,
   hasMissingRequiredContractInputs,
 } from '@openzeppelin/ui-utils';
 
+import type { BuilderAdapter } from '../../../core/runtimeAdapter';
+import { useBuilderWalletState } from '../../../hooks/useBuilderWalletState';
 import { useContractDefinition } from '../../../hooks/useContractDefinition';
 import { useContractDefinitionComparison } from '../../../hooks/useContractDefinitionComparison';
 import {
@@ -29,7 +30,7 @@ import { useUIBuilderStore } from './useUIBuilderStore';
 export function useUIBuilderState() {
   const state = useUIBuilderStore((s) => s);
   const { activeNetworkConfig, activeAdapter, isAdapterLoading, reconfigureActiveAdapterUiKit } =
-    useWalletState();
+    useBuilderWalletState();
 
   const savedConfigIdRef = useRef<string | null>(null);
   const isLoadingSavedConfigRef = useRef<boolean>(false);
@@ -69,7 +70,7 @@ export function useUIBuilderState() {
 
   // Helper: check if adapter-declared required fields are missing in provided values
   const hasMissingRequiredFields = useCallback(
-    (adapter: ContractAdapter | null | undefined, values: FormValues): boolean =>
+    (adapter: BuilderAdapter | null | undefined, values: FormValues): boolean =>
       hasMissingRequiredContractInputs(adapter, values),
     []
   );

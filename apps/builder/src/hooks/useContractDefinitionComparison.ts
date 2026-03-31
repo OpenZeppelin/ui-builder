@@ -2,17 +2,18 @@ import { useEffect, useState } from 'react';
 
 // Import the correct interface from types package
 import type {
-  ContractAdapter,
   ContractDefinitionComparisonResult,
   ContractDefinitionDifference,
 } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
+
 interface UseContractDefinitionComparisonProps {
   originalDefinition: string | null;
   currentDefinition: string | null;
   isLoadedConfigMode: boolean;
-  adapter?: ContractAdapter | null;
+  adapter?: BuilderAdapter | null;
 }
 
 interface UseContractDefinitionComparisonReturn {

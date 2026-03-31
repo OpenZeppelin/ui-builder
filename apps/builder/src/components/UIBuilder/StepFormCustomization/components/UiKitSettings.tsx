@@ -7,7 +7,6 @@ import { EmptyState, ExternalLink } from '@openzeppelin/ui-components';
 import { DynamicFormField } from '@openzeppelin/ui-renderer';
 import {
   AvailableUiKit,
-  ContractAdapter,
   FormFieldType,
   FormValues,
   UiKitConfiguration,
@@ -15,13 +14,15 @@ import {
 } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
+
 import { useBuilderAnalytics } from '../../../../hooks/useBuilderAnalytics';
 import { type SelectableOption } from '../../../Common/OptionSelector';
 import { TitledSection } from '../../../Common/TitledSection';
 import { ResponsiveUiKitSelector } from '../ResponsiveUiKitSelector';
 
 interface UiKitSettingsProps {
-  adapter: ContractAdapter;
+  adapter: BuilderAdapter;
   onUpdateConfig: (config: UiKitConfiguration) => void;
   currentConfig?: UiKitConfiguration;
 }
@@ -114,7 +115,12 @@ export function UiKitSettings({ adapter, onUpdateConfig, currentConfig }: UiKitS
         <div className="space-y-4">
           {selectedKit.configFields.map((field) => (
             <div key={field.id} className="pt-2">
-              <DynamicFormField field={field} control={control} adapter={adapter} />
+              <DynamicFormField
+                field={field}
+                control={control}
+                addressing={adapter}
+                typeMapping={adapter}
+              />
             </div>
           ))}
         </div>

@@ -1,12 +1,14 @@
 import { useEffect } from 'react';
 
-import type { ContractAdapter, FormValues } from '@openzeppelin/ui-types';
+import type { FormValues } from '@openzeppelin/ui-types';
 import {
   buildRequiredInputSnapshot,
   hasMissingRequiredContractInputs,
   normalizeAddress,
   requiredSnapshotsEqual,
 } from '@openzeppelin/ui-utils';
+
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
 
 import { contractDefinitionService } from '../../../../services/ContractDefinitionService';
 import { uiBuilderStore } from '../../hooks/uiBuilderStore';
@@ -16,7 +18,7 @@ interface UseFormSyncProps {
   contractAddressValue: string | undefined;
   currentContractAddress: string | null;
   networkId?: string | null;
-  adapter?: ContractAdapter | null;
+  adapter?: BuilderAdapter | null;
   debouncedValues?: FormValues;
 }
 

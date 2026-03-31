@@ -7,7 +7,6 @@
  */
 import { createTransformForFieldType } from '@openzeppelin/ui-renderer';
 import type {
-  ContractAdapter,
   ContractSchema,
   FieldValidation,
   FormFieldType,
@@ -16,6 +15,8 @@ import type {
   FunctionParameter,
   RenderFormSchema,
 } from '@openzeppelin/ui-types';
+
+import type { BuilderAdapter } from '@/core/runtimeAdapter';
 
 import { generateFieldsFromFunction } from '../../services/FormGenerator';
 import { BuilderFormConfig } from '../types/FormTypes';
@@ -29,13 +30,13 @@ export class FormSchemaFactory {
    * Creates a complete form schema from a contract function
    * using the appropriate adapter for field mapping and validation
    *
-   * @param adapter The configured ContractAdapter instance for the specific network.
+   * @param adapter The configured BuilderAdapter instance for the specific network.
    * @param contractSchema The contract schema containing function definitions.
    * @param functionId The ID of the function to generate a form for.
    * @returns A complete form schema for rendering.
    */
   generateFormSchema(
-    adapter: ContractAdapter,
+    adapter: BuilderAdapter,
     contractSchema: ContractSchema,
     functionId: string
   ): RenderFormSchema {
@@ -173,7 +174,7 @@ export class FormSchemaFactory {
    */
   private generateFields(
     inputs: FunctionParameter[],
-    adapter: ContractAdapter,
+    adapter: BuilderAdapter,
     contractSchema?: ContractSchema
   ): FormFieldType[] {
     // Use generateFieldsFromFunction to properly handle complex types
