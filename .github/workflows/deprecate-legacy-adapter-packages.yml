@@ -1,0 +1,92 @@
+# Deprecate @openzeppelin/ui-builder-adapter-* on npm in favor of @openzeppelin/adapter-*.
+# Manual run only. Requires org secret NPM_TOKEN with permission to deprecate @openzeppelin packages.
+#
+# After this one-time migration is done, delete this workflow file.
+
+name: Deprecate Legacy Adapter Packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (print npm deprecate commands only)"
+        required: true
+        default: "true"
+        type: choice
+        options:
+          - "true"
+          - "false"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deprecate-legacy-adapter-packages
+  cancel-in-progress: false
+
+jobs:
+  deprecate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
+        with:
+          egress-policy: audit
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22.x"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Deprecate legacy ui-builder-adapter packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          set -euo pipefail
+
+          if [ "${DRY_RUN}" != "true" ] && [ -z "${NODE_AUTH_TOKEN:-}" ]; then
+            echo "NPM_TOKEN secret is not set or empty (required when dry_run=false)."
+            exit 1
+          fi
+
+          ADAPTERS_REPO="https://github.com/OpenZeppelin/openzeppelin-adapters"
+          # legacy_pkg|new_pkg (suffix after @openzeppelin/)
+          MAPPINGS=(
+            "ui-builder-adapter-evm|adapter-evm"
+            "ui-builder-adapter-stellar|adapter-stellar"
+            "ui-builder-adapter-midnight|adapter-midnight"
+            "ui-builder-adapter-polkadot|adapter-polkadot"
+            "ui-builder-adapter-solana|adapter-solana"
+          )
+
+          echo "=== Deprecate legacy adapter packages ==="
+          echo "Dry run: ${DRY_RUN}"
+          echo ""
+
+          for row in "${MAPPINGS[@]}"; do
+            legacy_suffix="${row%%|*}"
+            new_suffix="${row##*|}"
+            legacy="@openzeppelin/${legacy_suffix}"
+            npm_new="https://www.npmjs.com/package/@openzeppelin/${new_suffix}"
+            msg="Deprecated: use @openzeppelin/${new_suffix} instead — ${npm_new} (source: ${ADAPTERS_REPO})"
+
+            spec="${legacy}@*"
+            echo "----------------------------------------"
+            echo "Legacy: ${legacy}"
+            echo "Use:    @openzeppelin/${new_suffix}"
+            if [ "${DRY_RUN}" = "true" ]; then
+              printf '[DRY RUN] npm deprecate %q %q\n' "${spec}" "${msg}"
+            else
+              npm deprecate "${spec}" "${msg}" || {
+                echo "::warning::npm deprecate failed for ${legacy} (already deprecated or no permission?)"
+              }
+            fi
+            echo ""
+          done
+
+          echo "=== Done ==="
+          if [ "${DRY_RUN}" = "true" ]; then
+            echo "Dry run only. Re-run with dry_run=false to apply deprecations."
+          fi
