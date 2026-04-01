@@ -4,6 +4,8 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { NetworkServiceErrorBanner } from '@openzeppelin/ui-components';
 
+import { filterUnhealthyServicesForContractDefinitionStep } from './utils/filterUnhealthyServicesForContractDefinitionStep';
+
 import { ActionBar } from '../../Common/ActionBar';
 import { STEP_INDICES } from '../constants/stepIndices';
 import {
@@ -52,6 +54,7 @@ export function StepContractDefinition({
     definitionJson: contractDefinitionJson,
     error: contractDefinitionError,
     source: contractDefinitionSource,
+    metadata: contractDefinitionMetadata,
     requiresManualReload,
   } = contractState;
 
@@ -98,10 +101,29 @@ export function StepContractDefinition({
     });
 
   // Proactive network service health check
-  const { hasUnhealthyServices, unhealthyServices } = useNetworkServiceHealthCheck(
-    adapter,
-    networkConfig
+  const { unhealthyServices } = useNetworkServiceHealthCheck(adapter, networkConfig);
+
+  const unhealthyServicesForBanners = useMemo(
+    () =>
+      filterUnhealthyServicesForContractDefinitionStep(unhealthyServices, {
+        contractSource: contractDefinitionSource,
+        contractSchema,
+        contractMetadata: contractDefinitionMetadata,
+        contractDefinitionError,
+        isContractLoading: isLoading || isLoadingFromService,
+      }),
+    [
+      unhealthyServices,
+      contractDefinitionSource,
+      contractSchema,
+      contractDefinitionMetadata,
+      contractDefinitionError,
+      isLoading,
+      isLoadingFromService,
+    ]
   );
+
+  const hasUnhealthyServicesForBanners = unhealthyServicesForBanners.length > 0;
 
   // Form-store synchronization
   useFormSync({
@@ -162,9 +184,9 @@ export function StepContractDefinition({
         isWidgetExpanded={isWidgetExpanded}
       />
 
-      {/* Show banners for unhealthy network services */}
-      {hasUnhealthyServices &&
-        unhealthyServices.map((service) => (
+      {/* Show banners for unhealthy network services (suppress explorer noise when load succeeds without it) */}
+      {hasUnhealthyServicesForBanners &&
+        unhealthyServicesForBanners.map((service) => (
           <NetworkServiceErrorBanner
             key={service.serviceId}
             networkConfig={networkConfig}
