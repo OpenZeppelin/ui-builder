@@ -9,8 +9,8 @@ import { getAdapter, getNetworkById, getNetworksByEcosystem } from '../ecosystem
  * Service class for managing and retrieving network configurations and their associated adapters.
  * Uses lazy-loading registry.
  *
- * IMPORTANT: Components should generally use the AdapterProvider/AdapterContext pattern
- * for adapter access rather than calling this service directly.
+ * IMPORTANT: Components should generally use the RuntimeProvider/RuntimeContext pattern
+ * for runtime access rather than calling this service directly.
  */
 export class NetworkService {
   // Cache to promote adapter reuse outside React context
@@ -61,7 +61,7 @@ export class NetworkService {
     }
 
     try {
-      // Note: In React components, use AdapterContext pattern instead of this
+      // Note: In React components, use RuntimeContext pattern instead of this
       const adapter = await getAdapter(network);
 
       // Cache the adapter

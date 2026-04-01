@@ -79,7 +79,7 @@ workflows, and export scripts.
 Core UI packages are maintained in the [openzeppelin-ui](https://github.com/OpenZeppelin/openzeppelin-ui)
 monorepo:
 
-- **react**: Core React context providers and hooks (AdapterProvider, WalletStateProvider, useWalletState) for managing global wallet/network state and adapter interactions.
+- **react**: Core React context providers and hooks (RuntimeProvider, WalletStateProvider, useWalletState) for managing global wallet/network state and runtime interactions.
 - **renderer**: React components for rendering blockchain transaction forms, contract state displays, execution configuration, and transaction status tracking.
 - **components**: Shared React UI components, including basic primitives (buttons, inputs, cards) and specialized form field components.
 - **storage**: Local storage services built on IndexedDB for persisting contract UI configurations, providing history, auto-save, and import/export capabilities.
@@ -280,21 +280,21 @@ The application uses a modular, domain-driven adapter pattern to support multipl
 
 - **Adapters (`@openzeppelin/adapter-*`)**: Individual packages maintained in
   `openzeppelin-adapters` containing chain-specific implementations (for example `adapter-evm` and
-  `adapter-stellar`). Each adapter conforms to the common `ContractAdapter` interface defined in
-  `@openzeppelin/ui-types`. Adapters are instantiated with a specific `NetworkConfig`, making them
-  network-aware. The Builder app (via providers from `@openzeppelin/ui-react`) dynamically loads and
-  uses these adapters. Furthermore, adapters can optionally provide UI-specific functionalities:
-  - **React UI Context Provider** (e.g., for `wagmi/react` on EVM): `WalletStateProvider` (from `@openzeppelin/ui-react`) consumes this to set up the necessary app-wide context for the active adapter.
+  `adapter-stellar`). Each adapter exposes profile-based runtimes and capability factories.
+  Runtimes are instantiated with a specific `NetworkConfig`, making them network-aware. The Builder
+  app (via `RuntimeProvider` from `@openzeppelin/ui-react`) dynamically loads and manages these
+  runtimes. Furthermore, adapters can optionally provide UI-specific functionalities:
+  - **React UI Context Provider** (e.g., for `wagmi/react` on EVM): `WalletStateProvider` (from `@openzeppelin/ui-react`) consumes this to set up the necessary app-wide context for the active runtime's ecosystem.
   - **Facade Hooks** (e.g., `useAccount`, `useSwitchChain`): These are exposed by `WalletStateProvider` (via `useWalletState().walletFacadeHooks` from `@openzeppelin/ui-react`) for UI components to interact with wallet functionalities reactively and agnostically.
-  - **Standardized UI Components** (e.g., `ConnectButton`): These components are retrieved via `activeAdapter.getEcosystemWalletComponents()` and are expected to internally use the facade hooks.
+  - **Standardized UI Components** (e.g., `ConnectButton`): These components are retrieved via `activeRuntime.uiKit.getEcosystemWalletComponents()` and are expected to internally use the facade hooks.
 
 - **Renderer (`@openzeppelin/ui-renderer`)**: Shared library containing app rendering components
   and common utilities (like logging).
 
 - **React Core (`@openzeppelin/ui-react`)**: Centralized React state management providing:
-  - **Adapter Provider**: Singleton pattern for adapter instance management
-  - **Wallet State Provider**: Global wallet/network state coordination
-  - **Context Hooks**: `useWalletState()` and `useAdapterContext()` for consistent state access
+  - **Runtime Provider**: Singleton pattern for ecosystem runtime instance management
+  - **Wallet State Provider**: Global wallet/network state coordination with ecosystem-scoped wallet sessions
+  - **Context Hooks**: `useWalletState()` and `useRuntimeContext()` for consistent state access
 
 - **UI Components (`@openzeppelin/ui-components`)**: Comprehensive component library including:
   - **Basic Primitives**: Buttons, inputs, cards, dialogs following shadcn/ui patterns
