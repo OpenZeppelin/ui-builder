@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { PolkadotNetworkConfig } from '@openzeppelin/ui-types';
+import type { ComposerEcosystemRuntime, PolkadotNetworkConfig } from '@openzeppelin/ui-types';
 
 import { getAdapter, getRuntime } from '../ecosystemManager';
 
-const { mockMoonbeamNetwork, mockLegacyCreateAdapter } = vi.hoisted(() => ({
+const { mockMoonbeamNetwork, mockCreateRuntime } = vi.hoisted(() => ({
   mockMoonbeamNetwork: {
     id: 'polkadot-moonbeam-mainnet',
     name: 'Moonbeam',
@@ -23,7 +23,7 @@ const { mockMoonbeamNetwork, mockLegacyCreateAdapter } = vi.hoisted(() => ({
       decimals: 18,
     },
   },
-  mockLegacyCreateAdapter: vi.fn(),
+  mockCreateRuntime: vi.fn(),
 }));
 
 vi.mock('@openzeppelin/adapter-evm/metadata', () => ({
@@ -50,88 +50,103 @@ vi.mock('@openzeppelin/adapter-polkadot', () => ({
   ecosystemDefinition: {
     ecosystem: 'polkadot',
     networks: [mockMoonbeamNetwork],
-    createAdapter: mockLegacyCreateAdapter,
+    createRuntime: mockCreateRuntime,
   },
 }));
 
 const networkConfig = mockMoonbeamNetwork as PolkadotNetworkConfig;
 
-function createLegacyAdapter() {
+function mkCap<T extends object>(
+  extra: T
+): T & { networkConfig: typeof networkConfig; dispose: () => void } {
   return {
     networkConfig,
     dispose: vi.fn(),
-    isValidAddress: vi.fn(() => true),
-    getExplorerUrl: vi.fn(() => 'https://moonbeam.explorer/address/0x123'),
-    getExplorerTxUrl: vi.fn(() => 'https://moonbeam.explorer/tx/0xabc'),
-    getUiLabels: vi.fn(() => ({ connectWallet: 'Connect wallet' })),
-    loadContract: vi.fn(),
-    getContractDefinitionInputs: vi.fn(() => []),
-    getWritableFunctions: vi.fn(() => []),
-    isViewFunction: vi.fn(() => false),
-    mapParameterTypeToFieldType: vi.fn(() => 'text'),
-    getCompatibleFieldTypes: vi.fn(() => []),
-    generateDefaultField: vi.fn(() => ({ type: 'text' })),
-    getTypeMappingInfo: vi.fn(() => ({})),
-    queryViewFunction: vi.fn(),
-    formatFunctionResult: vi.fn(() => ''),
-    getCurrentBlock: vi.fn(async () => 123),
-    formatTransactionData: vi.fn(async () => ({ calldata: '0x' })),
-    signAndBroadcast: vi.fn(async () => ({ txHash: '0xabc' })),
-    getSupportedExecutionMethods: vi.fn(() => ['wallet']),
-    validateExecutionConfig: vi.fn(async () => true),
-    supportsWalletConnection: vi.fn(function (this: { networkConfig: PolkadotNetworkConfig }) {
-      return this.networkConfig.id === networkConfig.id;
-    }),
-    getAvailableConnectors: vi.fn(async () => []),
-    connectWallet: vi.fn(async () => ({ connected: true, address: '0x123' })),
-    disconnectWallet: vi.fn(async () => ({ disconnected: true })),
-    getWalletConnectionStatus: vi.fn(() => ({
-      status: 'disconnected',
-      isConnected: false,
-      isConnecting: false,
-      isDisconnected: true,
-      isReconnecting: false,
-    })),
-    getAvailableUiKits: vi.fn(async () => [{ name: 'rainbowkit' }]),
-    configureUiKit: vi.fn(async () => undefined),
-    getRelayers: vi.fn(async () => []),
-    getRelayer: vi.fn(async () => ({ id: 'relayer-1' })),
-    getNetworkServiceForms: vi.fn(() => []),
-    getDefaultServiceConfig: vi.fn(() => ({})),
-  };
+    ...extra,
+  } as T & { networkConfig: typeof networkConfig; dispose: () => void };
 }
 
-describe('ecosystemManager legacy runtime fallback', () => {
+function buildMockComposerRuntime(): ComposerEcosystemRuntime {
+  return {
+    networkConfig,
+    dispose: vi.fn(),
+    addressing: mkCap({ isValidAddress: vi.fn(() => true) }),
+    explorer: mkCap({
+      getExplorerUrl: vi.fn(() => null),
+      getExplorerTxUrl: vi.fn(() => null),
+    }),
+    networkCatalog: mkCap({ getNetworks: vi.fn(() => [networkConfig]) }),
+    uiLabels: mkCap({ getUiLabels: vi.fn(() => ({})) }),
+    contractLoading: mkCap({
+      loadContract: vi.fn(),
+      getContractDefinitionInputs: vi.fn(() => []),
+    }),
+    schema: mkCap({
+      getWritableFunctions: vi.fn(() => []),
+      isViewFunction: vi.fn(() => false),
+    }),
+    typeMapping: mkCap({
+      mapParameterTypeToFieldType: vi.fn(() => 'text'),
+      getCompatibleFieldTypes: vi.fn(() => []),
+      generateDefaultField: vi.fn(() => ({ type: 'text' })),
+      getTypeMappingInfo: vi.fn(() => ({})),
+    }),
+    query: mkCap({
+      queryViewFunction: vi.fn(),
+      formatFunctionResult: vi.fn(() => ''),
+      getCurrentBlock: vi.fn(async () => 123),
+    }),
+    execution: mkCap({
+      formatTransactionData: vi.fn(() => ({})),
+      signAndBroadcast: vi.fn(async () => ({ txHash: '0xabc' })),
+      getSupportedExecutionMethods: vi.fn(async () => []),
+      validateExecutionConfig: vi.fn(async () => true),
+    }),
+    wallet: mkCap({
+      supportsWalletConnection: vi.fn(() => true),
+      getAvailableConnectors: vi.fn(async () => []),
+      connectWallet: vi.fn(async () => ({ connected: true })),
+      disconnectWallet: vi.fn(async () => ({ disconnected: true })),
+      getWalletConnectionStatus: vi.fn(() => ({
+        isConnected: false,
+        address: undefined,
+        chainId: networkConfig.id,
+      })),
+    }),
+    uiKit: mkCap({
+      getAvailableUiKits: vi.fn(async () => [{ id: 'custom', name: 'Custom', configFields: [] }]),
+      configureUiKit: vi.fn(async () => undefined),
+    }),
+    relayer: mkCap({
+      getRelayers: vi.fn(async () => []),
+      getRelayer: vi.fn(async () => ({})),
+      getNetworkServiceForms: vi.fn(() => []),
+      getDefaultServiceConfig: vi.fn(() => null),
+    }),
+  } as unknown as ComposerEcosystemRuntime;
+}
+
+describe('ecosystemManager getRuntime', () => {
   beforeEach(() => {
-    mockLegacyCreateAdapter.mockReset();
+    mockCreateRuntime.mockReset();
+    mockCreateRuntime.mockImplementation(() => buildMockComposerRuntime());
   });
 
-  it('wraps legacy createAdapter exports into a composer runtime', async () => {
-    const legacyAdapter = createLegacyAdapter();
-    mockLegacyCreateAdapter.mockReturnValue(legacyAdapter);
-
+  it('invokes adapter createRuntime for the composer profile', async () => {
     const runtime = await getRuntime(networkConfig);
 
-    expect(mockLegacyCreateAdapter).toHaveBeenCalledWith(networkConfig);
+    expect(mockCreateRuntime).toHaveBeenCalledWith('composer', networkConfig);
     expect(runtime.networkConfig).toBe(networkConfig);
     expect(runtime.networkCatalog.getNetworks()).toEqual([networkConfig]);
     expect(runtime.wallet.supportsWalletConnection()).toBe(true);
-    expect(legacyAdapter.supportsWalletConnection).toHaveBeenCalledTimes(1);
-    expect(await runtime.uiKit.getAvailableUiKits()).toEqual([{ name: 'rainbowkit' }]);
 
     runtime.dispose();
-
-    expect(legacyAdapter.dispose).toHaveBeenCalledTimes(1);
   });
 
-  it('builds a flattened builder adapter from the legacy runtime bridge', async () => {
-    const legacyAdapter = createLegacyAdapter();
-    mockLegacyCreateAdapter.mockReturnValue(legacyAdapter);
-
+  it('builds a flattened builder adapter from the composer runtime', async () => {
     const adapter = await getAdapter(networkConfig);
 
     expect(adapter.getNetworks()).toEqual([networkConfig]);
     expect(adapter.supportsWalletConnection()).toBe(true);
-    expect(legacyAdapter.supportsWalletConnection).toHaveBeenCalledTimes(1);
   });
 });

@@ -17,7 +17,6 @@ import type {
 } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
-import { createLegacyComposerRuntime } from './legacyComposerRuntime';
 import { toBuilderAdapter, type BuilderAdapter } from './runtimeAdapter';
 
 // =============================================================================
@@ -221,33 +220,17 @@ export async function getAdapterConfig(ecosystem: Ecosystem): Promise<AdapterCon
 // Runtime Instantiation
 // =============================================================================
 
-type LegacyEcosystemExport = Pick<EcosystemExport, 'networks'> & {
-  createAdapter?: (config: NetworkConfig) => Parameters<typeof createLegacyComposerRuntime>[0];
-};
-
 function createComposerRuntime(
   def: EcosystemExport,
   networkConfig: NetworkConfig
 ): ComposerEcosystemRuntime {
-  if (typeof def.createRuntime === 'function') {
-    return def.createRuntime('composer', networkConfig) as ComposerEcosystemRuntime;
-  }
-
-  const legacyDefinition = def as LegacyEcosystemExport;
-  if (typeof legacyDefinition.createAdapter === 'function') {
-    logger.warn(
-      'EcosystemManager(getRuntime)',
-      `Falling back to legacy createAdapter() for ecosystem ${networkConfig.ecosystem}.`
-    );
-    return createLegacyComposerRuntime(
-      legacyDefinition.createAdapter(networkConfig),
-      legacyDefinition.networks
+  if (typeof def.createRuntime !== 'function') {
+    throw new Error(
+      `Ecosystem export for ${networkConfig.ecosystem} is missing createRuntime (composer profile).`
     );
   }
 
-  throw new Error(
-    `No runtime or adapter factory available for ecosystem ${networkConfig.ecosystem}`
-  );
+  return def.createRuntime('composer', networkConfig) as ComposerEcosystemRuntime;
 }
 
 export async function getRuntime(networkConfig: NetworkConfig): Promise<ComposerEcosystemRuntime> {
