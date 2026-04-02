@@ -48,7 +48,7 @@ const resolveRuntime = async (nc: NetworkConfig): Promise<EcosystemRuntime> => {
       'composer',
       nc as typeof exportedNetworkConfig
     );
-    const adapter = runtime.contractLoading ?? runtime;
+    const _adapter = runtime.contractLoading ?? runtime;
     /*@@ADAPTER_BOOTSTRAP_CODE_INJECTION_POINT@@*/
     return runtime;
   }

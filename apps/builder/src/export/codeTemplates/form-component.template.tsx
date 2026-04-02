@@ -21,6 +21,7 @@ import { cn } from '@openzeppelin/ui-utils';
 
 export type BuilderAdapter = TransactionFormCapabilities;
 
+// eslint-disable-next-line react-refresh/only-export-components -- template file, non-component exports are intentional
 export function toBuilderAdapter(runtime: ComposerEcosystemRuntime | null): BuilderAdapter | null {
   if (!runtime) {
     return null;
