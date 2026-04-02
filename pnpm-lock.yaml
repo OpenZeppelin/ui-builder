@@ -1553,7 +1553,7 @@ packages:
         optional: true
 
   '@openzeppelin/adapter-evm@file:.packed-packages/local-dev/adapters/openzeppelin-adapter-evm-1.1.0.tgz':
-    resolution: {integrity: sha512-H9rzx8mHEQCJaJKUu5qjKAoKHNz3BWckMPQK9CgW2VWSRWcJhqSZG9QbxCyL6/9MvIcd6m/UfyWGKoE2IoG4DQ==, tarball: file:.packed-packages/local-dev/adapters/openzeppelin-adapter-evm-1.1.0.tgz}
+    resolution: {integrity: sha512-r+0c8oJUdETXj9fUw5eLkHgbXdJs4nwmY8I9iOxToa0LSBUgJn2BB5QOGxcUL/D8jOa+zKPsBzLnCvPFBzVzUA==, tarball: file:.packed-packages/local-dev/adapters/openzeppelin-adapter-evm-1.1.0.tgz}
     version: 1.1.0
     peerDependencies:
       '@openzeppelin/ui-components': ^1.7.0
@@ -1617,7 +1617,7 @@ packages:
       react-hook-form: ^7.62.0
 
   '@openzeppelin/adapters-vite@file:.packed-packages/local-dev/adapters/openzeppelin-adapters-vite-1.3.2.tgz':
-    resolution: {integrity: sha512-zfx2L36gqz3+D5A3vz6SehOoKzPeRr4qi6tRKUfa0PBl8RFC0qk+3MHgIVrFK2EpEUKiDmRh41DAjurU6qwIIg==, tarball: file:.packed-packages/local-dev/adapters/openzeppelin-adapters-vite-1.3.2.tgz}
+    resolution: {integrity: sha512-Njw1OoW7Ous7cQLrpWt6dPsrbSqiH0aYGq5eAGutwRUeI7L9Jfi5eQVNd9kmJVV9KHhcf4qL8PnUjsv4VggvRg==, tarball: file:.packed-packages/local-dev/adapters/openzeppelin-adapters-vite-1.3.2.tgz}
     version: 1.3.2
     peerDependencies:
       '@openzeppelin/adapter-evm': ^1.1.0
@@ -1647,7 +1647,7 @@ packages:
     engines: {node: '>=22.14.0', npm: use pnpm, pnpm: '>=9', yarn: use pnpm}
 
   '@openzeppelin/ui-components@file:.packed-packages/local-dev/ui/openzeppelin-ui-components-1.7.0.tgz':
-    resolution: {integrity: sha512-DLh4mj7Bi4NXque6ojS0/KQoRwE9jKk/LY0th5SNsGFH8nJCWvnCNeKsZbMVaI99qnoR3FqsHyiLrzMiEAb3Ng==, tarball: file:.packed-packages/local-dev/ui/openzeppelin-ui-components-1.7.0.tgz}
+    resolution: {integrity: sha512-kv/vXeBO4gaEXYithsVo2Hl6FeRlE9sFDr4ShJvm6Ds0JCyc0Guzz8S4LUEcVZwa87OYQzyrAAZvzvQa4BYI4g==, tarball: file:.packed-packages/local-dev/ui/openzeppelin-ui-components-1.7.0.tgz}
     version: 1.7.0
     peerDependencies:
       react: ^19.0.0
@@ -1659,7 +1659,7 @@ packages:
     hasBin: true
 
   '@openzeppelin/ui-react@file:.packed-packages/local-dev/ui/openzeppelin-ui-react-1.2.0.tgz':
-    resolution: {integrity: sha512-XrdDA57SvcLH3XJgp2z5ELXiW8LSpW6wov+e6mnLXB36GeM8HoBy/IHFVZyH7fkquNkDUF6wzvA0HNByeYrOXg==, tarball: file:.packed-packages/local-dev/ui/openzeppelin-ui-react-1.2.0.tgz}
+    resolution: {integrity: sha512-jAE6f0mSqXW9jvBY2yED4ZaQXDBr+abBo/LKgaoi1Xu9TvXIZAjPlZvZdsKyLJlmDGpgeUDXBkPTqxh1HygBzw==, tarball: file:.packed-packages/local-dev/ui/openzeppelin-ui-react-1.2.0.tgz}
     version: 1.2.0
     peerDependencies:
       '@tanstack/react-query': ^5.0.0
@@ -1667,7 +1667,7 @@ packages:
       react-dom: ^19.0.0
 
   '@openzeppelin/ui-renderer@file:.packed-packages/local-dev/ui/openzeppelin-ui-renderer-1.2.0.tgz':
-    resolution: {integrity: sha512-yorBe4F/pHTxGklnMLK0//BlZedGH4gdiFxZbbpZ7VS2TU1sj6BmDV0tX3N6oaRRi5HH1jxavrHKlFYUbwgLJg==, tarball: file:.packed-packages/local-dev/ui/openzeppelin-ui-renderer-1.2.0.tgz}
+    resolution: {integrity: sha512-YaR4zofi9AqRQpD1/lYW5k6cDB7yFOUMgl6jUSnK5aweDZj1YaB/AvSy5KeMJvE4D970j9lQI0lmoEjbborTNA==, tarball: file:.packed-packages/local-dev/ui/openzeppelin-ui-renderer-1.2.0.tgz}
     version: 1.2.0
     peerDependencies:
       react: ^18.0.0 || ^19.0.0
@@ -1675,7 +1675,7 @@ packages:
       react-hook-form: ^7.0.0
 
   '@openzeppelin/ui-storage@file:.packed-packages/local-dev/ui/openzeppelin-ui-storage-1.2.0.tgz':
-    resolution: {integrity: sha512-t2JZ9K6WHtAWI3vepQeOpBQZ56/m7+xiZwl2oWA1RcnF7RPyZyVY9cPTpXaVjd/xfbFazLTBRZB9EuyDqfAZfg==, tarball: file:.packed-packages/local-dev/ui/openzeppelin-ui-storage-1.2.0.tgz}
+    resolution: {integrity: sha512-Q3UVsAbjmQMI+o9BaxZixiOiSPMu06DSn3LUIXiGieDvWb4bQNuCOrZRMGO9vWlnDWalviAmvr1favodPhapXw==, tarball: file:.packed-packages/local-dev/ui/openzeppelin-ui-storage-1.2.0.tgz}
     version: 1.2.0
     peerDependencies:
       react: ^19.0.0
@@ -1685,11 +1685,11 @@ packages:
     version: 1.0.0
 
   '@openzeppelin/ui-types@file:.packed-packages/local-dev/ui/openzeppelin-ui-types-1.13.0.tgz':
-    resolution: {integrity: sha512-Zb6njAMzRwfvMaLY8g6ETLXM4qy3wIaxkh1j2mgJVpdKFbnF60oU308VXbEo36vfv+2wwFXxC3qmdrVwT1b1Iw==, tarball: file:.packed-packages/local-dev/ui/openzeppelin-ui-types-1.13.0.tgz}
+    resolution: {integrity: sha512-OTgtzGNBsokuTpuBnc+/NytsJIxkPpZFDaOdf8cL4OgRDXAx8ITbeLMYtwUuDwh76LAYIrnVFDNx+Boxj3i57A==, tarball: file:.packed-packages/local-dev/ui/openzeppelin-ui-types-1.13.0.tgz}
     version: 1.13.0
 
   '@openzeppelin/ui-utils@file:.packed-packages/local-dev/ui/openzeppelin-ui-utils-1.4.0.tgz':
-    resolution: {integrity: sha512-zToOOtk2S782rf4KH35dTdvtWMrHbl1NGFXjabU7uGsfl73thjYP1cqiEd7fsNcS3Uh2ZQ6RQnzbaU/fJrGLpA==, tarball: file:.packed-packages/local-dev/ui/openzeppelin-ui-utils-1.4.0.tgz}
+    resolution: {integrity: sha512-SJarO/NSNQ3kXAVPWqQOa4dbkVTw/KKTYtWnG+xHlAGJVXKIt1nAADum5BWm1yxgRbQZA4FYK2XHdqA96JiYiA==, tarball: file:.packed-packages/local-dev/ui/openzeppelin-ui-utils-1.4.0.tgz}
     version: 1.4.0
 
   '@pkgr/core@0.2.9':
