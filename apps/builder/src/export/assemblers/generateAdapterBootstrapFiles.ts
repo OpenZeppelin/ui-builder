@@ -1,5 +1,4 @@
 import type {
-  AdapterExportBootstrap,
   AdapterExportContext,
   ContractSchema,
   EcosystemExport,
@@ -30,12 +29,6 @@ export interface BootstrapInfo {
   initAfterAdapterConstruct: string;
 }
 
-type EcosystemExportWithBootstrap = EcosystemExport & {
-  getExportBootstrapFiles?: (
-    context: AdapterExportContext
-  ) => Promise<AdapterExportBootstrap | null>;
-};
-
 /**
  * Generates and adds adapter-specific bootstrap files to the project.
  * This enables adapters to bundle ecosystem-specific artifacts (e.g., Midnight contract artifacts)
@@ -52,15 +45,14 @@ export async function generateAdapterBootstrapFiles(
   context: BootstrapContext
 ): Promise<BootstrapInfo | null> {
   const logSystem = 'File Assembly (generateAdapterBootstrapFiles)';
-  const bootstrapProvider = ecosystemDefinition as EcosystemExportWithBootstrap;
 
-  if (typeof bootstrapProvider.getExportBootstrapFiles !== 'function') {
+  if (typeof ecosystemDefinition.getExportBootstrapFiles !== 'function') {
     logger.info(logSystem, 'Ecosystem does not provide export bootstrap files. Skipping.');
     return null;
   }
 
   try {
-    const bootstrap = await bootstrapProvider.getExportBootstrapFiles(
+    const bootstrap = await ecosystemDefinition.getExportBootstrapFiles(
       context as AdapterExportContext
     );
 
