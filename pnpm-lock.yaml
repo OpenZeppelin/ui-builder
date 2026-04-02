@@ -152,41 +152,41 @@ importers:
         specifier: ^12.9.0
         version: 12.9.0(react@19.2.3)
       '@openzeppelin/adapter-evm':
-        specifier: file:/Users/ghost/dev/repos/OpenZeppelin/ui-builder/.packed-packages/local-dev/adapters/openzeppelin-adapter-evm-1.1.0.tgz
-        version: file:.packed-packages/local-dev/adapters/openzeppelin-adapter-evm-1.1.0.tgz(650161bcc0fdddee3df6e31d3ae9962b)
+        specifier: ^1.1.0
+        version: 1.1.0(d22773f4cb48bbd89378a1af86d90941)
       '@openzeppelin/adapter-midnight':
-        specifier: file:/Users/ghost/dev/repos/OpenZeppelin/ui-builder/.packed-packages/local-dev/adapters/openzeppelin-adapter-midnight-1.1.0.tgz
-        version: file:.packed-packages/local-dev/adapters/openzeppelin-adapter-midnight-1.1.0.tgz(@openzeppelin/ui-components@file:.packed-packages/local-dev/ui/openzeppelin-ui-components-1.7.0.tgz(@babel/runtime@7.28.6)(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3))(@openzeppelin/ui-react@file:.packed-packages/local-dev/ui/openzeppelin-ui-react-1.2.0.tgz(@babel/runtime@7.28.6)(@tanstack/react-query@5.90.19(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3))(@openzeppelin/ui-types@file:.packed-packages/local-dev/ui/openzeppelin-ui-types-1.13.0.tgz)(@openzeppelin/ui-utils@file:.packed-packages/local-dev/ui/openzeppelin-ui-utils-1.4.0.tgz)(@types/react@19.2.9)(bufferutil@4.1.0)(crossws@0.3.5)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(utf-8-validate@5.0.10)
+        specifier: ^1.1.0
+        version: 1.1.0(@openzeppelin/ui-components@1.7.0(@babel/runtime@7.28.6)(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3))(@openzeppelin/ui-react@1.2.0(@babel/runtime@7.28.6)(@tanstack/react-query@5.90.19(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3))(@openzeppelin/ui-types@1.13.0)(@openzeppelin/ui-utils@1.4.0)(@types/react@19.2.9)(bufferutil@4.1.0)(crossws@0.3.5)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(utf-8-validate@5.0.10)
       '@openzeppelin/adapter-polkadot':
-        specifier: file:/Users/ghost/dev/repos/OpenZeppelin/ui-builder/.packed-packages/local-dev/adapters/openzeppelin-adapter-polkadot-1.1.0.tgz
-        version: file:.packed-packages/local-dev/adapters/openzeppelin-adapter-polkadot-1.1.0.tgz(a0aeb0dd38104ba5cc772a58c290ed4c)
+        specifier: ^1.1.0
+        version: 1.1.0(fef9529e058971dd9654eb53fb4ce6e4)
       '@openzeppelin/adapter-solana':
-        specifier: file:/Users/ghost/dev/repos/OpenZeppelin/ui-builder/.packed-packages/local-dev/adapters/openzeppelin-adapter-solana-1.1.0.tgz
-        version: file:.packed-packages/local-dev/adapters/openzeppelin-adapter-solana-1.1.0.tgz(@openzeppelin/ui-types@file:.packed-packages/local-dev/ui/openzeppelin-ui-types-1.13.0.tgz)(@openzeppelin/ui-utils@file:.packed-packages/local-dev/ui/openzeppelin-ui-utils-1.4.0.tgz)(bufferutil@4.1.0)(fastestsmallesttextencoderdecoder@1.0.22)(react-native@0.83.1(@babel/core@7.28.6)(@types/react@19.2.9)(bufferutil@4.1.0)(react@19.2.3)(utf-8-validate@5.0.10))(react@19.2.3)(typescript@5.9.3)(utf-8-validate@5.0.10)
+        specifier: ^1.1.0
+        version: 1.1.0(@openzeppelin/ui-types@1.13.0)(@openzeppelin/ui-utils@1.4.0)(bufferutil@4.1.0)(fastestsmallesttextencoderdecoder@1.0.22)(react-native@0.83.1(@babel/core@7.28.6)(@types/react@19.2.9)(bufferutil@4.1.0)(react@19.2.3)(utf-8-validate@5.0.10))(react@19.2.3)(typescript@5.9.3)(utf-8-validate@5.0.10)
       '@openzeppelin/adapter-stellar':
-        specifier: file:/Users/ghost/dev/repos/OpenZeppelin/ui-builder/.packed-packages/local-dev/adapters/openzeppelin-adapter-stellar-1.1.0.tgz
-        version: file:.packed-packages/local-dev/adapters/openzeppelin-adapter-stellar-1.1.0.tgz(40dbd3da0e748d71ecc8756bec0e5035)
+        specifier: ^1.1.0
+        version: 1.1.0(8963e6656a2dabcb3980f89171272dde)
       '@openzeppelin/ui-components':
-        specifier: file:/Users/ghost/dev/repos/OpenZeppelin/ui-builder/.packed-packages/local-dev/ui/openzeppelin-ui-components-1.7.0.tgz
-        version: file:.packed-packages/local-dev/ui/openzeppelin-ui-components-1.7.0.tgz(@babel/runtime@7.28.6)(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3)
+        specifier: ^1.7.0
+        version: 1.7.0(@babel/runtime@7.28.6)(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3)
       '@openzeppelin/ui-react':
-        specifier: file:/Users/ghost/dev/repos/OpenZeppelin/ui-builder/.packed-packages/local-dev/ui/openzeppelin-ui-react-1.2.0.tgz
-        version: file:.packed-packages/local-dev/ui/openzeppelin-ui-react-1.2.0.tgz(@babel/runtime@7.28.6)(@tanstack/react-query@5.90.19(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3)
+        specifier: ^1.2.0
+        version: 1.2.0(@babel/runtime@7.28.6)(@tanstack/react-query@5.90.19(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3)
       '@openzeppelin/ui-renderer':
-        specifier: file:/Users/ghost/dev/repos/OpenZeppelin/ui-builder/.packed-packages/local-dev/ui/openzeppelin-ui-renderer-1.2.0.tgz
-        version: file:.packed-packages/local-dev/ui/openzeppelin-ui-renderer-1.2.0.tgz(@babel/runtime@7.28.6)(@tanstack/react-query@5.90.19(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react-hook-form@7.71.1(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3)
+        specifier: ^1.2.0
+        version: 1.2.0(@babel/runtime@7.28.6)(@tanstack/react-query@5.90.19(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react-hook-form@7.71.1(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3)
       '@openzeppelin/ui-storage':
-        specifier: file:/Users/ghost/dev/repos/OpenZeppelin/ui-builder/.packed-packages/local-dev/ui/openzeppelin-ui-storage-1.2.0.tgz
-        version: file:.packed-packages/local-dev/ui/openzeppelin-ui-storage-1.2.0.tgz(@types/react@19.2.9)(react@19.2.3)
+        specifier: ^1.2.0
+        version: 1.2.0(@types/react@19.2.9)(react@19.2.3)
       '@openzeppelin/ui-styles':
-        specifier: file:/Users/ghost/dev/repos/OpenZeppelin/ui-builder/.packed-packages/local-dev/ui/openzeppelin-ui-styles-1.0.0.tgz
-        version: file:.packed-packages/local-dev/ui/openzeppelin-ui-styles-1.0.0.tgz
+        specifier: ^1.0.0
+        version: 1.0.0
       '@openzeppelin/ui-types':
-        specifier: file:/Users/ghost/dev/repos/OpenZeppelin/ui-builder/.packed-packages/local-dev/ui/openzeppelin-ui-types-1.13.0.tgz
-        version: file:.packed-packages/local-dev/ui/openzeppelin-ui-types-1.13.0.tgz
+        specifier: ^1.13.0
+        version: 1.13.0
       '@openzeppelin/ui-utils':
-        specifier: file:/Users/ghost/dev/repos/OpenZeppelin/ui-builder/.packed-packages/local-dev/ui/openzeppelin-ui-utils-1.4.0.tgz
-        version: file:.packed-packages/local-dev/ui/openzeppelin-ui-utils-1.4.0.tgz
+        specifier: ^1.4.0
+        version: 1.4.0
       '@radix-ui/react-accordion':
         specifier: ^1.2.11
         version: 1.2.12(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -321,8 +321,8 @@ importers:
         specifier: 4.0.0
         version: 4.0.0
       '@openzeppelin/adapters-vite':
-        specifier: file:/Users/ghost/dev/repos/OpenZeppelin/ui-builder/.packed-packages/local-dev/adapters/openzeppelin-adapters-vite-1.3.2.tgz
-        version: file:.packed-packages/local-dev/adapters/openzeppelin-adapters-vite-1.3.2.tgz(a0358035e75db7385749e4f4642855ae)
+        specifier: ^1.3.2
+        version: 1.3.2(299839496f253c1dbf078e2e9e7fefbf)
       '@tailwindcss/vite':
         specifier: ^4.1.11
         version: 4.1.18(vite@7.3.1(@types/node@24.10.13)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(yaml@2.8.2))
@@ -1531,30 +1531,8 @@ packages:
     resolution: {integrity: sha512-nn5ozdjYQpUCZlWGuxcJY/KpxkWQs4DcbMCmKojjyrYDEAGy4Ce19NN4v5MduafTwJlbKc99UA8YhSVqq9yPZA==}
     engines: {node: '>=12.4.0'}
 
-  '@openzeppelin/adapter-evm-core@file:../openzeppelin-adapters/packages/adapter-evm-core':
-    resolution: {directory: ../openzeppelin-adapters/packages/adapter-evm-core, type: directory}
-    peerDependencies:
-      '@openzeppelin/ui-components': ^1.7.0
-      '@openzeppelin/ui-react': ^1.2.0
-      '@openzeppelin/ui-types': ^1.12.0
-      '@openzeppelin/ui-utils': ^1.4.0
-      '@rainbow-me/rainbowkit': ^2.0.0
-      lucide-react: ^0.468.0
-      react: ^18.0.0 || ^19.0.0
-      react-dom: ^18.0.0 || ^19.0.0
-    peerDependenciesMeta:
-      '@openzeppelin/ui-components':
-        optional: true
-      '@openzeppelin/ui-react':
-        optional: true
-      '@rainbow-me/rainbowkit':
-        optional: true
-      lucide-react:
-        optional: true
-
-  '@openzeppelin/adapter-evm@file:.packed-packages/local-dev/adapters/openzeppelin-adapter-evm-1.1.0.tgz':
-    resolution: {integrity: sha512-r+0c8oJUdETXj9fUw5eLkHgbXdJs4nwmY8I9iOxToa0LSBUgJn2BB5QOGxcUL/D8jOa+zKPsBzLnCvPFBzVzUA==, tarball: file:.packed-packages/local-dev/adapters/openzeppelin-adapter-evm-1.1.0.tgz}
-    version: 1.1.0
+  '@openzeppelin/adapter-evm@1.1.0':
+    resolution: {integrity: sha512-S3UpPaml9GJl+dsnpjNROJawHl5j35ukQd0XIYhdd/KhouQVzwmvPmtxBPEEIUE4feoSEvWniC1efek3qASTZg==}
     peerDependencies:
       '@openzeppelin/ui-components': ^1.7.0
       '@openzeppelin/ui-react': ^1.2.0
@@ -1568,9 +1546,8 @@ packages:
       viem: ^2.28.0
       wagmi: ^2.15.0
 
-  '@openzeppelin/adapter-midnight@file:.packed-packages/local-dev/adapters/openzeppelin-adapter-midnight-1.1.0.tgz':
-    resolution: {integrity: sha512-zwlS7QZoKsDszHBQzanvllPX2xi19crtJy7qrQmVFwkrqpsCixNU4gQcIMrH+K2wetRulVEiW0+QblY77J3tCA==, tarball: file:.packed-packages/local-dev/adapters/openzeppelin-adapter-midnight-1.1.0.tgz}
-    version: 1.1.0
+  '@openzeppelin/adapter-midnight@1.1.0':
+    resolution: {integrity: sha512-7K/77+HKfrI/+KWuknuf6O5O0msY6fGBW+JtBtGtn0PI8PYzojoZO6v29DNG31TnT7U1O2k4WOJ9ZLUcrT4Kfg==}
     peerDependencies:
       '@openzeppelin/ui-components': ^1.7.0
       '@openzeppelin/ui-react': ^1.2.0
@@ -1579,9 +1556,8 @@ packages:
       react: ^19.0.0
       react-dom: ^19.0.0
 
-  '@openzeppelin/adapter-polkadot@file:.packed-packages/local-dev/adapters/openzeppelin-adapter-polkadot-1.1.0.tgz':
-    resolution: {integrity: sha512-hMvoT/s8aPZcLGSiuXmHqt9lilJszKRZ2mcNHcgS7G9qQ+fjfXifzm0sLLI6nCEFYsnSjfwxrf/ai9oc8IDIgw==, tarball: file:.packed-packages/local-dev/adapters/openzeppelin-adapter-polkadot-1.1.0.tgz}
-    version: 1.1.0
+  '@openzeppelin/adapter-polkadot@1.1.0':
+    resolution: {integrity: sha512-q6IvLDjgUF0JXNxuSrfqaZni57tOKDvH1886pV50BbWrADTjS85yYo2OQDXUdLOOfjD9TrDvsI+qS281wLZmJA==}
     peerDependencies:
       '@openzeppelin/ui-types': ^1.12.0
       '@openzeppelin/ui-utils': ^1.4.0
@@ -1592,22 +1568,15 @@ packages:
       viem: ^2.28.0
       wagmi: ^2.15.0
 
-  '@openzeppelin/adapter-runtime-utils@file:../openzeppelin-adapters/packages/adapter-runtime-utils':
-    resolution: {directory: ../openzeppelin-adapters/packages/adapter-runtime-utils, type: directory}
-    peerDependencies:
-      '@openzeppelin/ui-types': ^1.12.0
-
-  '@openzeppelin/adapter-solana@file:.packed-packages/local-dev/adapters/openzeppelin-adapter-solana-1.1.0.tgz':
-    resolution: {integrity: sha512-x1S8+j3UDoaIfxaV81qv5gaOLfCkrAqMTU9m9bwvVAR5dQDOIaDvUSMJGJaYgGaikUXVBL5J4rLGakn7UiXg2g==, tarball: file:.packed-packages/local-dev/adapters/openzeppelin-adapter-solana-1.1.0.tgz}
-    version: 1.1.0
+  '@openzeppelin/adapter-solana@1.1.0':
+    resolution: {integrity: sha512-gnFXk+7110F3uAZv9hb6qxbq6ebfoMJQzef5K1ZPrM/y2CGSXuUUrXsrIxIEJvO4OlbUOFaF57EClPB/JyMSew==}
     peerDependencies:
       '@openzeppelin/ui-types': ^1.12.0
       '@openzeppelin/ui-utils': ^1.4.0
       react: ^19.0.0
 
-  '@openzeppelin/adapter-stellar@file:.packed-packages/local-dev/adapters/openzeppelin-adapter-stellar-1.1.0.tgz':
-    resolution: {integrity: sha512-7eayWNBJ4qdeIWkEoVa5JIK3Khkls3sgh8J5uQHtvTeGLxZiuPmanRp/hDaSTGwkv4bRqKg/TjPJnNa9zHeiuQ==, tarball: file:.packed-packages/local-dev/adapters/openzeppelin-adapter-stellar-1.1.0.tgz}
-    version: 1.1.0
+  '@openzeppelin/adapter-stellar@1.1.0':
+    resolution: {integrity: sha512-0rBHmzrXzpiKtM2STsclTwr3ydf6JrPBorGI5DocHHzrYWEOXAxvlz1G8oQwdIOmPpcDM1gWz6D80JZ36lFzVg==}
     peerDependencies:
       '@openzeppelin/ui-components': ^1.7.0
       '@openzeppelin/ui-types': ^1.12.0
@@ -1616,9 +1585,8 @@ packages:
       react-dom: ^19.0.0
       react-hook-form: ^7.62.0
 
-  '@openzeppelin/adapters-vite@file:.packed-packages/local-dev/adapters/openzeppelin-adapters-vite-1.3.2.tgz':
-    resolution: {integrity: sha512-Njw1OoW7Ous7cQLrpWt6dPsrbSqiH0aYGq5eAGutwRUeI7L9Jfi5eQVNd9kmJVV9KHhcf4qL8PnUjsv4VggvRg==, tarball: file:.packed-packages/local-dev/adapters/openzeppelin-adapters-vite-1.3.2.tgz}
-    version: 1.3.2
+  '@openzeppelin/adapters-vite@1.3.2':
+    resolution: {integrity: sha512-UTjOMJdaoA+uoDL/a9bF0/uc6chDpRxwMWVm61B4jNDn7aHoKhPayL+GS0RvAbFueFt7b1hLXtz+3HHEM6+nUQ==}
     peerDependencies:
       '@openzeppelin/adapter-evm': ^1.1.0
       '@openzeppelin/adapter-midnight': ^1.1.0
@@ -1646,9 +1614,8 @@ packages:
     resolution: {integrity: sha512-G3Zhg0imaT9Ej1cE9Cq5d4uQvW+DinD2GvRuiPWo3+O9KI8ivBnGJkjEGgK9Ja3/QsUNIfx8Gk5Mdw2sPXjVWA==}
     engines: {node: '>=22.14.0', npm: use pnpm, pnpm: '>=9', yarn: use pnpm}
 
-  '@openzeppelin/ui-components@file:.packed-packages/local-dev/ui/openzeppelin-ui-components-1.7.0.tgz':
-    resolution: {integrity: sha512-kv/vXeBO4gaEXYithsVo2Hl6FeRlE9sFDr4ShJvm6Ds0JCyc0Guzz8S4LUEcVZwa87OYQzyrAAZvzvQa4BYI4g==, tarball: file:.packed-packages/local-dev/ui/openzeppelin-ui-components-1.7.0.tgz}
-    version: 1.7.0
+  '@openzeppelin/ui-components@1.7.0':
+    resolution: {integrity: sha512-QAK5whx0jkdrOQb24ldAezVcpCRN3OywzO1I4VPOhydkZwOFdFdR6/keIjgVxqTevwcWsYEPnm2/505iA6On2g==}
     peerDependencies:
       react: ^19.0.0
       react-dom: ^19.0.0
@@ -1658,39 +1625,33 @@ packages:
     engines: {node: '>=20.19.0'}
     hasBin: true
 
-  '@openzeppelin/ui-react@file:.packed-packages/local-dev/ui/openzeppelin-ui-react-1.2.0.tgz':
-    resolution: {integrity: sha512-jAE6f0mSqXW9jvBY2yED4ZaQXDBr+abBo/LKgaoi1Xu9TvXIZAjPlZvZdsKyLJlmDGpgeUDXBkPTqxh1HygBzw==, tarball: file:.packed-packages/local-dev/ui/openzeppelin-ui-react-1.2.0.tgz}
-    version: 1.2.0
+  '@openzeppelin/ui-react@1.2.0':
+    resolution: {integrity: sha512-g4BXLbODfK/EXN1Z30KsjkbOcWZfrnYQ8HfLH2uZC7GsMABjUdWxFk82TXLZlO1JIqd6TgpqbWfisARtnPhp0A==}
     peerDependencies:
       '@tanstack/react-query': ^5.0.0
       react: ^19.0.0
       react-dom: ^19.0.0
 
-  '@openzeppelin/ui-renderer@file:.packed-packages/local-dev/ui/openzeppelin-ui-renderer-1.2.0.tgz':
-    resolution: {integrity: sha512-YaR4zofi9AqRQpD1/lYW5k6cDB7yFOUMgl6jUSnK5aweDZj1YaB/AvSy5KeMJvE4D970j9lQI0lmoEjbborTNA==, tarball: file:.packed-packages/local-dev/ui/openzeppelin-ui-renderer-1.2.0.tgz}
-    version: 1.2.0
+  '@openzeppelin/ui-renderer@1.2.0':
+    resolution: {integrity: sha512-XYU3OuzWmUgXyvQ65lHbD6ygfLdPOLEu82AAgVmuhzgrvJfw8vgxPgD20ebERbseWRKBTvgrNM61tY7NM8ciIg==}
     peerDependencies:
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
       react-hook-form: ^7.0.0
 
-  '@openzeppelin/ui-storage@file:.packed-packages/local-dev/ui/openzeppelin-ui-storage-1.2.0.tgz':
-    resolution: {integrity: sha512-Q3UVsAbjmQMI+o9BaxZixiOiSPMu06DSn3LUIXiGieDvWb4bQNuCOrZRMGO9vWlnDWalviAmvr1favodPhapXw==, tarball: file:.packed-packages/local-dev/ui/openzeppelin-ui-storage-1.2.0.tgz}
-    version: 1.2.0
+  '@openzeppelin/ui-storage@1.2.0':
+    resolution: {integrity: sha512-T/xDTKyFRD97WsfpgzBSKACRh9HMgSX8nMhBwqKclN3XGcwR9ZRIYPr3DqsU7CL+JNIwM+N7f5V6Q7wCbhckZg==}
     peerDependencies:
       react: ^19.0.0
 
-  '@openzeppelin/ui-styles@file:.packed-packages/local-dev/ui/openzeppelin-ui-styles-1.0.0.tgz':
-    resolution: {integrity: sha512-5ekGIoW3VB8XClx7Nnmq5OPUI3FyzMtUfNj6OUUqsZOa9BbCqpyEzwd7T8mMehRT7B+OPoCLRbpfaq5moVf/dA==, tarball: file:.packed-packages/local-dev/ui/openzeppelin-ui-styles-1.0.0.tgz}
-    version: 1.0.0
+  '@openzeppelin/ui-styles@1.0.0':
+    resolution: {integrity: sha512-WHtgx5W88L8UXQTt+ltPi/Xt2NDrqdjADed2bMFQoUiQZ7b0gM+F0ySStpfjGC3sOAcu/R+7icyzI+v5cZlw/Q==}
 
-  '@openzeppelin/ui-types@file:.packed-packages/local-dev/ui/openzeppelin-ui-types-1.13.0.tgz':
-    resolution: {integrity: sha512-OTgtzGNBsokuTpuBnc+/NytsJIxkPpZFDaOdf8cL4OgRDXAx8ITbeLMYtwUuDwh76LAYIrnVFDNx+Boxj3i57A==, tarball: file:.packed-packages/local-dev/ui/openzeppelin-ui-types-1.13.0.tgz}
-    version: 1.13.0
+  '@openzeppelin/ui-types@1.13.0':
+    resolution: {integrity: sha512-nBeTSbWpLJyXUKauZEwQdchIe11CPUgOJ/dqyoAWiPW3wYVnNwlxFvMNdN4Xv/cYTCUmhLKZBwyqOKKYUNj2tA==}
 
-  '@openzeppelin/ui-utils@file:.packed-packages/local-dev/ui/openzeppelin-ui-utils-1.4.0.tgz':
-    resolution: {integrity: sha512-SJarO/NSNQ3kXAVPWqQOa4dbkVTw/KKTYtWnG+xHlAGJVXKIt1nAADum5BWm1yxgRbQZA4FYK2XHdqA96JiYiA==, tarball: file:.packed-packages/local-dev/ui/openzeppelin-ui-utils-1.4.0.tgz}
-    version: 1.4.0
+  '@openzeppelin/ui-utils@1.4.0':
+    resolution: {integrity: sha512-sHrxMECbrJa4SGsLUqgyTeHAxVYGyZP2cPcCxUx2rg1aIqrvREZPQVRi8ATEH7Fj3+wS2UYQNdORXLWtt7CnEw==}
 
   '@pkgr/core@0.2.9':
     resolution: {integrity: sha512-QNqXyfVS2wm9hweSYD2O7F0G06uurj9kZ96TRQE5Y9hU7+tgdZwIkbAKc5Ocy1HxEY2kuDQa6cQ1WRs/O5LFKA==}
@@ -10885,63 +10846,13 @@ snapshots:
 
   '@nolyfill/is-core-module@1.0.39': {}
 
-  '@openzeppelin/adapter-evm-core@file:../openzeppelin-adapters/packages/adapter-evm-core(1953014ece342219b43b857ae5542fa0)':
+  '@openzeppelin/adapter-evm@1.1.0(d22773f4cb48bbd89378a1af86d90941)':
     dependencies:
-      '@openzeppelin/adapter-runtime-utils': file:../openzeppelin-adapters/packages/adapter-runtime-utils(@openzeppelin/ui-types@file:.packed-packages/local-dev/ui/openzeppelin-ui-types-1.13.0.tgz)
       '@openzeppelin/relayer-sdk': 1.9.0
-      '@openzeppelin/ui-types': file:.packed-packages/local-dev/ui/openzeppelin-ui-types-1.13.0.tgz
-      '@openzeppelin/ui-utils': file:.packed-packages/local-dev/ui/openzeppelin-ui-utils-1.4.0.tgz
-      '@wagmi/connectors': 5.7.13(@react-native-async-storage/async-storage@1.24.0(react-native@0.83.1(@babel/core@7.28.6)(@types/react@19.2.9)(bufferutil@4.1.0)(react@19.2.3)(utf-8-validate@5.0.10)))(@types/react@19.2.9)(@wagmi/core@2.22.1(@tanstack/query-core@5.90.19)(@types/react@19.2.9)(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(viem@2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76)))(bufferutil@4.1.0)(react@19.2.3)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
-      '@wagmi/core': 2.22.1(@tanstack/query-core@5.90.19)(@types/react@19.2.9)(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(viem@2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))
-      lodash-es: 4.17.23
-      react: 19.2.3
-      react-dom: 19.2.3(react@19.2.3)
-      viem: 2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76)
-    optionalDependencies:
-      '@openzeppelin/ui-components': file:.packed-packages/local-dev/ui/openzeppelin-ui-components-1.7.0.tgz(@babel/runtime@7.28.6)(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3)
-      '@openzeppelin/ui-react': file:.packed-packages/local-dev/ui/openzeppelin-ui-react-1.2.0.tgz(@babel/runtime@7.28.6)(@tanstack/react-query@5.90.19(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3)
-      '@rainbow-me/rainbowkit': 2.2.10(@tanstack/react-query@5.90.19(react@19.2.3))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)(viem@2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(wagmi@2.19.5(@react-native-async-storage/async-storage@1.24.0(react-native@0.83.1(@babel/core@7.28.6)(@types/react@19.2.9)(bufferutil@4.1.0)(react@19.2.3)(utf-8-validate@5.0.10)))(@tanstack/query-core@5.90.19)(@tanstack/react-query@5.90.19(react@19.2.3))(@types/react@19.2.9)(bufferutil@4.1.0)(fastestsmallesttextencoderdecoder@1.0.22)(react-native@0.83.1(@babel/core@7.28.6)(@types/react@19.2.9)(bufferutil@4.1.0)(react@19.2.3)(utf-8-validate@5.0.10))(react@19.2.3)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76))
-      lucide-react: 0.510.0(react@19.2.3)
-    transitivePeerDependencies:
-      - '@azure/app-configuration'
-      - '@azure/cosmos'
-      - '@azure/data-tables'
-      - '@azure/identity'
-      - '@azure/keyvault-secrets'
-      - '@azure/storage-blob'
-      - '@capacitor/preferences'
-      - '@deno/kv'
-      - '@netlify/blobs'
-      - '@planetscale/database'
-      - '@react-native-async-storage/async-storage'
-      - '@tanstack/query-core'
-      - '@types/react'
-      - '@upstash/redis'
-      - '@vercel/blob'
-      - '@vercel/functions'
-      - '@vercel/kv'
-      - aws4fetch
-      - bufferutil
-      - db0
-      - debug
-      - encoding
-      - immer
-      - ioredis
-      - supports-color
-      - typescript
-      - uploadthing
-      - use-sync-external-store
-      - utf-8-validate
-      - zod
-
-  '@openzeppelin/adapter-evm@file:.packed-packages/local-dev/adapters/openzeppelin-adapter-evm-1.1.0.tgz(650161bcc0fdddee3df6e31d3ae9962b)':
-    dependencies:
-      '@openzeppelin/adapter-runtime-utils': file:../openzeppelin-adapters/packages/adapter-runtime-utils(@openzeppelin/ui-types@file:.packed-packages/local-dev/ui/openzeppelin-ui-types-1.13.0.tgz)
-      '@openzeppelin/relayer-sdk': 1.9.0
-      '@openzeppelin/ui-components': file:.packed-packages/local-dev/ui/openzeppelin-ui-components-1.7.0.tgz(@babel/runtime@7.28.6)(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3)
-      '@openzeppelin/ui-react': file:.packed-packages/local-dev/ui/openzeppelin-ui-react-1.2.0.tgz(@babel/runtime@7.28.6)(@tanstack/react-query@5.90.19(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3)
-      '@openzeppelin/ui-types': file:.packed-packages/local-dev/ui/openzeppelin-ui-types-1.13.0.tgz
-      '@openzeppelin/ui-utils': file:.packed-packages/local-dev/ui/openzeppelin-ui-utils-1.4.0.tgz
+      '@openzeppelin/ui-components': 1.7.0(@babel/runtime@7.28.6)(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3)
+      '@openzeppelin/ui-react': 1.2.0(@babel/runtime@7.28.6)(@tanstack/react-query@5.90.19(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3)
+      '@openzeppelin/ui-types': 1.13.0
+      '@openzeppelin/ui-utils': 1.4.0
       '@rainbow-me/rainbowkit': 2.2.10(@tanstack/react-query@5.90.19(react@19.2.3))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)(viem@2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(wagmi@2.19.5(@react-native-async-storage/async-storage@1.24.0(react-native@0.83.1(@babel/core@7.28.6)(@types/react@19.2.9)(bufferutil@4.1.0)(react@19.2.3)(utf-8-validate@5.0.10)))(@tanstack/query-core@5.90.19)(@tanstack/react-query@5.90.19(react@19.2.3))(@types/react@19.2.9)(bufferutil@4.1.0)(fastestsmallesttextencoderdecoder@1.0.22)(react-native@0.83.1(@babel/core@7.28.6)(@types/react@19.2.9)(bufferutil@4.1.0)(react@19.2.3)(utf-8-validate@5.0.10))(react@19.2.3)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76))
       '@tanstack/react-query': 5.90.19(react@19.2.3)
       '@wagmi/connectors': 5.7.13(@react-native-async-storage/async-storage@1.24.0(react-native@0.83.1(@babel/core@7.28.6)(@types/react@19.2.9)(bufferutil@4.1.0)(react@19.2.3)(utf-8-validate@5.0.10)))(@types/react@19.2.9)(@wagmi/core@2.22.1(@tanstack/query-core@5.90.19)(@types/react@19.2.9)(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(viem@2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76)))(bufferutil@4.1.0)(react@19.2.3)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
@@ -10986,7 +10897,7 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@openzeppelin/adapter-midnight@file:.packed-packages/local-dev/adapters/openzeppelin-adapter-midnight-1.1.0.tgz(@openzeppelin/ui-components@file:.packed-packages/local-dev/ui/openzeppelin-ui-components-1.7.0.tgz(@babel/runtime@7.28.6)(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3))(@openzeppelin/ui-react@file:.packed-packages/local-dev/ui/openzeppelin-ui-react-1.2.0.tgz(@babel/runtime@7.28.6)(@tanstack/react-query@5.90.19(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3))(@openzeppelin/ui-types@file:.packed-packages/local-dev/ui/openzeppelin-ui-types-1.13.0.tgz)(@openzeppelin/ui-utils@file:.packed-packages/local-dev/ui/openzeppelin-ui-utils-1.4.0.tgz)(@types/react@19.2.9)(bufferutil@4.1.0)(crossws@0.3.5)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(utf-8-validate@5.0.10)':
+  '@openzeppelin/adapter-midnight@1.1.0(@openzeppelin/ui-components@1.7.0(@babel/runtime@7.28.6)(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3))(@openzeppelin/ui-react@1.2.0(@babel/runtime@7.28.6)(@tanstack/react-query@5.90.19(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3))(@openzeppelin/ui-types@1.13.0)(@openzeppelin/ui-utils@1.4.0)(@types/react@19.2.9)(bufferutil@4.1.0)(crossws@0.3.5)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(utf-8-validate@5.0.10)':
     dependencies:
       '@midnight-ntwrk/compact-runtime': 0.9.0(patch_hash=81923a3ecf0dd679e5a35d9871f5a19512de29914adc6cbdbd0d0e249a6eb401)
       '@midnight-ntwrk/dapp-connector-api': 3.0.0(rxjs@7.8.2)
@@ -11002,11 +10913,10 @@ snapshots:
       '@midnight-ntwrk/midnight-js-utils': 2.0.2(patch_hash=c8db96a21a903c333ce2bfc1c85b8d5198d6060aa4b3f589d84bf3648291def9)
       '@midnight-ntwrk/wallet-sdk-address-format': 2.0.0(@midnight-ntwrk/zswap@4.0.0)
       '@midnight-ntwrk/zswap': 4.0.0
-      '@openzeppelin/adapter-runtime-utils': file:../openzeppelin-adapters/packages/adapter-runtime-utils(@openzeppelin/ui-types@file:.packed-packages/local-dev/ui/openzeppelin-ui-types-1.13.0.tgz)
-      '@openzeppelin/ui-components': file:.packed-packages/local-dev/ui/openzeppelin-ui-components-1.7.0.tgz(@babel/runtime@7.28.6)(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3)
-      '@openzeppelin/ui-react': file:.packed-packages/local-dev/ui/openzeppelin-ui-react-1.2.0.tgz(@babel/runtime@7.28.6)(@tanstack/react-query@5.90.19(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3)
-      '@openzeppelin/ui-types': file:.packed-packages/local-dev/ui/openzeppelin-ui-types-1.13.0.tgz
-      '@openzeppelin/ui-utils': file:.packed-packages/local-dev/ui/openzeppelin-ui-utils-1.4.0.tgz
+      '@openzeppelin/ui-components': 1.7.0(@babel/runtime@7.28.6)(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3)
+      '@openzeppelin/ui-react': 1.2.0(@babel/runtime@7.28.6)(@tanstack/react-query@5.90.19(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3)
+      '@openzeppelin/ui-types': 1.13.0
+      '@openzeppelin/ui-utils': 1.4.0
       '@types/jszip': 3.4.1
       jszip: 3.10.1
       lodash-es: 4.17.23
@@ -11024,13 +10934,11 @@ snapshots:
       - uWebSockets.js
       - utf-8-validate
 
-  '@openzeppelin/adapter-polkadot@file:.packed-packages/local-dev/adapters/openzeppelin-adapter-polkadot-1.1.0.tgz(a0aeb0dd38104ba5cc772a58c290ed4c)':
+  '@openzeppelin/adapter-polkadot@1.1.0(fef9529e058971dd9654eb53fb4ce6e4)':
     dependencies:
-      '@openzeppelin/adapter-evm-core': file:../openzeppelin-adapters/packages/adapter-evm-core(1953014ece342219b43b857ae5542fa0)
-      '@openzeppelin/adapter-runtime-utils': file:../openzeppelin-adapters/packages/adapter-runtime-utils(@openzeppelin/ui-types@file:.packed-packages/local-dev/ui/openzeppelin-ui-types-1.13.0.tgz)
       '@openzeppelin/relayer-sdk': 1.9.0
-      '@openzeppelin/ui-types': file:.packed-packages/local-dev/ui/openzeppelin-ui-types-1.13.0.tgz
-      '@openzeppelin/ui-utils': file:.packed-packages/local-dev/ui/openzeppelin-ui-utils-1.4.0.tgz
+      '@openzeppelin/ui-types': 1.13.0
+      '@openzeppelin/ui-utils': 1.4.0
       '@rainbow-me/rainbowkit': 2.2.10(@tanstack/react-query@5.90.19(react@19.2.3))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)(viem@2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(wagmi@2.19.5(@react-native-async-storage/async-storage@1.24.0(react-native@0.83.1(@babel/core@7.28.6)(@types/react@19.2.9)(bufferutil@4.1.0)(react@19.2.3)(utf-8-validate@5.0.10)))(@tanstack/query-core@5.90.19)(@tanstack/react-query@5.90.19(react@19.2.3))(@types/react@19.2.9)(bufferutil@4.1.0)(fastestsmallesttextencoderdecoder@1.0.22)(react-native@0.83.1(@babel/core@7.28.6)(@types/react@19.2.9)(bufferutil@4.1.0)(react@19.2.3)(utf-8-validate@5.0.10))(react@19.2.3)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76))
       '@tanstack/react-query': 5.90.19(react@19.2.3)
       '@wagmi/connectors': 5.7.13(@react-native-async-storage/async-storage@1.24.0(react-native@0.83.1(@babel/core@7.28.6)(@types/react@19.2.9)(bufferutil@4.1.0)(react@19.2.3)(utf-8-validate@5.0.10)))(@types/react@19.2.9)(@wagmi/core@2.22.1(@tanstack/query-core@5.90.19)(@types/react@19.2.9)(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(viem@2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76)))(bufferutil@4.1.0)(react@19.2.3)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
@@ -11051,8 +10959,6 @@ snapshots:
       - '@capacitor/preferences'
       - '@deno/kv'
       - '@netlify/blobs'
-      - '@openzeppelin/ui-components'
-      - '@openzeppelin/ui-react'
       - '@planetscale/database'
       - '@react-native-async-storage/async-storage'
       - '@tanstack/query-core'
@@ -11068,7 +10974,6 @@ snapshots:
       - encoding
       - immer
       - ioredis
-      - lucide-react
       - supports-color
       - typescript
       - uploadthing
@@ -11076,15 +10981,10 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@openzeppelin/adapter-runtime-utils@file:../openzeppelin-adapters/packages/adapter-runtime-utils(@openzeppelin/ui-types@file:.packed-packages/local-dev/ui/openzeppelin-ui-types-1.13.0.tgz)':
+  '@openzeppelin/adapter-solana@1.1.0(@openzeppelin/ui-types@1.13.0)(@openzeppelin/ui-utils@1.4.0)(bufferutil@4.1.0)(fastestsmallesttextencoderdecoder@1.0.22)(react-native@0.83.1(@babel/core@7.28.6)(@types/react@19.2.9)(bufferutil@4.1.0)(react@19.2.3)(utf-8-validate@5.0.10))(react@19.2.3)(typescript@5.9.3)(utf-8-validate@5.0.10)':
     dependencies:
-      '@openzeppelin/ui-types': file:.packed-packages/local-dev/ui/openzeppelin-ui-types-1.13.0.tgz
-
-  '@openzeppelin/adapter-solana@file:.packed-packages/local-dev/adapters/openzeppelin-adapter-solana-1.1.0.tgz(@openzeppelin/ui-types@file:.packed-packages/local-dev/ui/openzeppelin-ui-types-1.13.0.tgz)(@openzeppelin/ui-utils@file:.packed-packages/local-dev/ui/openzeppelin-ui-utils-1.4.0.tgz)(bufferutil@4.1.0)(fastestsmallesttextencoderdecoder@1.0.22)(react-native@0.83.1(@babel/core@7.28.6)(@types/react@19.2.9)(bufferutil@4.1.0)(react@19.2.3)(utf-8-validate@5.0.10))(react@19.2.3)(typescript@5.9.3)(utf-8-validate@5.0.10)':
-    dependencies:
-      '@openzeppelin/adapter-runtime-utils': file:../openzeppelin-adapters/packages/adapter-runtime-utils(@openzeppelin/ui-types@file:.packed-packages/local-dev/ui/openzeppelin-ui-types-1.13.0.tgz)
-      '@openzeppelin/ui-types': file:.packed-packages/local-dev/ui/openzeppelin-ui-types-1.13.0.tgz
-      '@openzeppelin/ui-utils': file:.packed-packages/local-dev/ui/openzeppelin-ui-utils-1.4.0.tgz
+      '@openzeppelin/ui-types': 1.13.0
+      '@openzeppelin/ui-utils': 1.4.0
       '@project-serum/anchor': 0.26.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)
       '@solana/spl-token': 0.3.11(@solana/web3.js@1.98.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10))(bufferutil@4.1.0)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.3)(utf-8-validate@5.0.10)
       '@solana/wallet-adapter-base': 0.9.27(@solana/web3.js@1.98.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10))
@@ -11102,14 +11002,13 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@openzeppelin/adapter-stellar@file:.packed-packages/local-dev/adapters/openzeppelin-adapter-stellar-1.1.0.tgz(40dbd3da0e748d71ecc8756bec0e5035)':
+  '@openzeppelin/adapter-stellar@1.1.0(8963e6656a2dabcb3980f89171272dde)':
     dependencies:
       '@creit.tech/stellar-wallets-kit': 1.9.5(55dca7d182cf59242ce7e38b5c0baff5)
-      '@openzeppelin/adapter-runtime-utils': file:../openzeppelin-adapters/packages/adapter-runtime-utils(@openzeppelin/ui-types@file:.packed-packages/local-dev/ui/openzeppelin-ui-types-1.13.0.tgz)
       '@openzeppelin/relayer-sdk': 1.9.0
-      '@openzeppelin/ui-components': file:.packed-packages/local-dev/ui/openzeppelin-ui-components-1.7.0.tgz(@babel/runtime@7.28.6)(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3)
-      '@openzeppelin/ui-types': file:.packed-packages/local-dev/ui/openzeppelin-ui-types-1.13.0.tgz
-      '@openzeppelin/ui-utils': file:.packed-packages/local-dev/ui/openzeppelin-ui-utils-1.4.0.tgz
+      '@openzeppelin/ui-components': 1.7.0(@babel/runtime@7.28.6)(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3)
+      '@openzeppelin/ui-types': 1.13.0
+      '@openzeppelin/ui-utils': 1.4.0
       '@stellar/stellar-sdk': 14.4.3
       '@stellar/stellar-xdr-json': 23.0.0
       '@web3icons/react': 4.1.14(react@19.2.3)(typescript@5.9.3)
@@ -11158,15 +11057,15 @@ snapshots:
       - utf-8-validate
       - ws
 
-  '@openzeppelin/adapters-vite@file:.packed-packages/local-dev/adapters/openzeppelin-adapters-vite-1.3.2.tgz(a0358035e75db7385749e4f4642855ae)':
+  '@openzeppelin/adapters-vite@1.3.2(299839496f253c1dbf078e2e9e7fefbf)':
     dependencies:
       vite: 7.3.1(@types/node@24.10.13)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(yaml@2.8.2)
     optionalDependencies:
-      '@openzeppelin/adapter-evm': file:.packed-packages/local-dev/adapters/openzeppelin-adapter-evm-1.1.0.tgz(650161bcc0fdddee3df6e31d3ae9962b)
-      '@openzeppelin/adapter-midnight': file:.packed-packages/local-dev/adapters/openzeppelin-adapter-midnight-1.1.0.tgz(@openzeppelin/ui-components@file:.packed-packages/local-dev/ui/openzeppelin-ui-components-1.7.0.tgz(@babel/runtime@7.28.6)(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3))(@openzeppelin/ui-react@file:.packed-packages/local-dev/ui/openzeppelin-ui-react-1.2.0.tgz(@babel/runtime@7.28.6)(@tanstack/react-query@5.90.19(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3))(@openzeppelin/ui-types@file:.packed-packages/local-dev/ui/openzeppelin-ui-types-1.13.0.tgz)(@openzeppelin/ui-utils@file:.packed-packages/local-dev/ui/openzeppelin-ui-utils-1.4.0.tgz)(@types/react@19.2.9)(bufferutil@4.1.0)(crossws@0.3.5)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(utf-8-validate@5.0.10)
-      '@openzeppelin/adapter-polkadot': file:.packed-packages/local-dev/adapters/openzeppelin-adapter-polkadot-1.1.0.tgz(a0aeb0dd38104ba5cc772a58c290ed4c)
-      '@openzeppelin/adapter-solana': file:.packed-packages/local-dev/adapters/openzeppelin-adapter-solana-1.1.0.tgz(@openzeppelin/ui-types@file:.packed-packages/local-dev/ui/openzeppelin-ui-types-1.13.0.tgz)(@openzeppelin/ui-utils@file:.packed-packages/local-dev/ui/openzeppelin-ui-utils-1.4.0.tgz)(bufferutil@4.1.0)(fastestsmallesttextencoderdecoder@1.0.22)(react-native@0.83.1(@babel/core@7.28.6)(@types/react@19.2.9)(bufferutil@4.1.0)(react@19.2.3)(utf-8-validate@5.0.10))(react@19.2.3)(typescript@5.9.3)(utf-8-validate@5.0.10)
-      '@openzeppelin/adapter-stellar': file:.packed-packages/local-dev/adapters/openzeppelin-adapter-stellar-1.1.0.tgz(40dbd3da0e748d71ecc8756bec0e5035)
+      '@openzeppelin/adapter-evm': 1.1.0(d22773f4cb48bbd89378a1af86d90941)
+      '@openzeppelin/adapter-midnight': 1.1.0(@openzeppelin/ui-components@1.7.0(@babel/runtime@7.28.6)(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3))(@openzeppelin/ui-react@1.2.0(@babel/runtime@7.28.6)(@tanstack/react-query@5.90.19(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3))(@openzeppelin/ui-types@1.13.0)(@openzeppelin/ui-utils@1.4.0)(@types/react@19.2.9)(bufferutil@4.1.0)(crossws@0.3.5)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(utf-8-validate@5.0.10)
+      '@openzeppelin/adapter-polkadot': 1.1.0(fef9529e058971dd9654eb53fb4ce6e4)
+      '@openzeppelin/adapter-solana': 1.1.0(@openzeppelin/ui-types@1.13.0)(@openzeppelin/ui-utils@1.4.0)(bufferutil@4.1.0)(fastestsmallesttextencoderdecoder@1.0.22)(react-native@0.83.1(@babel/core@7.28.6)(@types/react@19.2.9)(bufferutil@4.1.0)(react@19.2.3)(utf-8-validate@5.0.10))(react@19.2.3)(typescript@5.9.3)(utf-8-validate@5.0.10)
+      '@openzeppelin/adapter-stellar': 1.1.0(8963e6656a2dabcb3980f89171272dde)
 
   '@openzeppelin/docs-utils@0.1.6':
     dependencies:
@@ -11186,10 +11085,10 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
-  '@openzeppelin/ui-components@file:.packed-packages/local-dev/ui/openzeppelin-ui-components-1.7.0.tgz(@babel/runtime@7.28.6)(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3)':
+  '@openzeppelin/ui-components@1.7.0(@babel/runtime@7.28.6)(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3)':
     dependencies:
-      '@openzeppelin/ui-types': file:.packed-packages/local-dev/ui/openzeppelin-ui-types-1.13.0.tgz
-      '@openzeppelin/ui-utils': file:.packed-packages/local-dev/ui/openzeppelin-ui-utils-1.4.0.tgz
+      '@openzeppelin/ui-types': 1.13.0
+      '@openzeppelin/ui-utils': 1.4.0
       '@radix-ui/react-accordion': 1.2.12(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@radix-ui/react-checkbox': 1.3.3(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@radix-ui/react-collapsible': 1.1.12(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -11232,11 +11131,11 @@ snapshots:
       commander: 13.1.0
       picocolors: 1.1.1
 
-  '@openzeppelin/ui-react@file:.packed-packages/local-dev/ui/openzeppelin-ui-react-1.2.0.tgz(@babel/runtime@7.28.6)(@tanstack/react-query@5.90.19(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3)':
+  '@openzeppelin/ui-react@1.2.0(@babel/runtime@7.28.6)(@tanstack/react-query@5.90.19(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3)':
     dependencies:
-      '@openzeppelin/ui-components': file:.packed-packages/local-dev/ui/openzeppelin-ui-components-1.7.0.tgz(@babel/runtime@7.28.6)(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3)
-      '@openzeppelin/ui-types': file:.packed-packages/local-dev/ui/openzeppelin-ui-types-1.13.0.tgz
-      '@openzeppelin/ui-utils': file:.packed-packages/local-dev/ui/openzeppelin-ui-utils-1.4.0.tgz
+      '@openzeppelin/ui-components': 1.7.0(@babel/runtime@7.28.6)(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3)
+      '@openzeppelin/ui-types': 1.13.0
+      '@openzeppelin/ui-utils': 1.4.0
       '@tanstack/react-query': 5.90.19(react@19.2.3)
       lucide-react: 0.510.0(react@19.2.3)
       react: 19.2.3
@@ -11248,13 +11147,13 @@ snapshots:
       - tailwindcss
       - typescript
 
-  '@openzeppelin/ui-renderer@file:.packed-packages/local-dev/ui/openzeppelin-ui-renderer-1.2.0.tgz(@babel/runtime@7.28.6)(@tanstack/react-query@5.90.19(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react-hook-form@7.71.1(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3)':
+  '@openzeppelin/ui-renderer@1.2.0(@babel/runtime@7.28.6)(@tanstack/react-query@5.90.19(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react-hook-form@7.71.1(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3)':
     dependencies:
       '@hookform/resolvers': 4.1.3(react-hook-form@7.71.1(react@19.2.3))
-      '@openzeppelin/ui-components': file:.packed-packages/local-dev/ui/openzeppelin-ui-components-1.7.0.tgz(@babel/runtime@7.28.6)(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3)
-      '@openzeppelin/ui-react': file:.packed-packages/local-dev/ui/openzeppelin-ui-react-1.2.0.tgz(@babel/runtime@7.28.6)(@tanstack/react-query@5.90.19(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3)
-      '@openzeppelin/ui-types': file:.packed-packages/local-dev/ui/openzeppelin-ui-types-1.13.0.tgz
-      '@openzeppelin/ui-utils': file:.packed-packages/local-dev/ui/openzeppelin-ui-utils-1.4.0.tgz
+      '@openzeppelin/ui-components': 1.7.0(@babel/runtime@7.28.6)(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3)
+      '@openzeppelin/ui-react': 1.2.0(@babel/runtime@7.28.6)(@tanstack/react-query@5.90.19(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)(typescript@5.9.3)
+      '@openzeppelin/ui-types': 1.13.0
+      '@openzeppelin/ui-utils': 1.4.0
       '@radix-ui/react-checkbox': 1.3.3(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@radix-ui/react-label': 2.1.8(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@radix-ui/react-progress': 1.1.8(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -11274,23 +11173,23 @@ snapshots:
       - tailwindcss
       - typescript
 
-  '@openzeppelin/ui-storage@file:.packed-packages/local-dev/ui/openzeppelin-ui-storage-1.2.0.tgz(@types/react@19.2.9)(react@19.2.3)':
+  '@openzeppelin/ui-storage@1.2.0(@types/react@19.2.9)(react@19.2.3)':
     dependencies:
-      '@openzeppelin/ui-types': file:.packed-packages/local-dev/ui/openzeppelin-ui-types-1.13.0.tgz
-      '@openzeppelin/ui-utils': file:.packed-packages/local-dev/ui/openzeppelin-ui-utils-1.4.0.tgz
+      '@openzeppelin/ui-types': 1.13.0
+      '@openzeppelin/ui-utils': 1.4.0
       dexie: 4.2.1
       dexie-react-hooks: 1.1.7(@types/react@19.2.9)(dexie@4.2.1)(react@19.2.3)
       react: 19.2.3
     transitivePeerDependencies:
       - '@types/react'
 
-  '@openzeppelin/ui-styles@file:.packed-packages/local-dev/ui/openzeppelin-ui-styles-1.0.0.tgz': {}
+  '@openzeppelin/ui-styles@1.0.0': {}
 
-  '@openzeppelin/ui-types@file:.packed-packages/local-dev/ui/openzeppelin-ui-types-1.13.0.tgz': {}
+  '@openzeppelin/ui-types@1.13.0': {}
 
-  '@openzeppelin/ui-utils@file:.packed-packages/local-dev/ui/openzeppelin-ui-utils-1.4.0.tgz':
+  '@openzeppelin/ui-utils@1.4.0':
     dependencies:
-      '@openzeppelin/ui-types': file:.packed-packages/local-dev/ui/openzeppelin-ui-types-1.13.0.tgz
+      '@openzeppelin/ui-types': 1.13.0
       clsx: 2.1.1
       tailwind-merge: 3.4.0
       uuid: 11.1.0
