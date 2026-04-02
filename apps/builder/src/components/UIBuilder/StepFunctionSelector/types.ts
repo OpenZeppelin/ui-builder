@@ -1,6 +1,6 @@
 import type { ContractFunction, ContractSchema, NetworkConfig } from '@openzeppelin/ui-types';
 
-import type { BuilderAdapter } from '@/core/runtimeAdapter';
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 export interface StepFunctionSelectorProps {
   contractSchema: ContractSchema | null;
@@ -9,7 +9,7 @@ export interface StepFunctionSelectorProps {
   networkConfig?: NetworkConfig | null;
   onToggleContractState?: () => void;
   isWidgetExpanded?: boolean;
-  adapter?: BuilderAdapter;
+  runtime?: BuilderRuntime;
 }
 
 export interface FilterControlsProps {

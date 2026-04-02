@@ -3,10 +3,10 @@ import { useEffect, useState } from 'react';
 import type { RelayerDetailsRich } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
-import type { BuilderAdapter } from '@/core/runtimeAdapter';
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 interface UseRelayerDetailsParams {
-  adapter: BuilderAdapter | null;
+  runtime: BuilderRuntime | null;
   relayerId?: string;
   serviceUrl?: string;
   apiKey?: string;
@@ -20,7 +20,7 @@ interface UseRelayerDetailsReturn {
 }
 
 export function useRelayerDetails({
-  adapter,
+  runtime,
   relayerId,
   serviceUrl,
   apiKey,
@@ -31,7 +31,7 @@ export function useRelayerDetails({
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    if (!enabled || !relayerId || !apiKey || !serviceUrl || !adapter?.getRelayer) {
+    if (!enabled || !relayerId || !apiKey || !serviceUrl || !runtime?.relayer.getRelayer) {
       setEnhancedDetails(null);
       return;
     }
@@ -39,7 +39,7 @@ export function useRelayerDetails({
     setLoading(true);
     setError(null);
 
-    adapter
+    runtime.relayer
       .getRelayer(serviceUrl, apiKey, relayerId)
       .then((details) => {
         setEnhancedDetails(details);
@@ -52,7 +52,7 @@ export function useRelayerDetails({
       .finally(() => {
         setLoading(false);
       });
-  }, [enabled, relayerId, apiKey, serviceUrl, adapter]);
+  }, [enabled, relayerId, apiKey, serviceUrl, runtime]);
 
   return {
     enhancedDetails,

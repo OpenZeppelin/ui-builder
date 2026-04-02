@@ -5,7 +5,7 @@ import { Banner, BooleanField, SelectGroupedField, TextField } from '@openzeppel
 import { DynamicFormField } from '@openzeppelin/ui-renderer';
 import { FormFieldType } from '@openzeppelin/ui-types';
 
-import type { BuilderAdapter } from '@/core/runtimeAdapter';
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 import { OptionGroup, shouldShowFieldTypeSelector } from './utils/fieldTypeUtils';
 
@@ -28,9 +28,9 @@ interface FieldBasicSettingsProps {
   trigger?: (name?: string | string[]) => Promise<boolean>;
 
   /**
-   * The adapter for chain-specific type mapping and validation
+   * The runtime for chain-specific type mapping and validation
    */
-  adapter?: BuilderAdapter;
+  runtime?: BuilderRuntime;
 
   /**
    * The original field being edited.
@@ -56,13 +56,13 @@ interface FieldBasicSettingsProps {
  * @param props - Component props
  * @param props.control - React Hook Form control instance
  * @param props.fieldTypeGroups - Available field types organized by category
- * @param props.adapter - Chain-specific adapter for type validation
+ * @param props.runtime - Chain-specific runtime for type validation
  * @param props.field - The field being edited with its current configuration
  */
 export function FieldBasicSettings({
   control,
   fieldTypeGroups,
-  adapter,
+  runtime,
   field,
   onFieldValidationChange,
   trigger,
@@ -192,7 +192,7 @@ export function FieldBasicSettings({
         />
       </div>
 
-      {isHardcoded && adapter && (
+      {isHardcoded && runtime && (
         <div className="space-y-4 border-t pt-4 md:col-span-2">
           {fieldType === 'runtimeSecret' && (
             <Banner variant="warning" title="Security Notice" dismissible={false}>
@@ -204,8 +204,8 @@ export function FieldBasicSettings({
             key={`hardcoded-${field.id}-${fieldType}`}
             field={hardcodedFieldConfig}
             control={control}
-            addressing={adapter}
-            typeMapping={adapter}
+            addressing={runtime?.addressing}
+            typeMapping={runtime?.typeMapping}
           />
           <BooleanField
             id="is-read-only"
@@ -217,9 +217,9 @@ export function FieldBasicSettings({
           />
         </div>
       )}
-      {isHardcoded && !adapter && fieldType === 'blockchain-address' && (
+      {isHardcoded && !runtime && fieldType === 'blockchain-address' && (
         <div className="text-destructive border-t pt-4 text-sm md:col-span-2">
-          Cannot edit hardcoded address value: Adapter not available.
+          Cannot edit hardcoded address value: Runtime not available.
         </div>
       )}
     </div>

@@ -2,7 +2,7 @@ import capitalize from 'lodash-es/capitalize';
 
 import { FieldType } from '@openzeppelin/ui-types';
 
-import type { BuilderAdapter } from '@/core/runtimeAdapter';
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 /**
  * Field type option with display label
@@ -57,7 +57,7 @@ export function getFieldTypeOption(type: FieldType, disabled = false): FieldType
 }
 
 /**
- * Default field types when no adapter is available
+ * Default field types when no runtime is available
  */
 const DEFAULT_FIELD_TYPES: FieldType[] = [
   'text',
@@ -104,16 +104,16 @@ export function shouldShowFieldTypeSelector(fieldType?: string): boolean {
 }
 
 /**
- * Generate field type groups based on adapter and parameter type
+ * Generate field type groups based on runtime and parameter type
  */
 export function getFieldTypeGroups(
-  adapter?: BuilderAdapter,
+  runtime?: BuilderRuntime,
   originalParameterType?: string
 ): OptionGroup[] {
   // Get compatible field types
   const compatibleTypes =
-    adapter && originalParameterType
-      ? adapter.getCompatibleFieldTypes(originalParameterType)
+    runtime && originalParameterType
+      ? runtime.typeMapping.getCompatibleFieldTypes(originalParameterType)
       : DEFAULT_FIELD_TYPES;
 
   const recommendedType = compatibleTypes[0];

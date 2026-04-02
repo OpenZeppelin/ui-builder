@@ -14,7 +14,7 @@ import {
 import type { RelayerDetails, RelayerDetailsRich } from '@openzeppelin/ui-types';
 import { truncateMiddle } from '@openzeppelin/ui-utils';
 
-import type { BuilderAdapter } from '@/core/runtimeAdapter';
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 import type { ExecutionMethodFormData } from '../../../types';
 
@@ -28,7 +28,7 @@ interface RelayerSelectionCardProps {
   loadingEnhancedDetails: boolean;
   isLoading: boolean;
   onEdit: () => void;
-  adapter?: BuilderAdapter | null;
+  runtime?: BuilderRuntime | null;
 }
 
 export function RelayerSelectionCard({
@@ -41,7 +41,7 @@ export function RelayerSelectionCard({
   loadingEnhancedDetails,
   isLoading,
   onEdit,
-  adapter,
+  runtime,
 }: RelayerSelectionCardProps): React.ReactElement {
   const relayerOptions = fetchedRelayers.map((r) => ({
     value: r.relayerId,
@@ -95,7 +95,7 @@ export function RelayerSelectionCard({
                 enhancedDetails={enhancedDetails}
                 loading={loadingEnhancedDetails}
                 className="w-full"
-                labels={adapter?.getUiLabels?.()}
+                labels={runtime?.uiLabels.getUiLabels?.()}
               />
             </div>
           )}

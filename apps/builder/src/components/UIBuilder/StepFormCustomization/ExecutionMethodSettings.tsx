@@ -2,7 +2,7 @@ import React from 'react';
 
 import type { ExecutionConfig, ExecutionMethodDetail } from '@openzeppelin/ui-types';
 
-import type { BuilderAdapter } from '@/core/runtimeAdapter';
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 import { PrimaryMethodSelector } from './components/PrimaryMethodSelector';
 import { useExecutionMethodState } from './hooks/useExecutionMethodState';
@@ -10,21 +10,21 @@ import { useExecutionMethodState } from './hooks/useExecutionMethodState';
 export interface ExecutionMethodSettingsProps {
   currentConfig?: ExecutionConfig;
   onUpdateConfig: (config: ExecutionConfig | undefined, isValid: boolean) => void;
-  adapter: BuilderAdapter | null;
+  runtime: BuilderRuntime | null;
   isWidgetExpanded?: boolean;
 }
 
 export function ExecutionMethodSettings({
   currentConfig,
   onUpdateConfig,
-  adapter,
+  runtime,
   isWidgetExpanded = false,
 }: ExecutionMethodSettingsProps): React.ReactElement {
   // Use the custom hook to manage state and logic
   const { formMethods, supportedMethods, watchedEoaOption, validationError } =
-    useExecutionMethodState({ currentConfig, adapter, onUpdateConfig });
+    useExecutionMethodState({ currentConfig, runtime, onUpdateConfig });
 
-  // Generate options - rely solely on adapter's disabled flag
+  // Generate options - rely solely on runtime's disabled flag
   const primaryMethodOptions = supportedMethods.map((detail: ExecutionMethodDetail) => ({
     value: detail.type,
     label: detail.name,
@@ -36,10 +36,10 @@ export function ExecutionMethodSettings({
       {/* Render Primary Method Selector with embedded configuration panels */}
       <PrimaryMethodSelector
         control={formMethods.control}
-        adapterAvailable={!!adapter}
+        runtimeAvailable={!!runtime}
         options={primaryMethodOptions}
         watchedEoaOption={watchedEoaOption}
-        adapter={adapter}
+        runtime={runtime}
         setValue={formMethods.setValue}
         isWidgetExpanded={isWidgetExpanded}
       />

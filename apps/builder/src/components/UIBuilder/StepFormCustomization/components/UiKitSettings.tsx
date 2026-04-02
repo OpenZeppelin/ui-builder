@@ -14,7 +14,7 @@ import {
 } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
-import type { BuilderAdapter } from '@/core/runtimeAdapter';
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 import { useBuilderAnalytics } from '../../../../hooks/useBuilderAnalytics';
 import { type SelectableOption } from '../../../Common/OptionSelector';
@@ -22,7 +22,7 @@ import { TitledSection } from '../../../Common/TitledSection';
 import { ResponsiveUiKitSelector } from '../ResponsiveUiKitSelector';
 
 interface UiKitSettingsProps {
-  adapter: BuilderAdapter;
+  runtime: BuilderRuntime;
   onUpdateConfig: (config: UiKitConfiguration) => void;
   currentConfig?: UiKitConfiguration;
 }
@@ -32,7 +32,7 @@ interface UiKitOption extends SelectableOption {
   name: string;
 }
 
-export function UiKitSettings({ adapter, onUpdateConfig, currentConfig }: UiKitSettingsProps) {
+export function UiKitSettings({ runtime, onUpdateConfig, currentConfig }: UiKitSettingsProps) {
   const { trackUiKitChanged } = useBuilderAnalytics();
   const [availableKits, setAvailableKits] = useState<AvailableUiKit[]>([]);
   const [selectedKitId, setSelectedKitId] = useState<UiKitName | null>(null);
@@ -47,7 +47,7 @@ export function UiKitSettings({ adapter, onUpdateConfig, currentConfig }: UiKitS
 
   useEffect(() => {
     async function fetchKits() {
-      if (!adapter) {
+      if (!runtime) {
         setIsLoading(false);
         return;
       }
@@ -55,7 +55,7 @@ export function UiKitSettings({ adapter, onUpdateConfig, currentConfig }: UiKitS
       try {
         setIsLoading(true);
         setErrorMessage(null);
-        const kits = await adapter.getAvailableUiKits();
+        const kits = await runtime.uiKit.getAvailableUiKits();
         setAvailableKits(kits);
 
         // Set default selection
@@ -85,7 +85,7 @@ export function UiKitSettings({ adapter, onUpdateConfig, currentConfig }: UiKitS
       }
     }
     void fetchKits();
-  }, [adapter, currentConfig, reset]);
+  }, [runtime, currentConfig, reset]);
 
   const selectedKit = availableKits.find((kit) => kit.id === selectedKitId);
 
@@ -118,8 +118,8 @@ export function UiKitSettings({ adapter, onUpdateConfig, currentConfig }: UiKitS
               <DynamicFormField
                 field={field}
                 control={control}
-                addressing={adapter}
-                typeMapping={adapter}
+                addressing={runtime?.addressing}
+                typeMapping={runtime?.typeMapping}
               />
             </div>
           ))}
@@ -189,9 +189,9 @@ export function UiKitSettings({ adapter, onUpdateConfig, currentConfig }: UiKitS
     <TitledSection
       title="UI Kit Selection"
       description="Choose a wallet connection UI kit and configure its settings for your form."
-      isAvailable={!!adapter}
+      isAvailable={!!runtime}
       errorMessage={errorMessage}
-      unavailableMessage="No blockchain adapter selected."
+      unavailableMessage="No blockchain runtime selected."
     >
       <ResponsiveUiKitSelector
         options={selectorOptions}
@@ -212,7 +212,7 @@ export function UiKitSettings({ adapter, onUpdateConfig, currentConfig }: UiKitS
 
           onUpdateConfig(newConfig);
 
-          const nc = adapter.networkConfig;
+          const nc = runtime.networkConfig;
           if (nc) {
             trackUiKitChanged(nc.id, nc.ecosystem, id);
           }
@@ -220,7 +220,7 @@ export function UiKitSettings({ adapter, onUpdateConfig, currentConfig }: UiKitS
         configContent={configContent}
         isLoading={isLoading}
         loadingMessage="Loading available UI kits..."
-        emptyMessage="No UI kits available for this adapter."
+        emptyMessage="No UI kits available for this runtime."
       />
     </TitledSection>
   );

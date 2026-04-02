@@ -2,7 +2,7 @@ import { Control } from 'react-hook-form';
 
 import { BooleanField, TextAreaField, TextField } from '@openzeppelin/ui-components';
 
-import type { BuilderAdapter } from '@/core/runtimeAdapter';
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 import { shouldShowFieldTypeSelector } from './utils/fieldTypeUtils';
 
@@ -19,26 +19,26 @@ interface FieldAdvancedSettingsProps {
    */
   fieldType?: string;
   /**
-   * Optional adapter to drive adapter-specific settings (e.g., runtimeSecret extras)
+   * Optional runtime to drive runtime-specific settings (e.g., runtimeSecret extras)
    */
-  adapter?: BuilderAdapter;
+  runtime?: BuilderRuntime;
 }
 
 /**
  * Component for editing advanced field settings like description and validation.
  *
  * Provides form controls for:
- * - Adapter-specific property inputs (e.g., identity secret key property name for Midnight)
+ * - Runtime-specific property inputs (e.g., identity secret key property name for Midnight)
  * - Field description (optional explanatory text)
  * - Required field validation (hidden for runtime-only fields like runtime secrets)
  *
  * @param props - Component props
  * @param props.control - React Hook Form control instance
  * @param props.fieldType - The current field type
- * @param props.adapter - Optional adapter for adapter-specific field configurations
+ * @param props.runtime - Optional runtime for runtime-specific field configurations
  */
-export function FieldAdvancedSettings({ control, fieldType, adapter }: FieldAdvancedSettingsProps) {
-  const propertyCfg = adapter?.getRuntimeFieldBinding?.()?.propertyNameInput;
+export function FieldAdvancedSettings({ control, fieldType, runtime }: FieldAdvancedSettingsProps) {
+  const propertyCfg = runtime?.typeMapping.getRuntimeFieldBinding?.()?.propertyNameInput;
   const showIdentityProp =
     fieldType === 'runtimeSecret' && (propertyCfg?.visible ?? !!propertyCfg?.metadataKey);
 

@@ -12,7 +12,7 @@ import { uiBuilderStore } from '../uiBuilderStore';
  * @returns An object with functions to update form, execution, and UI kit configurations.
  */
 export function useBuilderConfig() {
-  const { reconfigureActiveAdapterUiKit } = useBuilderWalletState();
+  const { reconfigureActiveUiKit } = useBuilderWalletState();
 
   const handleFormConfigUpdated = useCallback((config: Partial<BuilderFormConfig>) => {
     uiBuilderStore.updateState((s) => ({
@@ -46,9 +46,9 @@ export function useBuilderConfig() {
       uiBuilderStore.updateState((s) => ({
         formConfig: s.formConfig ? { ...s.formConfig, uiKitConfig } : null,
       }));
-      reconfigureActiveAdapterUiKit(uiKitConfig);
+      reconfigureActiveUiKit(uiKitConfig);
     },
-    [reconfigureActiveAdapterUiKit]
+    [reconfigureActiveUiKit]
   );
 
   return {

@@ -62,7 +62,7 @@ export function useContractDefinition(
   options: UseContractDefinitionOptions = {}
 ): UseContractDefinitionReturn {
   const { onLoaded, onError } = options;
-  const { activeAdapter } = useBuilderWalletState();
+  const { activeRuntime } = useBuilderWalletState();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
@@ -121,8 +121,8 @@ export function useContractDefinition(
 
   const load = useCallback(
     async (formValues: FormValues): Promise<void> => {
-      if (!activeAdapter) {
-        throw new Error('No active adapter available');
+      if (!activeRuntime) {
+        throw new Error('No active runtime available');
       }
 
       if (!formValues.contractAddress || typeof formValues.contractAddress !== 'string') {
@@ -132,9 +132,9 @@ export function useContractDefinition(
       try {
         await contractDefinitionService.loadContractDefinition(
           {
-            adapter: activeAdapter,
+            runtime: activeRuntime,
             formValues,
-            networkId: activeAdapter.networkConfig.id,
+            networkId: activeRuntime.networkConfig.id,
             contractAddress: formValues.contractAddress,
           },
           handleSuccess
@@ -145,7 +145,7 @@ export function useContractDefinition(
         throw error;
       }
     },
-    [activeAdapter, handleSuccess, handleError]
+    [activeRuntime, handleSuccess, handleError]
   );
 
   const clearError = useCallback(() => {

@@ -1,12 +1,12 @@
 import { NetworkConfig } from '@openzeppelin/ui-types';
 import type { ContractSchema, FormValues } from '@openzeppelin/ui-types';
 
-import type { BuilderAdapter } from '@/core/runtimeAdapter';
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 import type { ContractDefinitionComparisonResult } from '../../warnings';
 
 export interface StepContractDefinitionProps {
-  adapter: BuilderAdapter | null;
+  runtime: BuilderRuntime | null;
   networkConfig: NetworkConfig | null;
   existingFormValues?: FormValues | null;
   loadedConfigurationId?: string | null;
@@ -25,7 +25,7 @@ export interface ContractFormData {
 }
 
 export interface ContractAddressFormProps {
-  adapter: BuilderAdapter;
+  runtime: BuilderRuntime;
   networkConfig: NetworkConfig;
   isLoading: boolean;
   onLoadContract: (schema: ContractSchema) => void;

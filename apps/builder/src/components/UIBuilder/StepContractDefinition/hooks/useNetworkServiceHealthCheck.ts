@@ -7,7 +7,7 @@ import {
   userNetworkServiceConfigService,
 } from '@openzeppelin/ui-utils';
 
-import type { BuilderAdapter } from '@/core/runtimeAdapter';
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 export interface ServiceHealthStatus {
   serviceId: string;
@@ -29,28 +29,28 @@ export interface NetworkHealthCheckResult {
  * Hook that proactively tests network services when a network is selected.
  * This helps users identify service outages before they try to interact with the network.
  *
- * The hook uses the adapter's getDefaultServiceConfig() method to get default endpoint
+ * The hook uses the runtime's getDefaultServiceConfig() method to get default endpoint
  * values for testing. User overrides from the settings dialog take precedence.
  *
- * @param adapter The contract adapter for the selected network
+ * @param runtime The ecosystem runtime for the selected network
  * @param networkConfig The network configuration
  * @returns Health check results including any unhealthy services
  */
 export function useNetworkServiceHealthCheck(
-  adapter: BuilderAdapter | null,
+  runtime: BuilderRuntime | null,
   networkConfig: NetworkConfig | null
 ): NetworkHealthCheckResult {
   const [isChecking, setIsChecking] = useState(false);
   const [serviceStatuses, setServiceStatuses] = useState<ServiceHealthStatus[]>([]);
 
   const checkServices = useCallback(async () => {
-    if (!adapter || !networkConfig) {
+    if (!runtime || !networkConfig) {
       setServiceStatuses([]);
       return;
     }
 
     // Get the network service forms to know which services exist
-    const serviceForms = filterEnabledServiceForms(adapter.getNetworkServiceForms());
+    const serviceForms = filterEnabledServiceForms(runtime.relayer.getNetworkServiceForms());
     if (!serviceForms || serviceForms.length === 0) {
       // No services to check (e.g., some ecosystems might not have configurable services)
       setServiceStatuses([]);
@@ -67,8 +67,8 @@ export function useNetworkServiceHealthCheck(
         let serviceValues = getUserServiceConfigOverride(networkConfig.id, serviceForm.id);
 
         if (!serviceValues) {
-          // Get defaults from the adapter
-          serviceValues = adapter.getDefaultServiceConfig(serviceForm.id);
+          // Get defaults from the runtime
+          serviceValues = runtime.relayer.getDefaultServiceConfig(serviceForm.id);
         }
 
         if (!serviceValues || Object.keys(serviceValues).length === 0) {
@@ -81,7 +81,10 @@ export function useNetworkServiceHealthCheck(
         }
 
         // Test the service connection
-        const result = await adapter.testNetworkServiceConnection?.(serviceForm.id, serviceValues);
+        const result = await runtime.relayer.testNetworkServiceConnection?.(
+          serviceForm.id,
+          serviceValues
+        );
 
         statuses.push({
           serviceId: serviceForm.id,
@@ -107,9 +110,9 @@ export function useNetworkServiceHealthCheck(
 
     setServiceStatuses(statuses);
     setIsChecking(false);
-  }, [adapter, networkConfig]);
+  }, [runtime, networkConfig]);
 
-  // Run health check when adapter or network changes
+  // Run health check when runtime or network changes
   useEffect(() => {
     void checkServices();
   }, [checkServices]);

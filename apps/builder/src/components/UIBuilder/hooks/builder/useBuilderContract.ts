@@ -11,7 +11,7 @@ import { uiBuilderStore } from '../uiBuilderStore';
  * @returns An object with functions to handle definition loading and function selection.
  */
 export function useBuilderContract() {
-  const { activeAdapter } = useBuilderWalletState();
+  const { activeRuntime } = useBuilderWalletState();
 
   const handleFunctionSelected = useCallback(
     async (functionId: string | null) => {
@@ -30,16 +30,16 @@ export function useBuilderContract() {
           }),
         }));
 
-        // Trigger artifact trimming if adapter supports it AND artifacts were deferred
+        // Trigger artifact trimming if runtime supports it AND artifacts were deferred
         if (
-          activeAdapter &&
-          typeof activeAdapter.prepareArtifactsForFunction === 'function' &&
+          activeRuntime &&
+          typeof activeRuntime.contractLoading?.prepareArtifactsForFunction === 'function' &&
           currentState.contractState.contractDefinitionArtifacts
         ) {
           // Only trim if we have the policy and the ZIP was actually deferred
           const policy =
-            typeof activeAdapter.getArtifactPersistencePolicy === 'function'
-              ? activeAdapter.getArtifactPersistencePolicy()
+            typeof activeRuntime.contractLoading?.getArtifactPersistencePolicy === 'function'
+              ? activeRuntime.contractLoading.getArtifactPersistencePolicy!()
               : undefined;
 
           logger.info(
@@ -77,11 +77,13 @@ export function useBuilderContract() {
                     'useBuilderContract',
                     `Preparing artifacts for function: ${functionId} (ZIP size: ${Math.round(estimatedSize / 1024 / 1024)}MB)`
                   );
-                  const prepared = await activeAdapter.prepareArtifactsForFunction({
-                    functionId,
-                    currentArtifacts: currentState.contractState.contractDefinitionArtifacts,
-                    definitionOriginal: currentState.contractState.definitionOriginal,
-                  });
+                  const prepared = await activeRuntime.contractLoading.prepareArtifactsForFunction!(
+                    {
+                      functionId,
+                      currentArtifacts: currentState.contractState.contractDefinitionArtifacts,
+                      definitionOriginal: currentState.contractState.definitionOriginal,
+                    }
+                  );
 
                   if (prepared.persistableArtifacts) {
                     logger.info('useBuilderContract', 'Updating state with trimmed artifacts');
@@ -117,7 +119,7 @@ export function useBuilderContract() {
         }
       }
     },
-    [activeAdapter]
+    [activeRuntime]
   );
 
   // Memoize the return object to prevent unnecessary re-renders

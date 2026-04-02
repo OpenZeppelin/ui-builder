@@ -1,9 +1,9 @@
 /**
  * FormSchemaFactory
  *
- * Creates form schemas from contract functions using the adapter pattern.
+ * Creates form schemas from contract functions using the runtime pattern.
  * This factory is responsible for generating schemas that can be used to render forms
- * while delegating chain-specific logic to the appropriate adapter.
+ * while delegating chain-specific logic to the appropriate runtime.
  */
 import { createTransformForFieldType } from '@openzeppelin/ui-renderer';
 import type {
@@ -16,7 +16,7 @@ import type {
   RenderFormSchema,
 } from '@openzeppelin/ui-types';
 
-import type { BuilderAdapter } from '@/core/runtimeAdapter';
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 import { generateFieldsFromFunction } from '../../services/FormGenerator';
 import { BuilderFormConfig } from '../types/FormTypes';
@@ -28,15 +28,15 @@ import { humanizeString } from '../utils/utils';
 export class FormSchemaFactory {
   /**
    * Creates a complete form schema from a contract function
-   * using the appropriate adapter for field mapping and validation
+   * using the appropriate runtime for field mapping and validation
    *
-   * @param adapter The configured BuilderAdapter instance for the specific network.
+   * @param runtime The configured BuilderRuntime instance for the specific network.
    * @param contractSchema The contract schema containing function definitions.
    * @param functionId The ID of the function to generate a form for.
    * @returns A complete form schema for rendering.
    */
   generateFormSchema(
-    adapter: BuilderAdapter,
+    runtime: BuilderRuntime,
     contractSchema: ContractSchema,
     functionId: string
   ): RenderFormSchema {
@@ -48,7 +48,7 @@ export class FormSchemaFactory {
 
     // Create the common properties
     const commonProperties = {
-      fields: this.generateFields(functionDefinition.inputs, adapter, contractSchema),
+      fields: this.generateFields(functionDefinition.inputs, runtime, contractSchema),
       layout: this.generateDefaultLayout(),
       validation: {
         mode: 'onChange' as const,
@@ -165,16 +165,16 @@ export class FormSchemaFactory {
   }
 
   /**
-   * Generates form fields using the adapter's default field generation
+   * Generates form fields using the runtime's default field generation
    * and enhances them with transform functions
    *
    * @param inputs The function input parameters
-   * @param adapter The blockchain adapter to use
+   * @param runtime The blockchain runtime to use
    * @returns An array of form fields with transforms
    */
   private generateFields(
     inputs: FunctionParameter[],
-    adapter: BuilderAdapter,
+    runtime: BuilderRuntime,
     contractSchema?: ContractSchema
   ): FormFieldType[] {
     // Use generateFieldsFromFunction to properly handle complex types
@@ -190,12 +190,12 @@ export class FormSchemaFactory {
       stateMutability: 'view' as const,
     };
 
-    const fields = generateFieldsFromFunction(adapter, functionDetails, contractSchema);
+    const fields = generateFieldsFromFunction(runtime, functionDetails, contractSchema);
 
     // Enhance fields with transforms
     return fields.map((field) => ({
       ...field,
-      transforms: createTransformForFieldType(field.type, adapter),
+      transforms: createTransformForFieldType(field.type, runtime.addressing),
     }));
   }
 

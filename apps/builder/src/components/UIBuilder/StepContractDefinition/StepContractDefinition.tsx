@@ -27,7 +27,7 @@ import {
 import { StepContractDefinitionProps } from './types';
 
 export function StepContractDefinition({
-  adapter,
+  runtime,
   networkConfig,
   existingFormValues = null,
   loadedConfigurationId = null,
@@ -56,14 +56,14 @@ export function StepContractDefinition({
   } = contractState;
 
   const contractDefinitionInputs = useMemo(
-    () => (adapter ? adapter.getContractDefinitionInputs() : []),
-    [adapter]
+    () => (runtime ? runtime.contractLoading.getContractDefinitionInputs() : []),
+    [runtime]
   );
 
-  // Get adapter name for banner
+  // Get runtime name for banner
   const adapterName = useMemo(() => {
-    return adapter?.networkConfig?.ecosystem || 'Contract';
-  }, [adapter]);
+    return runtime?.networkConfig?.ecosystem || 'Contract';
+  }, [runtime]);
 
   // Handler to navigate to saved function when user wants to view it
   const handleViewSavedFunction = useCallback(() => {
@@ -81,7 +81,7 @@ export function StepContractDefinition({
     debouncedManualDefinition,
     validationError,
   } = useContractForm({
-    adapter,
+    runtime,
     existingFormValues,
     loadedConfigurationId,
     networkId: networkConfig?.id || null,
@@ -93,13 +93,13 @@ export function StepContractDefinition({
   // Contract loading with circuit breaker
   const { isLoading, circuitBreakerActive, loadContract, canAttemptLoad, markAttempted } =
     useContractLoader({
-      adapter,
+      runtime,
       ignoreProxy,
     });
 
   // Proactive network service health check
   const { hasUnhealthyServices, unhealthyServices } = useNetworkServiceHealthCheck(
-    adapter,
+    runtime,
     networkConfig
   );
 
@@ -109,7 +109,7 @@ export function StepContractDefinition({
     contractAddressValue,
     currentContractAddress: contractState.address,
     networkId: networkConfig?.id,
-    adapter,
+    runtime,
     debouncedValues,
   });
 
@@ -137,12 +137,12 @@ export function StepContractDefinition({
     setIgnoreProxy(true);
     // Trigger reload with proxy detection disabled
     const currentFormValues = contractState.formValues;
-    if (currentFormValues && adapter) {
+    if (currentFormValues && runtime) {
       void loadContract(currentFormValues, { skipProxyDetection: true });
     }
-  }, [contractState.formValues, adapter, loadContract]);
+  }, [contractState.formValues, runtime, loadContract]);
 
-  if (!adapter || !networkConfig) {
+  if (!runtime || !networkConfig) {
     return (
       <div className="p-4 text-center text-muted-foreground">
         Please select a valid network first.
@@ -185,7 +185,7 @@ export function StepContractDefinition({
       <ContractFormFields
         contractDefinitionInputs={contractDefinitionInputs}
         control={control}
-        adapter={adapter}
+        runtime={runtime}
         isLoading={isLoading || isLoadingFromService}
       />
 
@@ -206,7 +206,7 @@ export function StepContractDefinition({
           ignoreProxy={ignoreProxy}
           definitionComparison={definitionComparison}
           loadedConfigurationId={loadedConfigurationId}
-          adapter={adapter}
+          runtime={runtime}
           onIgnoreProxy={handleIgnoreProxy}
           requiresManualReload={requiresManualReload}
           onManualReload={handleManualReload}

@@ -6,6 +6,7 @@ import { TransactionForm } from '@openzeppelin/ui-renderer';
 import type { ContractFunction, ContractSchema } from '@openzeppelin/ui-types';
 
 import { formSchemaFactory } from '../../../core/factories/FormSchemaFactory';
+import { toTransactionFormCapabilities } from '../../../core/runtimeAdapter';
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 import { useBuilderAnalytics } from '../../../hooks/useBuilderAnalytics';
 import { useBuilderWalletState } from '../../../hooks/useBuilderWalletState';
@@ -22,9 +23,9 @@ interface FormPreviewProps {
  */
 export function FormPreview({ formConfig, functionDetails, contractSchema }: FormPreviewProps) {
   const {
-    activeAdapter: adapter,
+    activeRuntime: runtime,
     activeNetworkConfig: networkConfig,
-    isAdapterLoading: adapterLoading,
+    isRuntimeLoading: runtimeLoading,
   } = useBuilderWalletState();
 
   const { isConnected: isWalletConnected } = useDerivedAccountStatus();
@@ -47,14 +48,14 @@ export function FormPreview({ formConfig, functionDetails, contractSchema }: For
     return formSchemaFactory.builderConfigToRenderSchema(formConfig, formTitle, formDescription);
   }, [formConfig, functionDetails]);
 
-  if (adapterLoading) {
+  if (runtimeLoading) {
     return <div className="p-4 text-center text-muted-foreground">Loading form preview...</div>;
   }
 
-  if (!adapter) {
+  if (!runtime) {
     return (
       <div className="p-4 text-center text-muted-foreground">
-        Form preview requires an active adapter from global state.
+        Form preview requires an active runtime from global state.
       </div>
     );
   }
@@ -76,7 +77,7 @@ export function FormPreview({ formConfig, functionDetails, contractSchema }: For
         <CardContent className="p-6">
           <TransactionForm
             schema={renderSchema}
-            adapter={adapter}
+            adapter={toTransactionFormCapabilities(runtime)}
             contractSchema={contractSchema}
             isWalletConnected={isWalletConnected}
             executionConfig={formConfig.executionConfig}

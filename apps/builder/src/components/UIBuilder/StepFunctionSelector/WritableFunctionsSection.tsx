@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import type { FunctionDecorationsMap } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
-import type { BuilderAdapter } from '@/core/runtimeAdapter';
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 import { WritableFunctionsSectionProps } from './types';
 import { WritableFunctionRow } from './WritableFunctionRow';
@@ -12,19 +12,19 @@ export function WritableFunctionsSection({
   functions,
   selectedFunction,
   onSelectFunction,
-  adapter,
-}: WritableFunctionsSectionProps & { adapter?: BuilderAdapter }) {
+  runtime,
+}: WritableFunctionsSectionProps & { runtime?: BuilderRuntime }) {
   const [decorations, setDecorations] = useState<FunctionDecorationsMap | undefined>();
 
-  // Fetch function decorations when adapter is available
+  // Fetch function decorations when runtime is available
   useEffect(() => {
-    if (!adapter?.getFunctionDecorations) {
+    if (!runtime?.schema?.getFunctionDecorations) {
       return;
     }
 
     const fetchDecorations = async () => {
       try {
-        const result = await adapter.getFunctionDecorations!();
+        const result = await runtime.schema.getFunctionDecorations!();
         if (result) {
           setDecorations(result);
           logger.debug('WritableFunctionsSection', 'Function decorations loaded');
@@ -35,7 +35,7 @@ export function WritableFunctionsSection({
     };
 
     void fetchDecorations();
-  }, [adapter]);
+  }, [runtime]);
 
   return (
     <div className="space-y-2">

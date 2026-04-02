@@ -1,20 +1,20 @@
 import { Ecosystem, NetworkConfig } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
-import type { BuilderAdapter } from '@/core/runtimeAdapter';
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
-import { getAdapter, getNetworkById, getNetworksByEcosystem } from '../ecosystemManager';
+import { getNetworkById, getNetworksByEcosystem, getRuntime } from '../ecosystemManager';
 
 /**
- * Service class for managing and retrieving network configurations and their associated adapters.
+ * Service class for managing and retrieving network configurations and their associated runtimes.
  * Uses lazy-loading registry.
  *
  * IMPORTANT: Components should generally use the RuntimeProvider/RuntimeContext pattern
  * for runtime access rather than calling this service directly.
  */
 export class NetworkService {
-  // Cache to promote adapter reuse outside React context
-  private adapterCache: Record<string, BuilderAdapter> = {};
+  // Cache to promote runtime reuse outside React context
+  private runtimeCache: Record<string, BuilderRuntime> = {};
 
   /**
    * Get network configurations for a specific ecosystem using lazy loading.
@@ -35,17 +35,17 @@ export class NetworkService {
   }
 
   /**
-   * Retrieves both the network configuration and the corresponding contract adapter
+   * Retrieves both the network configuration and the corresponding runtime
    * for a given network configuration ID.
    *
-   * CAUTION: For non-React contexts only. React components should use AdapterContext instead.
+   * CAUTION: For non-React contexts only. React components should use RuntimeContext instead.
    *
    * @param networkConfigId The unique ID of the network configuration.
-   * @returns A promise resolving to an object containing the network config and adapter, or null if either is not found.
+   * @returns A promise resolving to an object containing the network config and runtime, or null if either is not found.
    */
-  async getNetworkAndAdapter(
+  async getNetworkAndRuntime(
     networkConfigId: string
-  ): Promise<{ network: NetworkConfig; adapter: BuilderAdapter } | null> {
+  ): Promise<{ network: NetworkConfig; runtime: BuilderRuntime } | null> {
     const network = await this.getNetworkById(networkConfigId);
     if (!network) {
       logger.error('NetworkService', `Network configuration not found for ID: ${networkConfigId}`);
@@ -53,25 +53,25 @@ export class NetworkService {
     }
 
     // Check the cache first
-    if (this.adapterCache[networkConfigId]) {
+    if (this.runtimeCache[networkConfigId]) {
       return {
         network,
-        adapter: this.adapterCache[networkConfigId],
+        runtime: this.runtimeCache[networkConfigId],
       };
     }
 
     try {
       // Note: In React components, use RuntimeContext pattern instead of this
-      const adapter = await getAdapter(network);
+      const runtime = await getRuntime(network);
 
-      // Cache the adapter
-      this.adapterCache[networkConfigId] = adapter;
+      // Cache the runtime
+      this.runtimeCache[networkConfigId] = runtime;
 
-      return { network, adapter };
+      return { network, runtime };
     } catch (error) {
       logger.error(
         'NetworkService',
-        `Adapter could not be created for ecosystem: ${network.ecosystem}`,
+        `Runtime could not be created for ecosystem: ${network.ecosystem}`,
         error
       );
       return null;

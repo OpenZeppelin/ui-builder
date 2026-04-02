@@ -12,7 +12,7 @@ import type {
 } from '@openzeppelin/ui-types';
 import { generateId } from '@openzeppelin/ui-utils';
 
-import type { BuilderAdapter } from '@/core/runtimeAdapter';
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 import type { BuilderFormConfig } from '../../types/FormTypes';
 import { FormSchemaFactory } from '../FormSchemaFactory';
@@ -32,81 +32,122 @@ const mockTestEvmConfig: EvmNetworkConfig = {
   apiUrl: '',
 };
 
-// Mock adapter instance (ensure it fulfills BuilderAdapter)
+// Helper to map parameter types to field types (shared by typeMapping mock)
+const mapParameterTypeToFieldType = vi.fn((type: string): FieldType => {
+  if (type === 'address') return 'blockchain-address';
+  if (type === 'uint256') return 'number';
+  if (type === 'bool') return 'checkbox';
+  if (type.startsWith('tuple')) return 'textarea';
+  if (type.includes('[')) return 'textarea';
+  return 'text';
+});
+
+// Mock adapter instance with proper nested capability structure
 const mockAdapterInstance = {
   networkConfig: mockTestEvmConfig,
-  mapParameterTypeToFieldType: vi.fn((type: string): FieldType => {
-    if (type === 'address') return 'blockchain-address';
-    if (type === 'uint256') return 'number';
-    if (type === 'bool') return 'checkbox';
-    if (type.startsWith('tuple')) return 'textarea';
-    if (type.includes('[')) return 'textarea';
-    return 'text';
-  }),
-  generateDefaultField: vi.fn((param: FunctionParameter): FormFieldType => {
-    const fieldType = mockAdapterInstance.mapParameterTypeToFieldType(param.type) as FieldType;
-    return {
-      id: `field-${param.name}-${generateId()}`,
-      name: param.name,
-      label: param.displayName || param.name,
-      type: fieldType,
-      placeholder: `Enter ${param.name}`,
-      helperText: '',
-      defaultValue: fieldType === 'number' ? 0 : fieldType === 'checkbox' ? false : '',
-      validation: { required: true },
-      width: 'full',
-      originalParameterType: param.type,
-    } as FormFieldType;
-  }),
-  getCompatibleFieldTypes: vi.fn((type: string): FieldType[] => {
-    if (type === 'address') return ['blockchain-address', 'text'] as FieldType[];
-    if (type === 'uint256') return ['number', 'text'] as FieldType[];
-    return ['text'] as FieldType[];
-  }),
-  // Add dummy implementations for ALL methods in BuilderAdapter
-  loadContract: vi.fn().mockResolvedValue({} as ContractSchema),
-  getWritableFunctions: vi.fn(() => []),
-  formatTransactionData: vi.fn(() => ({})),
-  signAndBroadcast: vi.fn().mockResolvedValue({ txHash: '0xmockhash' }),
-  isValidAddress: vi.fn(() => true),
-  getSupportedExecutionMethods: vi.fn().mockResolvedValue([]),
-  validateExecutionConfig: vi.fn().mockResolvedValue(true),
-  isViewFunction: vi.fn(() => false),
-  queryViewFunction: vi.fn().mockResolvedValue(undefined),
-  formatFunctionResult: vi.fn(() => ''),
-  supportsWalletConnection: vi.fn(() => false),
-  getAvailableConnectors: vi.fn().mockResolvedValue([]),
-  connectWallet: vi.fn().mockResolvedValue({ connected: false }),
-  disconnectWallet: vi.fn().mockResolvedValue({ disconnected: true }),
-  getWalletConnectionStatus: vi.fn().mockReturnValue({ isConnected: false }),
-  getExplorerUrl: vi.fn(() => null),
-  getExplorerTxUrl: vi.fn(() => null),
-  waitForTransactionConfirmation: vi.fn().mockResolvedValue({ status: 'success' }),
-  onWalletConnectionChange: vi.fn(() => () => {}),
-  getAvailableUiKits: vi.fn().mockResolvedValue([]),
-  getContractDefinitionInputs: vi.fn(() => []),
-  getRelayers: vi.fn().mockResolvedValue([]),
-  getRelayer: vi.fn().mockResolvedValue({} as RelayerDetailsRich),
-  getNetworkServiceForms: vi.fn(() => []),
-  getDefaultServiceConfig: vi.fn(() => null),
-  getCurrentBlock: vi.fn().mockResolvedValue(12345),
-  getTypeMappingInfo: vi.fn(() => ({
-    primitives: {
-      address: 'blockchain-address' as FieldType,
-      uint256: 'bigint' as FieldType,
-      bool: 'checkbox' as FieldType,
-      string: 'text' as FieldType,
-    },
-    dynamicPatterns: [
-      {
-        name: 'array',
-        syntax: 'T[]',
-        mapsTo: 'array' as FieldType,
-        description: 'Dynamic array',
+  dispose: vi.fn(),
+  addressing: {
+    isValidAddress: vi.fn(() => true),
+  },
+  typeMapping: {
+    mapParameterTypeToFieldType,
+    generateDefaultField: vi.fn((param: FunctionParameter): FormFieldType => {
+      const fieldType = mapParameterTypeToFieldType(param.type) as FieldType;
+      return {
+        id: `field-${param.name}-${generateId()}`,
+        name: param.name,
+        label: param.displayName || param.name,
+        type: fieldType,
+        placeholder: `Enter ${param.name}`,
+        helperText: '',
+        defaultValue: fieldType === 'number' ? 0 : fieldType === 'checkbox' ? false : '',
+        validation: { required: true },
+        width: 'full',
+        originalParameterType: param.type,
+      } as FormFieldType;
+    }),
+    getCompatibleFieldTypes: vi.fn((type: string): FieldType[] => {
+      if (type === 'address') return ['blockchain-address', 'text'] as FieldType[];
+      if (type === 'uint256') return ['number', 'text'] as FieldType[];
+      return ['text'] as FieldType[];
+    }),
+    getTypeMappingInfo: vi.fn(() => ({
+      primitives: {
+        address: 'blockchain-address' as FieldType,
+        uint256: 'bigint' as FieldType,
+        bool: 'checkbox' as FieldType,
+        string: 'text' as FieldType,
       },
-    ],
-  })),
-} as unknown as BuilderAdapter;
+      dynamicPatterns: [
+        {
+          name: 'array',
+          syntax: 'T[]',
+          mapsTo: 'array' as FieldType,
+          description: 'Dynamic array',
+        },
+      ],
+    })),
+  },
+  contractLoading: {
+    networkConfig: mockTestEvmConfig,
+    dispose: vi.fn(),
+    loadContract: vi.fn().mockResolvedValue({} as ContractSchema),
+    getContractDefinitionInputs: vi.fn(() => []),
+  },
+  schema: {
+    networkConfig: mockTestEvmConfig,
+    dispose: vi.fn(),
+    getWritableFunctions: vi.fn(() => []),
+    isViewFunction: vi.fn(() => false),
+  },
+  query: {
+    networkConfig: mockTestEvmConfig,
+    dispose: vi.fn(),
+    queryViewFunction: vi.fn().mockResolvedValue(undefined),
+    formatFunctionResult: vi.fn(() => ''),
+    getCurrentBlock: vi.fn().mockResolvedValue(12345),
+  },
+  execution: {
+    networkConfig: mockTestEvmConfig,
+    dispose: vi.fn(),
+    formatTransactionData: vi.fn(() => ({})),
+    signAndBroadcast: vi.fn().mockResolvedValue({ txHash: '0xmockhash' }),
+    getSupportedExecutionMethods: vi.fn().mockResolvedValue([]),
+    validateExecutionConfig: vi.fn().mockResolvedValue(true),
+    waitForTransactionConfirmation: vi.fn().mockResolvedValue({ status: 'success' }),
+  },
+  wallet: {
+    networkConfig: mockTestEvmConfig,
+    dispose: vi.fn(),
+    supportsWalletConnection: vi.fn(() => false),
+    getAvailableConnectors: vi.fn().mockResolvedValue([]),
+    connectWallet: vi.fn().mockResolvedValue({ connected: false }),
+    disconnectWallet: vi.fn().mockResolvedValue({ disconnected: true }),
+    getWalletConnectionStatus: vi.fn().mockReturnValue({ isConnected: false }),
+    onWalletConnectionChange: vi.fn(() => () => {}),
+  },
+  explorer: {
+    getExplorerUrl: vi.fn(() => null),
+    getExplorerTxUrl: vi.fn(() => null),
+  },
+  networkCatalog: {
+    getNetworks: vi.fn().mockResolvedValue([]),
+  },
+  uiLabels: {},
+  uiKit: {
+    networkConfig: mockTestEvmConfig,
+    dispose: vi.fn(),
+    getAvailableUiKits: vi.fn().mockResolvedValue([]),
+  },
+  relayer: {
+    networkConfig: mockTestEvmConfig,
+    dispose: vi.fn(),
+    getRelayers: vi.fn().mockResolvedValue([]),
+    getRelayer: vi.fn().mockResolvedValue({} as RelayerDetailsRich),
+    getNetworkServiceForms: vi.fn(() => []),
+    getDefaultServiceConfig: vi.fn(() => null),
+  },
+} as unknown as BuilderRuntime;
 
 describe('FormSchemaFactory', () => {
   const factory = new FormSchemaFactory();

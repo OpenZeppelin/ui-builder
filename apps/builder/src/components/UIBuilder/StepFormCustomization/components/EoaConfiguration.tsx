@@ -11,7 +11,7 @@ const eoaSubOptions = [
 
 export function EoaConfiguration({
   control,
-  adapter,
+  runtime,
   watchedEoaOption,
 }: EoaConfigurationProps): React.ReactElement {
   return (
@@ -37,7 +37,7 @@ export function EoaConfiguration({
             label="Specific EOA Address"
             name="specificEoaAddress"
             control={control}
-            addressing={adapter ?? undefined}
+            addressing={runtime?.addressing}
             validation={{ required: true }}
             placeholder="Enter the required EOA address (e.g., 0x...)"
           />

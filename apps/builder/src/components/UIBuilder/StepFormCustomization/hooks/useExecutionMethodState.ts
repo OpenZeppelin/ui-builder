@@ -9,7 +9,7 @@ import type {
 } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
-import type { BuilderAdapter } from '@/core/runtimeAdapter';
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 import type { ExecutionMethodFormData } from '../types';
 import {
@@ -25,7 +25,7 @@ import {
 
 interface UseExecutionMethodStateArgs {
   currentConfig?: ExecutionConfig;
-  adapter: BuilderAdapter | null;
+  runtime: BuilderRuntime | null;
   // Combined callback for config and validity
   onUpdateConfig: (config: ExecutionConfig | undefined, isValid: boolean) => void;
 }
@@ -43,7 +43,7 @@ interface UseExecutionMethodStateReturn {
 
 export function useExecutionMethodState({
   currentConfig,
-  adapter,
+  runtime,
   onUpdateConfig,
 }: UseExecutionMethodStateArgs): UseExecutionMethodStateReturn {
   //---------------------------------------------------------------------------
@@ -71,14 +71,14 @@ export function useExecutionMethodState({
     (configToValidate: ExecutionConfig | undefined): void => {
       let errorForBuilder: string | null = null;
 
-      if (!adapter) {
-        errorForBuilder = 'Adapter is not available.';
+      if (!runtime) {
+        errorForBuilder = 'Runtime is not available.';
       } else if (!configToValidate) {
         errorForBuilder = 'Please select an execution method.';
       } else {
         const validator = executionMethodValidatorMap[configToValidate.method];
         if (validator) {
-          errorForBuilder = validator(configToValidate, adapter);
+          errorForBuilder = validator(configToValidate, runtime);
         } else {
           errorForBuilder = `Unknown execution method: ${configToValidate.method}`;
         }
@@ -89,7 +89,7 @@ export function useExecutionMethodState({
 
       onUpdateConfig(configToValidate, !errorForBuilder);
     },
-    [adapter, onUpdateConfig]
+    [runtime, onUpdateConfig]
   );
 
   // Debounced version for user input changes to prevent excessive re-renders
@@ -112,11 +112,11 @@ export function useExecutionMethodState({
   // Effects
   //---------------------------------------------------------------------------
 
-  // Effect 1: Fetch supported methods and set defaults when adapter changes
+  // Effect 1: Fetch supported methods and set defaults when runtime changes
   useEffect(() => {
     let isMounted = true;
-    if (adapter) {
-      adapter
+    if (runtime) {
+      runtime.execution
         .getSupportedExecutionMethods()
         .then((methods: ExecutionMethodDetail[]) => {
           if (isMounted) {
@@ -150,7 +150,7 @@ export function useExecutionMethodState({
     } else {
       setSupportedMethods([]);
       reset({
-        executionMethodType: 'eoa', // Default to 'eoa' even when no adapter
+        executionMethodType: 'eoa', // Default to 'eoa' even when no runtime
         eoaOption: 'any', // Default to 'any'
         specificEoaAddress: '', // Reset to empty string
       });
@@ -159,7 +159,7 @@ export function useExecutionMethodState({
     return () => {
       isMounted = false;
     };
-  }, [adapter, getValues, onUpdateConfig, reset, setValue]);
+  }, [runtime, getValues, onUpdateConfig, reset, setValue]);
 
   // Effect 2: Perform initial validation when config or validator changes
   // Use a stable reference to currentConfig to avoid expensive JSON.stringify

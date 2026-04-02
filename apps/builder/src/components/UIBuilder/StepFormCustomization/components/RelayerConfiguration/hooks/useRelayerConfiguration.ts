@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useForm, UseFormReturn } from 'react-hook-form';
 
-import type { BuilderAdapter } from '@/core/runtimeAdapter';
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 import { ExecutionMethodFormData } from '../../../types';
 
@@ -15,7 +15,7 @@ export type SetupStep = 'credentials' | 'selection' | 'configuration';
 
 interface UseRelayerConfigurationParams {
   control: UseFormReturn<ExecutionMethodFormData>['control'];
-  adapter: BuilderAdapter | null;
+  runtime: BuilderRuntime | null;
   setValue: UseFormReturn<ExecutionMethodFormData>['setValue'];
 }
 

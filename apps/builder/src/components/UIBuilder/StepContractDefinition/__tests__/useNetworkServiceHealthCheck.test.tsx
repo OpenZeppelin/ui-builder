@@ -8,7 +8,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import type { NetworkConfig, NetworkServiceForm } from '@openzeppelin/ui-types';
 
-import type { BuilderAdapter } from '@/core/runtimeAdapter';
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 import { useNetworkServiceHealthCheck } from '../hooks/useNetworkServiceHealthCheck';
 
@@ -62,19 +62,21 @@ function createMockServiceForms(): NetworkServiceForm[] {
 }
 
 // Helper to create mock adapter
-function createMockAdapter(): Partial<BuilderAdapter> {
+function createMockAdapter() {
   return {
     networkConfig: createMockNetworkConfig(),
-    getNetworkServiceForms: vi.fn().mockReturnValue(createMockServiceForms()),
-    getDefaultServiceConfig: vi.fn().mockImplementation((serviceId: string) => {
-      if (serviceId === 'rpc') return { rpcUrl: 'https://eth.llamarpc.com' };
-      return null;
-    }),
-    testNetworkServiceConnection: vi.fn().mockResolvedValue({
-      success: true,
-      latency: 150,
-    }),
-  };
+    relayer: {
+      getNetworkServiceForms: vi.fn().mockReturnValue(createMockServiceForms()),
+      getDefaultServiceConfig: vi.fn().mockImplementation((serviceId: string) => {
+        if (serviceId === 'rpc') return { rpcUrl: 'https://eth.llamarpc.com' };
+        return null;
+      }),
+      testNetworkServiceConnection: vi.fn().mockResolvedValue({
+        success: true,
+        latency: 150,
+      }),
+    },
+  } as unknown as BuilderRuntime;
 }
 
 describe('useNetworkServiceHealthCheck', () => {
@@ -91,7 +93,7 @@ describe('useNetworkServiceHealthCheck', () => {
     const mockAdapter = createMockAdapter();
 
     const { result } = renderHook(() =>
-      useNetworkServiceHealthCheck(mockAdapter as BuilderAdapter, createMockNetworkConfig())
+      useNetworkServiceHealthCheck(mockAdapter, createMockNetworkConfig())
     );
 
     await waitFor(() => {
@@ -105,13 +107,13 @@ describe('useNetworkServiceHealthCheck', () => {
 
   it('should report unhealthy services correctly', async () => {
     const mockAdapter = createMockAdapter();
-    mockAdapter.testNetworkServiceConnection = vi.fn().mockResolvedValue({
+    vi.mocked(mockAdapter.relayer.testNetworkServiceConnection!).mockResolvedValue({
       success: false,
       error: 'Connection timeout',
     });
 
     const { result } = renderHook(() =>
-      useNetworkServiceHealthCheck(mockAdapter as BuilderAdapter, createMockNetworkConfig())
+      useNetworkServiceHealthCheck(mockAdapter, createMockNetworkConfig())
     );
 
     await waitFor(() => {
@@ -125,12 +127,12 @@ describe('useNetworkServiceHealthCheck', () => {
 
   it('should handle exceptions during health check gracefully', async () => {
     const mockAdapter = createMockAdapter();
-    mockAdapter.testNetworkServiceConnection = vi
-      .fn()
-      .mockRejectedValue(new Error('Network failure'));
+    vi.mocked(mockAdapter.relayer.testNetworkServiceConnection!).mockRejectedValue(
+      new Error('Network failure')
+    );
 
     const { result } = renderHook(() =>
-      useNetworkServiceHealthCheck(mockAdapter as BuilderAdapter, createMockNetworkConfig())
+      useNetworkServiceHealthCheck(mockAdapter, createMockNetworkConfig())
     );
 
     await waitFor(() => {

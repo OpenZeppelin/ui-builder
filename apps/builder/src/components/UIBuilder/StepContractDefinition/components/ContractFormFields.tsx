@@ -4,12 +4,12 @@ import { Control } from 'react-hook-form';
 import { DynamicFormField } from '@openzeppelin/ui-renderer';
 import type { FormFieldType, FormValues } from '@openzeppelin/ui-types';
 
-import type { BuilderAdapter } from '@/core/runtimeAdapter';
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 interface ContractFormFieldsProps {
   contractDefinitionInputs: FormFieldType[];
   control: Control<FormValues>;
-  adapter: BuilderAdapter;
+  runtime: BuilderRuntime;
   isLoading: boolean;
 }
 
@@ -19,7 +19,7 @@ interface ContractFormFieldsProps {
 export function ContractFormFields({
   contractDefinitionInputs,
   control,
-  adapter,
+  runtime,
   isLoading,
 }: ContractFormFieldsProps) {
   return (
@@ -31,8 +31,8 @@ export function ContractFormFields({
             key={field.id}
             field={field}
             control={control}
-            addressing={adapter}
-            typeMapping={adapter}
+            addressing={runtime?.addressing}
+            typeMapping={runtime?.typeMapping}
           />
         ))}
       </div>

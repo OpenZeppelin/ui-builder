@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { ComposerEcosystemRuntime, PolkadotNetworkConfig } from '@openzeppelin/ui-types';
 
-import { getAdapter, getRuntime } from '../ecosystemManager';
+import { getRuntime } from '../ecosystemManager';
 
 const { mockMoonbeamNetwork, mockCreateRuntime } = vi.hoisted(() => ({
   mockMoonbeamNetwork: {
@@ -143,10 +143,12 @@ describe('ecosystemManager getRuntime', () => {
     runtime.dispose();
   });
 
-  it('builds a flattened builder adapter from the composer runtime', async () => {
-    const adapter = await getAdapter(networkConfig);
+  it('exposes capability methods on the composer runtime', async () => {
+    const runtime = await getRuntime(networkConfig);
 
-    expect(adapter.getNetworks()).toEqual([networkConfig]);
-    expect(adapter.supportsWalletConnection()).toBe(true);
+    expect(runtime.networkCatalog.getNetworks()).toEqual([networkConfig]);
+    expect(runtime.wallet.supportsWalletConnection()).toBe(true);
+
+    runtime.dispose();
   });
 });

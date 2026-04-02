@@ -7,13 +7,13 @@ import { useContractForm } from '../hooks/useContractForm';
 
 describe('useContractForm reset guard', () => {
   it('does not overwrite in-progress contractAddress edits with existingFormValues', async () => {
-    const adapter = null;
+    const runtime = null;
     const existingFormValues: FormValues = {
       contractAddress: '0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
     };
 
     const props = {
-      adapter,
+      runtime,
       existingFormValues,
       loadedConfigurationId: 'config-1',
       networkId: 'net-1',

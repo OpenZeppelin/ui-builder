@@ -1,6 +1,6 @@
 import type { FormFieldType } from '@openzeppelin/ui-types';
 
-import type { BuilderAdapter } from '@/core/runtimeAdapter';
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 import { useMediaQuery } from '../../../hooks/useMediaQuery';
 import { FieldEditor } from './FieldEditor';
@@ -24,9 +24,9 @@ interface ResponsiveFieldsLayoutProps {
   onSelectField: (index: number) => void;
 
   /**
-   * Chain-specific adapter for type validation and mapping
+   * Chain-specific runtime for type validation and mapping
    */
-  adapter: BuilderAdapter;
+  runtime: BuilderRuntime;
 
   /**
    * Callback fired when field properties are updated
@@ -64,7 +64,7 @@ export function ResponsiveFieldsLayout({
   fields,
   selectedFieldIndex,
   onSelectField,
-  adapter,
+  runtime,
   onUpdateField,
   onFieldValidationChange,
   fieldValidationErrors,
@@ -96,7 +96,7 @@ export function ResponsiveFieldsLayout({
               key={selectedField.id}
               field={selectedField}
               onUpdate={(updates) => onUpdateField(effectiveSelectedIndex, updates)}
-              adapter={adapter}
+              runtime={runtime}
               originalParameterType={selectedField.originalParameterType}
               onFieldValidationChange={onFieldValidationChange}
             />
@@ -122,7 +122,7 @@ export function ResponsiveFieldsLayout({
             key={selectedField.id}
             field={selectedField}
             onUpdate={(updates) => onUpdateField(effectiveSelectedIndex, updates)}
-            adapter={adapter}
+            runtime={runtime}
             originalParameterType={selectedField.originalParameterType}
             onFieldValidationChange={onFieldValidationChange}
           />

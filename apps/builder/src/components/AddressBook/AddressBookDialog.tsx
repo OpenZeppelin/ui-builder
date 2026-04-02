@@ -30,7 +30,7 @@ interface AddressBookDialogProps {
 }
 
 export function AddressBookDialog({ open, onOpenChange }: AddressBookDialogProps) {
-  const { activeAdapter, activeNetworkConfig, activeRuntime } = useBuilderWalletState();
+  const { activeRuntime, activeNetworkConfig } = useBuilderWalletState();
   const { networks } = useAllNetworks();
   const [filterNetworkIds, setFilterNetworkIds] = useState<string[]>([]);
   const { trackAddressBookOpened } = useBuilderAnalytics();
@@ -44,11 +44,11 @@ export function AddressBookDialog({ open, onOpenChange }: AddressBookDialogProps
       return;
     }
 
-    const networkId = activeNetworkConfig?.id ?? activeAdapter?.networkConfig.id ?? 'unknown';
+    const networkId = activeNetworkConfig?.id ?? activeRuntime?.networkConfig.id ?? 'unknown';
     const ecosystem =
-      activeAdapter?.networkConfig.ecosystem ?? activeNetworkConfig?.ecosystem ?? 'unknown';
+      activeRuntime?.networkConfig.ecosystem ?? activeNetworkConfig?.ecosystem ?? 'unknown';
     trackAddressBookOpened(networkId, ecosystem);
-  }, [open, activeNetworkConfig, activeAdapter, trackAddressBookOpened]);
+  }, [open, activeNetworkConfig, activeRuntime, trackAddressBookOpened]);
 
   const widgetProps = useAddressBookWidgetProps(db, {
     networkId: activeNetworkConfig?.id,
@@ -65,8 +65,8 @@ export function AddressBookDialog({ open, onOpenChange }: AddressBookDialogProps
     (address: string, networkId?: string) => {
       if (!networkId) return undefined;
 
-      if (activeAdapter && activeNetworkConfig?.id === networkId) {
-        return activeAdapter.getExplorerUrl(address) ?? undefined;
+      if (activeRuntime && activeNetworkConfig?.id === networkId) {
+        return activeRuntime.explorer.getExplorerUrl(address) ?? undefined;
       }
 
       const net = networks.find((n) => n.id === networkId);
@@ -82,15 +82,15 @@ export function AddressBookDialog({ open, onOpenChange }: AddressBookDialogProps
         return `${baseUrl}/${segment}/${address}`;
       }
     },
-    [activeAdapter, networks, activeNetworkConfig]
+    [activeRuntime, networks, activeNetworkConfig]
   );
 
   const addressPlaceholder = useMemo(
     () =>
-      activeAdapter
-        ? (getEcosystemMetadata(activeAdapter.networkConfig.ecosystem)?.addressExample ?? '0x...')
+      activeRuntime
+        ? (getEcosystemMetadata(activeRuntime.networkConfig.ecosystem)?.addressExample ?? '0x...')
         : '0x...',
-    [activeAdapter]
+    [activeRuntime]
   );
 
   const resolveAddressing = useCallback(

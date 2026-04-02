@@ -8,7 +8,7 @@ import {
   requiredSnapshotsEqual,
 } from '@openzeppelin/ui-utils';
 
-import type { BuilderAdapter } from '@/core/runtimeAdapter';
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 import { contractDefinitionService } from '../../../../services/ContractDefinitionService';
 import { uiBuilderStore } from '../../hooks/uiBuilderStore';
@@ -18,7 +18,7 @@ interface UseFormSyncProps {
   contractAddressValue: string | undefined;
   currentContractAddress: string | null;
   networkId?: string | null;
-  adapter?: BuilderAdapter | null;
+  runtime?: BuilderRuntime | null;
   debouncedValues?: FormValues;
 }
 
@@ -30,7 +30,7 @@ export function useFormSync({
   contractAddressValue,
   currentContractAddress,
   networkId,
-  adapter,
+  runtime,
   debouncedValues,
 }: UseFormSyncProps) {
   // Sync manual definition changes to the store
@@ -127,13 +127,13 @@ export function useFormSync({
     }
   }, [contractAddressValue, currentContractAddress, networkId]);
 
-  // Sync adapter-declared artifact inputs generically into contractDefinitionArtifacts
+  // Sync runtime-declared artifact inputs generically into contractDefinitionArtifacts
   useEffect(() => {
-    if (!adapter || !debouncedValues) return;
-    if (typeof adapter.getContractDefinitionInputs !== 'function') return;
+    if (!runtime || !debouncedValues) return;
+    if (typeof runtime.contractLoading?.getContractDefinitionInputs !== 'function') return;
 
     try {
-      const inputs = adapter.getContractDefinitionInputs() || [];
+      const inputs = runtime.contractLoading.getContractDefinitionInputs() || [];
       // Collect values for inputs other than the canonical ones stored elsewhere
       const artifacts: Record<string, unknown> = {};
       for (const field of inputs as Array<{ name?: string; id?: string }>) {
@@ -160,16 +160,16 @@ export function useFormSync({
         }));
 
         // Transition-based gating: only set needsContractDefinitionLoad when
-        // required adapter inputs change from missing -> present
-        const nowHasAll = adapter
-          ? !hasMissingRequiredContractInputs(adapter, {
+        // required runtime inputs change from missing -> present
+        const nowHasAll = runtime
+          ? !hasMissingRequiredContractInputs(runtime.contractLoading, {
               ...(uiBuilderStore.getState().contractState.formValues || {}),
               ...artifacts,
             } as FormValues)
           : false;
 
-        const prevHadAll = adapter
-          ? !hasMissingRequiredContractInputs(adapter, {
+        const prevHadAll = runtime
+          ? !hasMissingRequiredContractInputs(runtime.contractLoading, {
               ...(uiBuilderStore.getState().contractState.formValues || {}),
               ...(prev as Record<string, unknown>),
             } as FormValues)
@@ -187,21 +187,21 @@ export function useFormSync({
         }
       }
     } catch {
-      // no-op on adapter errors
+      // no-op on runtime errors
     }
-  }, [adapter, debouncedValues]);
+  }, [runtime, debouncedValues]);
 
   useEffect(() => {
-    if (!adapter || !debouncedValues) return;
+    if (!runtime || !debouncedValues) return;
     const state = uiBuilderStore.getState();
     const snapshot = state.contractState.requiredInputSnapshot;
     if (!snapshot) return;
 
-    const currentSnapshot = buildRequiredInputSnapshot(adapter, debouncedValues);
+    const currentSnapshot = buildRequiredInputSnapshot(runtime.contractLoading, debouncedValues);
     if (!currentSnapshot) return;
 
     if (!requiredSnapshotsEqual(snapshot, currentSnapshot)) {
       uiBuilderStore.markManualReloadRequired();
     }
-  }, [adapter, debouncedValues]);
+  }, [runtime, debouncedValues]);
 }

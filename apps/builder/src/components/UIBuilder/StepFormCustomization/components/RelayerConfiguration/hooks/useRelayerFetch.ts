@@ -2,10 +2,10 @@ import { useState } from 'react';
 
 import type { RelayerDetails } from '@openzeppelin/ui-types';
 
-import type { BuilderAdapter } from '@/core/runtimeAdapter';
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 interface UseRelayerFetchParams {
-  adapter: BuilderAdapter | null;
+  runtime: BuilderRuntime | null;
   onRelayersFetched?: (relayers: RelayerDetails[]) => void;
 }
 
@@ -18,7 +18,7 @@ interface UseRelayerFetchReturn {
 }
 
 export function useRelayerFetch({
-  adapter,
+  runtime,
   onRelayersFetched,
 }: UseRelayerFetchParams): UseRelayerFetchReturn {
   const [fetchedRelayers, setFetchedRelayers] = useState<RelayerDetails[]>([]);
@@ -26,8 +26,8 @@ export function useRelayerFetch({
   const [error, setError] = useState<string | null>(null);
 
   const fetchRelayers = async (serviceUrl: string, apiKey: string) => {
-    if (!adapter) {
-      setError('Adapter is not available.');
+    if (!runtime) {
+      setError('Runtime is not available.');
       return;
     }
 
@@ -41,7 +41,7 @@ export function useRelayerFetch({
     setFetchedRelayers([]);
 
     try {
-      const relayers = await adapter.getRelayers(serviceUrl, apiKey);
+      const relayers = await runtime.relayer.getRelayers(serviceUrl, apiKey);
       if (relayers.length === 0) {
         setError('No compatible relayers found for the current network.');
       } else {

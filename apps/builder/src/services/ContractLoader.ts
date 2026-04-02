@@ -2,23 +2,23 @@
  * Contract Loader Service
  *
  * Handles loading contract definitions across different blockchain platforms.
- * Uses the appropriate adapter based on the selected chain type.
+ * Uses the appropriate runtime based on the selected chain type.
  */
 import { ContractSchema, FormValues, ProxyInfo } from '@openzeppelin/ui-types';
 import { getMissingRequiredContractInputs, logger } from '@openzeppelin/ui-utils';
 
-import type { BuilderAdapter } from '@/core/runtimeAdapter';
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 /**
- * Loads a contract definition using the provided chain adapter.
- * It passes the artifacts object from the contract definition form directly to the adapter.
+ * Loads a contract definition using the provided chain runtime.
+ * It passes the artifacts object from the contract definition form directly to the runtime.
  *
- * @param adapter The specific contract adapter instance configured for the target network.
+ * @param runtime The specific runtime instance configured for the target network.
  * @param artifacts A FormValues object containing the necessary data (address, contract schema, custom artifacts, etc.).
  * @returns A Promise resolving to the ContractSchema or null if loading fails.
  */
 export async function loadContractDefinition(
-  adapter: BuilderAdapter,
+  runtime: BuilderRuntime,
   artifacts: FormValues
 ): Promise<ContractSchema | null> {
   logger.info('ContractLoader', `Loading contract definition with provided artifacts...`);
@@ -27,16 +27,13 @@ export async function loadContractDefinition(
       throw new Error('Contract definition input is empty.');
     }
 
-    logger.info('ContractLoader', 'Delegating to adapter.loadContract...');
-    const schema = await adapter.loadContract(artifacts);
-    logger.info('ContractLoader', 'Schema loaded successfully by adapter.');
+    logger.info('ContractLoader', 'Delegating to runtime.contractLoading.loadContract...');
+    const schema = await runtime.contractLoading.loadContract(artifacts);
+    logger.info('ContractLoader', 'Schema loaded successfully by runtime.');
     return schema;
   } catch (error) {
     logger.error('ContractLoader', 'Failed to load contract definition:', error);
-    // Propagate specific error messages by re-throwing the error.
-    // The calling component should handle this error and update the UI accordingly.
-    // Returning null hides the specific reason for failure.
-    throw error; // Re-throw the caught error
+    throw error;
   }
 }
 
@@ -60,14 +57,14 @@ export interface ContractLoadResult {
 
 /**
  * Enhanced contract loader that attempts to get source metadata when possible.
- * Uses the adapter's loadContractWithMetadata method if available, otherwise falls back to basic loading.
+ * Uses the runtime's loadContractWithMetadata method if available, otherwise falls back to basic loading.
  *
- * @param adapter The specific contract adapter instance configured for the target network.
+ * @param runtime The specific runtime instance configured for the target network.
  * @param artifacts A FormValues object containing the necessary data (address, contract schema, custom artifacts, etc.).
  * @returns A Promise resolving to ContractLoadResult with schema and metadata.
  */
 export async function loadContractDefinitionWithMetadata(
-  adapter: BuilderAdapter,
+  runtime: BuilderRuntime,
   artifacts: FormValues
 ): Promise<ContractLoadResult> {
   logger.info('ContractLoader', `Loading contract definition with metadata...`);
@@ -77,27 +74,29 @@ export async function loadContractDefinitionWithMetadata(
       throw new Error('Contract definition input is empty.');
     }
 
-    // Defensive preflight: ensure all adapter-declared required fields are present
-    const missing = getMissingRequiredContractInputs(adapter, artifacts);
+    // Defensive preflight: ensure all runtime-declared required fields are present
+    const missing = getMissingRequiredContractInputs(runtime.contractLoading, artifacts);
     if (missing.length > 0) {
       throw new Error(`Missing required fields: ${missing.join(', ')}`);
     }
 
-    // Use adapter's enhanced method if available
-    if (adapter.loadContractWithMetadata) {
-      logger.info('ContractLoader', 'Using adapter loadContractWithMetadata method...');
-      return await adapter.loadContractWithMetadata(artifacts);
+    // Use runtime's enhanced method if available
+    if (runtime.contractLoading.loadContractWithMetadata) {
+      logger.info('ContractLoader', 'Using runtime loadContractWithMetadata method...');
+      return await runtime.contractLoading.loadContractWithMetadata(artifacts);
     }
 
     // Fallback to basic loading with default metadata
-    logger.info('ContractLoader', 'Delegating to adapter.loadContract (fallback)...');
-    const schema = await adapter.loadContract(artifacts);
-    logger.info('ContractLoader', 'Schema loaded successfully by adapter.');
+    logger.info(
+      'ContractLoader',
+      'Delegating to runtime.contractLoading.loadContract (fallback)...'
+    );
+    const schema = await runtime.contractLoading.loadContract(artifacts);
+    logger.info('ContractLoader', 'Schema loaded successfully by runtime.');
 
-    // Provide basic metadata when adapter doesn't support enhanced loading
     return {
       schema,
-      source: 'manual', // Default to manual since we can't determine the source
+      source: 'manual',
       metadata: {
         contractName: schema.name,
         verificationStatus: 'unknown',
@@ -106,6 +105,6 @@ export async function loadContractDefinitionWithMetadata(
     };
   } catch (error) {
     logger.error('ContractLoader', 'Failed to load contract definition:', error);
-    throw error; // Re-throw the caught error
+    throw error;
   }
 }

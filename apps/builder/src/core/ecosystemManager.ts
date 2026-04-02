@@ -17,8 +17,6 @@ import type {
 } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
-import { toBuilderAdapter, type BuilderAdapter } from './runtimeAdapter';
-
 // =============================================================================
 // Metadata Registry (synchronous — available from first render)
 // =============================================================================
@@ -242,21 +240,6 @@ export async function getRuntime(networkConfig: NetworkConfig): Promise<Composer
 
   const def = await loadAdapterModule(networkConfig.ecosystem);
   return createComposerRuntime(def, networkConfig);
-}
-
-/**
- * Compatibility helper for builder-only callsites that still expect a flattened adapter surface.
- * New provider-driven code should prefer `getRuntime`.
- */
-export async function getAdapter(networkConfig: NetworkConfig): Promise<BuilderAdapter> {
-  const runtime = await getRuntime(networkConfig);
-  const adapter = toBuilderAdapter(runtime);
-
-  if (!adapter) {
-    throw new Error(`Failed to construct builder adapter for network ${networkConfig.id}`);
-  }
-
-  return adapter;
 }
 
 // =============================================================================

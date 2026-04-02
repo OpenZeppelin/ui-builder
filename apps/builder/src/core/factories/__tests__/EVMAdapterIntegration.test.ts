@@ -2,11 +2,11 @@ import { beforeAll, describe, expect, it } from 'vitest';
 
 import type { ContractSchema, EvmNetworkConfig } from '@openzeppelin/ui-types';
 
-import type { BuilderAdapter } from '@/core/runtimeAdapter';
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 import { TEST_FIXTURES } from './fixtures/evm-test-fixtures';
 
-import { getAdapter } from '../../ecosystemManager';
+import { getRuntime } from '../../ecosystemManager';
 import { FormSchemaFactory } from '../FormSchemaFactory';
 
 /**
@@ -38,13 +38,12 @@ const mockEvmNetworkConfig: EvmNetworkConfig = {
 
 describe('EVM Adapter Integration Tests', () => {
   const factory = new FormSchemaFactory();
-  let adapter: BuilderAdapter; // Type it as BuilderAdapter
+  let adapter: BuilderRuntime;
   let erc20Schema: ContractSchema;
   let inputTesterSchema: ContractSchema;
 
   beforeAll(async () => {
-    // Await the adapter initialization
-    adapter = await getAdapter(mockEvmNetworkConfig);
+    adapter = await getRuntime(mockEvmNetworkConfig);
 
     // Create mock schemas directly instead of loading them
     erc20Schema = {
@@ -506,7 +505,7 @@ describe('EVM Adapter Integration Tests', () => {
 
   describe('End-to-End Form Generation', () => {
     it('should generate forms for all ERC20 functions', async () => {
-      const writableFunctions = adapter.getWritableFunctions(erc20Schema);
+      const writableFunctions = adapter.schema.getWritableFunctions(erc20Schema);
 
       // Loop through all writable functions and generate schemas
       for (const func of writableFunctions) {
@@ -571,7 +570,7 @@ describe('EVM Adapter Integration Tests', () => {
       const contract = erc20Schema;
 
       // 2. Get writable functions
-      const writableFunctions = adapter.getWritableFunctions(contract);
+      const writableFunctions = adapter.schema.getWritableFunctions(contract);
       expect(writableFunctions.length).toBeGreaterThan(0);
 
       // 3. Get a function to test
@@ -596,7 +595,7 @@ describe('EVM Adapter Integration Tests', () => {
         expect(field.name).toBe(input.name);
 
         // Field should have a type mapped from the parameter type
-        const expectedType = adapter.mapParameterTypeToFieldType(input.type);
+        const expectedType = adapter.typeMapping.mapParameterTypeToFieldType(input.type);
         expect(field.type).toBe(expectedType);
 
         // Field should have transforms
