@@ -15,6 +15,11 @@
 const { execSync } = require('child_process');
 const { ADAPTER_PACKAGES } = require('./lib/update-export-versions-core.cjs');
 
+const STAGING_ADAPTER_PACKAGES = [
+  ...ADAPTER_PACKAGES,
+  '@openzeppelin/adapters-vite',
+];
+
 const WORKSPACE_FILTER = '@openzeppelin/ui-builder-app';
 
 // ---------------------------------------------------------------------------
@@ -125,7 +130,7 @@ function main() {
   /** @type {string[]} */
   const packagesToAdd = [];
 
-  for (const pkg of ADAPTER_PACKAGES) {
+  for (const pkg of STAGING_ADAPTER_PACKAGES) {
     const tagVersion = getNpmTagVersion(pkg, distTag);
     const latestVersion = getNpmTagVersion(pkg, 'latest');
 
