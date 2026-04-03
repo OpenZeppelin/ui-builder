@@ -96,8 +96,11 @@ export function AddressBookDialog({ open, onOpenChange }: AddressBookDialogProps
   const resolveAddressing = useCallback(async (network: NetworkConfig) => {
     const rt = await getRuntime(network);
     const { addressing } = rt;
-    rt.dispose();
-    return addressing;
+    return {
+      ...addressing,
+      isValidAddress: addressing.isValidAddress.bind(addressing),
+      dispose: () => rt.dispose(),
+    };
   }, []);
 
   const resolveAddressPlaceholder = useCallback(

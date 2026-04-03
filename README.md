@@ -114,7 +114,7 @@ integration for consuming apps is provided by `@openzeppelin/adapters-vite`.
 #### Internal Adapter Package
 
 - `@openzeppelin/adapter-evm-core` is an internal package bundled by the public EVM-oriented
-adapters rather than consumed directly by Builder applications.
+  adapters rather than consumed directly by Builder applications.
 
 ## Features
 
@@ -159,22 +159,30 @@ adapters rather than consumed directly by Builder applications.
 ### Installation
 
 1. Clone the repository:
-  ```bash
+
+   ```bash
    git clone https://github.com/OpenZeppelin/ui-builder.git
    cd ui-builder
-  ```
+   ```
+
 2. Install dependencies:
-  ```bash
+
+   ```bash
    pnpm install
-  ```
+   ```
+
 3. Build all packages:
-  ```bash
+
+   ```bash
    pnpm build
-  ```
+   ```
+
 4. Start the development server:
-  ```bash
+
+   ```bash
    pnpm dev
-  ```
+   ```
+
 5. Open your browser and navigate to `http://localhost:5173`
 
 ### Running with Docker (Recommended)
@@ -183,9 +191,11 @@ For a consistent and reliable development environment, it is highly recommended 
 
 1. **Prerequisites**: Make sure you have Docker and Docker Compose installed on your system.
 2. **Build and Run the Container**:
-  ```bash
+
+   ```bash
    docker-compose up --build
-  ```
+   ```
+
    This command will build the Docker image and start the application. Once it's running, you can access it at `http://localhost:3000`.
 
 ## Available Scripts
