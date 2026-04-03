@@ -230,14 +230,14 @@ This repository contains the Builder application and repository-level tooling.
 ### Local Application
 
 - **[apps/builder/](./apps/builder/README.md)** - Main application with builder UI, export system,
-and runtime integration code
+  and runtime integration code
 
 ### External Package Repositories
 
 - **[openzeppelin-adapters](https://github.com/OpenZeppelin/openzeppelin-adapters)** - Adapter
-implementations published as `@openzeppelin/adapter-*`
+  implementations published as `@openzeppelin/adapter-*`
 - **[openzeppelin-ui](https://github.com/OpenZeppelin/openzeppelin-ui)** - Shared renderer, React,
-components, storage, types, styles, and utils packages
+  components, storage, types, styles, and utils packages
 
 ### Configuration Structure
 
@@ -269,23 +269,23 @@ The application uses a modular, domain-driven adapter pattern to support multipl
   - **Modular State Management**: Decomposed hook architecture with specialized responsibilities.
   - **Application Sidebar**: Complete UI for managing saved configurations with import/export capabilities
 - **Storage System (`@openzeppelin/ui-storage`)**: IndexedDB-based persistence layer built on
-Dexie.js providing:
+  Dexie.js providing:
   - **Auto-Save Engine**: Debounced saving with in-memory caching and global coordination
   - **Multi-Tab Synchronization**: Real-time updates across browser tabs
   - **Import/Export**: JSON-based configuration sharing with validation
   - **CRUD Operations**: Complete lifecycle management for contract UI configurations
   - **Performance Optimization**: Efficient handling of 1000+ records with reactive updates
-- **Adapters (`@openzeppelin/adapter-`*)**: Individual packages maintained in
-`openzeppelin-adapters` containing chain-specific implementations (for example `adapter-evm` and
-`adapter-stellar`). Each adapter exposes profile-based runtimes and capability factories.
-Runtimes are instantiated with a specific `NetworkConfig`, making them network-aware. The Builder
-app (via `RuntimeProvider` from `@openzeppelin/ui-react`) dynamically loads and manages these
-runtimes. Furthermore, adapters can optionally provide UI-specific functionalities:
+- **Adapters (`@openzeppelin/adapter-*`)**: Individual packages maintained in
+  `openzeppelin-adapters` containing chain-specific implementations (for example `adapter-evm` and
+  `adapter-stellar`). Each adapter exposes profile-based runtimes and capability factories.
+  Runtimes are instantiated with a specific `NetworkConfig`, making them network-aware. The Builder
+  app (via `RuntimeProvider` from `@openzeppelin/ui-react`) dynamically loads and manages these
+  runtimes. Furthermore, adapters can optionally provide UI-specific functionalities:
   - **React UI Context Provider** (e.g., for `wagmi/react` on EVM): `WalletStateProvider` (from `@openzeppelin/ui-react`) consumes this to set up the necessary app-wide context for the active runtime's ecosystem.
   - **Facade Hooks** (e.g., `useAccount`, `useSwitchChain`): These are exposed by `WalletStateProvider` (via `useWalletState().walletFacadeHooks` from `@openzeppelin/ui-react`) for UI components to interact with wallet functionalities reactively and agnostically.
   - **Standardized UI Components** (e.g., `ConnectButton`): These components are retrieved via `activeRuntime.uiKit.getEcosystemWalletComponents()` and are expected to internally use the facade hooks.
 - **Renderer (`@openzeppelin/ui-renderer`)**: Shared library containing app rendering components
-and common utilities (like logging).
+  and common utilities (like logging).
 - **React Core (`@openzeppelin/ui-react`)**: Centralized React state management providing:
   - **Runtime Provider**: Singleton pattern for ecosystem runtime instance management
   - **Wallet State Provider**: Global wallet/network state coordination with ecosystem-scoped wallet sessions
