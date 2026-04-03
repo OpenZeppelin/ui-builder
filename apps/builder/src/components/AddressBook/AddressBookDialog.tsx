@@ -93,10 +93,12 @@ export function AddressBookDialog({ open, onOpenChange }: AddressBookDialogProps
     [activeRuntime]
   );
 
-  const resolveAddressing = useCallback(
-    async (network: NetworkConfig) => (await getRuntime(network)).addressing,
-    []
-  );
+  const resolveAddressing = useCallback(async (network: NetworkConfig) => {
+    const rt = await getRuntime(network);
+    const { addressing } = rt;
+    rt.dispose();
+    return addressing;
+  }, []);
 
   const resolveAddressPlaceholder = useCallback(
     (network: NetworkConfig) => getEcosystemMetadata(network.ecosystem)?.addressExample ?? '0x...',

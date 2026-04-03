@@ -12,7 +12,7 @@
  * Example: node scripts/resolve-staging-adapters.cjs rc
  */
 
-const { execSync } = require('child_process');
+const { execFileSync } = require('child_process');
 const { ADAPTER_PACKAGES } = require('./lib/update-export-versions-core.cjs');
 
 const STAGING_ADAPTER_PACKAGES = [
@@ -33,9 +33,12 @@ const WORKSPACE_FILTER = '@openzeppelin/ui-builder-app';
  * @returns {string | null}
  */
 function getNpmTagVersion(packageName, tag) {
+  if (!/^[\w@/.-]+$/.test(tag)) {
+    throw new Error(`Invalid dist-tag: ${tag}`);
+  }
   try {
     return (
-      execSync(`npm view ${packageName}@${tag} version`, {
+      execFileSync('npm', ['view', `${packageName}@${tag}`, 'version'], {
         encoding: 'utf8',
         stdio: ['pipe', 'pipe', 'pipe'],
       }).trim() || null
@@ -188,11 +191,11 @@ function main() {
   }
 
   // Surgical install: only the adapters that need overriding
-  const addCmd = `pnpm add ${packagesToAdd.join(' ')} --save-exact --filter ${WORKSPACE_FILTER}`;
-  console.log(`\n📦 Running: ${addCmd}\n`);
+  const addArgs = ['add', ...packagesToAdd, '--save-exact', '--filter', WORKSPACE_FILTER];
+  console.log(`\n📦 Running: pnpm ${addArgs.join(' ')}\n`);
 
   try {
-    execSync(addCmd, { stdio: 'inherit' });
+    execFileSync('pnpm', addArgs, { stdio: 'inherit' });
   } catch (error) {
     console.error('❌ Failed to install adapter overrides:', error.message);
     process.exit(1);
