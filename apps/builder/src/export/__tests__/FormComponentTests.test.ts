@@ -89,7 +89,7 @@ describe('Form Component Tests', () => {
       const { formComponentCode } = await extractFormComponent('evm');
 
       // Check that the component accepts a generic adapter prop
-      expect(formComponentCode).toMatch(/adapter:\s*ContractAdapter/);
+      expect(formComponentCode).toMatch(/adapter:\s*BuilderAdapter/);
 
       // Check that the adapter prop is used in the TransactionForm
       expect(formComponentCode).toMatch(/adapter={adapter}/);
