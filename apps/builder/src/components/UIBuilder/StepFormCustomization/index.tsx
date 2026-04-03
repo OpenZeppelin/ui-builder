@@ -2,9 +2,7 @@ import { FormInput } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { EmptyState, Tabs, TabsContent, TabsList, TabsTrigger } from '@openzeppelin/ui-components';
-import { useWalletState } from '@openzeppelin/ui-react';
 import {
-  ContractAdapter,
   ContractSchema,
   ExecutionConfig,
   NetworkConfig,
@@ -13,7 +11,9 @@ import {
 
 import { ensureCompleteConfig } from './utils/executionUtils';
 
+import type { BuilderRuntime } from '../../../core/runtimeAdapter';
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
+import { useBuilderWalletState } from '../../../hooks/useBuilderWalletState';
 import { ActionBar } from '../../Common/ActionBar';
 import { useWizardStepUiState } from '../hooks/useWizardStepUiState';
 import { FunctionNoteSection, RuntimeSecretButton, UiKitSettings } from './components';
@@ -45,7 +45,7 @@ interface StepFormCustomizationProps {
   onUiKitConfigUpdated: (config: UiKitConfiguration) => void;
   currentUiKitConfig?: UiKitConfiguration;
   currentFormConfig?: BuilderFormConfig | null;
-  adapter?: ContractAdapter;
+  runtime?: BuilderRuntime;
 }
 
 export function StepFormCustomization({
@@ -60,7 +60,7 @@ export function StepFormCustomization({
   onUiKitConfigUpdated,
   currentUiKitConfig,
   currentFormConfig,
-  adapter: adapterProp,
+  runtime: runtimeProp,
 }: StepFormCustomizationProps) {
   const {
     stepUiState: { activeTab, previewMode, selectedFieldIndex, bannerDismissed },
@@ -72,7 +72,7 @@ export function StepFormCustomization({
     bannerDismissed: false,
   });
 
-  const { activeAdapter: adapter, isAdapterLoading: adapterLoading } = useWalletState();
+  const { activeRuntime: runtime, isRuntimeLoading: runtimeLoading } = useBuilderWalletState();
 
   // Find the selected function details using memoization
   const selectedFunctionDetails = useMemo(() => {
@@ -80,9 +80,9 @@ export function StepFormCustomization({
   }, [contractSchema, selectedFunction]);
 
   // Fetch function decorations to check if this function requires a runtime secret
-  const effectiveAdapter = adapterProp ?? adapter ?? undefined;
+  const effectiveRuntime = runtimeProp ?? runtime ?? undefined;
   const functionNote = useGetFunctionNote(
-    effectiveAdapter,
+    effectiveRuntime,
     selectedFunction,
     selectedFunctionDetails
   );
@@ -95,7 +95,7 @@ export function StepFormCustomization({
   } = useFormConfig({
     contractSchema,
     selectedFunction,
-    adapter,
+    runtime: effectiveRuntime ?? null,
     onFormConfigUpdated,
     existingFormConfig: currentFormConfig,
   });
@@ -183,13 +183,13 @@ export function StepFormCustomization({
 
   // Ensure execution config validation happens on mount if no config exists
   useEffect(() => {
-    if (effectiveAdapter && handleExecutionConfigUpdated && !currentExecutionConfig) {
+    if (effectiveRuntime && handleExecutionConfigUpdated && !currentExecutionConfig) {
       const defaultConfig = ensureCompleteConfig({ method: 'eoa', allowAny: true });
       if (defaultConfig) {
         handleExecutionConfigUpdated(defaultConfig, true);
       }
     }
-  }, [effectiveAdapter, currentExecutionConfig, handleExecutionConfigUpdated]);
+  }, [effectiveRuntime, currentExecutionConfig, handleExecutionConfigUpdated]);
 
   // Auto-select first field when fields tab becomes active
   useEffect(() => {
@@ -224,29 +224,29 @@ export function StepFormCustomization({
     );
   }
 
-  if (adapterLoading) {
+  if (runtimeLoading) {
     return (
       <div className="py-8 text-center">
-        <p>Loading adapter...</p>
+        <p>Loading runtime...</p>
       </div>
     );
   }
 
-  if (!effectiveAdapter && networkConfig) {
+  if (!effectiveRuntime && networkConfig) {
     return (
       <div className="py-8 text-center text-red-600">
         <p>
-          Failed to load adapter for the selected network. Please try again or select a different
+          Failed to load runtime for the selected network. Please try again or select a different
           network.
         </p>
       </div>
     );
   }
 
-  if (!effectiveAdapter) {
+  if (!effectiveRuntime) {
     return (
       <div className="py-8 text-center">
-        <p>Adapter not available. Please ensure network is selected and supported.</p>
+        <p>Runtime not available. Please ensure network is selected and supported.</p>
       </div>
     );
   }
@@ -327,13 +327,13 @@ export function StepFormCustomization({
                     description="This function doesn't require any input parameters, so there are no form fields to customize. You can proceed to configure the execution method or preview your form."
                   />
                 ) : (
-                  effectiveAdapter && (
+                  effectiveRuntime && (
                     <>
                       <ResponsiveFieldsLayout
                         fields={baseFormConfigFromHook.fields}
                         selectedFieldIndex={selectedFieldIndex}
                         onSelectField={selectField}
-                        adapter={effectiveAdapter}
+                        runtime={effectiveRuntime}
                         onUpdateField={updateField}
                         onFieldValidationChange={onFieldValidationChange}
                         fieldValidationErrors={fieldValidationErrors}
@@ -344,7 +344,7 @@ export function StepFormCustomization({
                       {functionNote &&
                         !baseFormConfigFromHook.fields.some((f) => f.type === 'runtimeSecret') && (
                           <RuntimeSecretButton
-                            adapter={effectiveAdapter}
+                            runtime={effectiveRuntime}
                             formConfig={baseFormConfigFromHook}
                             onFormConfigUpdated={onFormConfigUpdated}
                           />
@@ -361,9 +361,9 @@ export function StepFormCustomization({
             className="mt-4 rounded-md border p-4 data-[state=inactive]:hidden"
             forceMount
           >
-            {effectiveAdapter && (
+            {effectiveRuntime && (
               <ExecutionMethodSettings
-                adapter={effectiveAdapter}
+                runtime={effectiveRuntime}
                 currentConfig={currentExecutionConfig}
                 onUpdateConfig={handleExecutionConfigUpdated}
                 isWidgetExpanded={isWidgetExpanded}
@@ -376,9 +376,9 @@ export function StepFormCustomization({
             className="mt-4 rounded-md border p-4 data-[state=inactive]:hidden"
             forceMount
           >
-            {effectiveAdapter && (
+            {effectiveRuntime && (
               <UiKitSettings
-                adapter={effectiveAdapter}
+                runtime={effectiveRuntime}
                 onUpdateConfig={handleUiKitConfigUpdate}
                 currentConfig={currentUiKitConfig}
               />

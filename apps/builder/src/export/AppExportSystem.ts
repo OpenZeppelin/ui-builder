@@ -7,14 +7,15 @@
  * standalone app project.
  */
 import { ContractSchema, NetworkConfig } from '@openzeppelin/ui-types';
-import type { ContractAdapter } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
+
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 // Lazy import types for dependency management
 import type { AppCodeGenerator } from './generators/AppCodeGenerator';
 import type { TemplateProcessor } from './generators/TemplateProcessor';
 
-import { getAdapter } from '../core/ecosystemManager';
+import { getEcosystemDefinition, getRuntime } from '../core/ecosystemManager';
 import type { ExportOptions, ExportResult } from '../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../core/types/FormTypes';
 import {
@@ -153,61 +154,76 @@ export class AppExportSystem {
       logger.info('Export System', 'Starting export process...');
       logger.info('Export System', 'Options:', exportOptions);
 
-      // Get the adapter instance for the selected network
-      const adapter = await getAdapter(networkConfig);
+      // Get the builder runtime and build-time ecosystem definition for the selected network.
+      const [runtime, ecosystemDefinition] = await Promise.all([
+        getRuntime(networkConfig),
+        getEcosystemDefinition(networkConfig.ecosystem),
+      ]);
 
-      // 1. Generate all necessary code components
-      logger.info('Export System', 'Generating code components...');
-      const mainTsxCode = await this.appCodeGenerator!.generateMainTsx(networkConfig);
-      const appComponentCode = await this.appCodeGenerator!.generateAppComponent(
-        networkConfig.ecosystem,
-        functionId
-      );
-      const formComponentCode = await this.appCodeGenerator!.generateFormComponent(
-        formConfig,
-        contractSchema,
-        networkConfig,
-        functionId
-      );
+      try {
+        // 1. Generate all necessary code components
+        logger.info('Export System', 'Generating code components...');
+        const mainTsxCode = await this.appCodeGenerator!.generateMainTsx(networkConfig);
+        const appComponentCode = await this.appCodeGenerator!.generateAppComponent(
+          networkConfig.ecosystem,
+          functionId
+        );
+        const formComponentCode = await this.appCodeGenerator!.generateFormComponent(
+          formConfig,
+          contractSchema,
+          networkConfig,
+          functionId
+        );
 
-      // 2. Prepare custom files object
-      const customFiles = {
-        'src/main.tsx': mainTsxCode,
-        'src/App.tsx': appComponentCode,
-        'src/components/GeneratedForm.tsx': formComponentCode,
-      };
+        // 2. Prepare custom files object
+        const customFiles = {
+          'src/main.tsx': mainTsxCode,
+          'src/App.tsx': appComponentCode,
+          'src/components/GeneratedForm.tsx': formComponentCode,
+        };
 
-      // 3. Assemble Project Files
-      logger.info('Export System', 'Assembling project files...');
-      const projectFiles = await this.assembleProjectFiles(
-        formConfig,
-        contractSchema,
-        networkConfig,
-        functionId,
-        exportOptions,
-        customFiles,
-        adapter
-      );
-      logger.info('Export System', `Project files assembled: ${Object.keys(projectFiles).length}`);
+        // 3. Assemble Project Files
+        logger.info('Export System', 'Assembling project files...');
+        const projectFiles = await this.assembleProjectFiles(
+          formConfig,
+          contractSchema,
+          networkConfig,
+          functionId,
+          exportOptions,
+          customFiles,
+          runtime,
+          ecosystemDefinition
+        );
+        logger.info(
+          'Export System',
+          `Project files assembled: ${Object.keys(projectFiles).length}`
+        );
 
-      // 4. Create ZIP file
-      logger.info('Export System', 'Generating ZIP file...');
-      const fileName = this.generateFileName(functionId);
-      const zipResult = await this.createZipFile(projectFiles, fileName, exportOptions.onProgress);
-      logger.info('Export System', `ZIP file generated: ${zipResult.fileName}`);
+        // 4. Create ZIP file
+        logger.info('Export System', 'Generating ZIP file...');
+        const fileName = this.generateFileName(functionId);
+        const zipResult = await this.createZipFile(
+          projectFiles,
+          fileName,
+          exportOptions.onProgress
+        );
+        logger.info('Export System', `ZIP file generated: ${zipResult.fileName}`);
 
-      // 5. Prepare and return the final export result
-      const dependencies = await this.packageManager!.getDependencies(
-        formConfig,
-        networkConfig.ecosystem
-      );
-      const finalResult: ExportResult = {
-        data: zipResult.data,
-        fileName: zipResult.fileName,
-        dependencies,
-      };
-      logger.info('Export System', 'Export process complete.');
-      return finalResult;
+        // 5. Prepare and return the final export result
+        const dependencies = await this.packageManager!.getDependencies(
+          formConfig,
+          networkConfig.ecosystem
+        );
+        const finalResult: ExportResult = {
+          data: zipResult.data,
+          fileName: zipResult.fileName,
+          dependencies,
+        };
+        logger.info('Export System', 'Export process complete.');
+        return finalResult;
+      } finally {
+        runtime.dispose();
+      }
     } catch (error) {
       logger.error('Export System', 'Export failed:', error);
       throw new Error(`Export failed: ${(error as Error).message}`);
@@ -226,7 +242,8 @@ export class AppExportSystem {
     functionId: string,
     exportOptions: ExportOptions,
     customFiles: Record<string, string>,
-    adapter: ContractAdapter
+    runtime: BuilderRuntime,
+    ecosystemDefinition: Awaited<ReturnType<typeof getEcosystemDefinition>>
   ): Promise<Record<string, string | Uint8Array | Blob>> {
     logger.info('File Assembly', 'Starting file assembly process...');
 
@@ -237,12 +254,12 @@ export class AppExportSystem {
     );
     await addStyleAndRootConfigFiles(projectFiles, this.styleManager!, this.templateProcessor!);
     await generateAndAddAppConfig(projectFiles, networkConfig, this.templateProcessor!, formConfig);
-    await generateAdapterSpecificFiles(projectFiles, adapter, formConfig);
+    await generateAdapterSpecificFiles(projectFiles, runtime, formConfig);
 
     // Generate adapter bootstrap files if the adapter supports it
     const bootstrapInfo = await generateAdapterBootstrapFiles(
       projectFiles as unknown as Record<string, string>,
-      adapter,
+      ecosystemDefinition,
       {
         formConfig,
         contractSchema,

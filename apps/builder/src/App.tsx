@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 
 import { Footer, NetworkErrorNotificationProvider, Toaster } from '@openzeppelin/ui-components';
-import { AdapterProvider, AnalyticsProvider, WalletStateProvider } from '@openzeppelin/ui-react';
+import { AnalyticsProvider, RuntimeProvider, WalletStateProvider } from '@openzeppelin/ui-react';
 import type { NativeConfigLoader } from '@openzeppelin/ui-types';
 
 import { Header } from './components/Common/Header';
@@ -12,7 +12,7 @@ import { useUIBuilderState } from './components/UIBuilder/hooks';
 import { AliasLabelBridge } from './contexts/AliasLabelBridge';
 import { ContractUIStorageProvider } from './contexts/ContractUIStorageProvider';
 import { StorageOperationsProvider } from './contexts/StorageOperationsContext';
-import { getAdapter, getNetworkById } from './core/ecosystemManager';
+import { getNetworkById, getRuntime } from './core/ecosystemManager';
 
 // Use Vite's import.meta.glob to find all potential kit config files.
 // Expecting them to be .ts files as per convention.
@@ -92,7 +92,7 @@ function App() {
       <NetworkErrorNotificationProvider>
         <StorageOperationsProvider>
           <ContractUIStorageProvider>
-            <AdapterProvider resolveAdapter={getAdapter}>
+            <RuntimeProvider resolveRuntime={getRuntime}>
               <WalletStateProvider
                 initialNetworkId={null}
                 getNetworkConfigById={getNetworkById}
@@ -104,7 +104,7 @@ function App() {
                   <NetworkErrorHandler />
                 </AliasLabelBridge>
               </WalletStateProvider>
-            </AdapterProvider>
+            </RuntimeProvider>
             <Toaster position="top-right" />
           </ContractUIStorageProvider>
         </StorageOperationsProvider>

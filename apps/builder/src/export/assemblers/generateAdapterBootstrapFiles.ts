@@ -1,7 +1,7 @@
 import type {
   AdapterExportContext,
-  ContractAdapter,
   ContractSchema,
+  EcosystemExport,
   NetworkConfig,
 } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
@@ -35,24 +35,26 @@ export interface BootstrapInfo {
  * into exported applications in a chain-agnostic manner.
  *
  * @param projectFiles - The current map of project files to be modified.
- * @param adapter - The active ContractAdapter instance.
+ * @param ecosystemDefinition - The ecosystem definition for the active network.
  * @param context - Context information for bootstrap generation.
  * @returns Bootstrap info for template injection, or null if not supported.
  */
 export async function generateAdapterBootstrapFiles(
   projectFiles: Record<string, string | Uint8Array | Blob>,
-  adapter: ContractAdapter,
+  ecosystemDefinition: EcosystemExport,
   context: BootstrapContext
 ): Promise<BootstrapInfo | null> {
   const logSystem = 'File Assembly (generateAdapterBootstrapFiles)';
 
-  if (typeof adapter.getExportBootstrapFiles !== 'function') {
-    logger.info(logSystem, 'Adapter does not support export bootstrap files. Skipping.');
+  if (typeof ecosystemDefinition.getExportBootstrapFiles !== 'function') {
+    logger.info(logSystem, 'Ecosystem does not provide export bootstrap files. Skipping.');
     return null;
   }
 
   try {
-    const bootstrap = await adapter.getExportBootstrapFiles(context as AdapterExportContext);
+    const bootstrap = await ecosystemDefinition.getExportBootstrapFiles(
+      context as AdapterExportContext
+    );
 
     if (!bootstrap) {
       logger.info(logSystem, 'Adapter returned no bootstrap files.');

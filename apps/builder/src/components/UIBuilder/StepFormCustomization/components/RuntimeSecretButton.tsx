@@ -1,11 +1,13 @@
 import { Button } from '@openzeppelin/ui-components';
-import type { ContractAdapter, FormFieldType } from '@openzeppelin/ui-types';
+import type { FormFieldType } from '@openzeppelin/ui-types';
+
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 import type { BuilderFormConfig } from '../../../../core/types/FormTypes';
 import { buildInitialMetadata, type ExtendedRuntimeBinding } from '../utils/runtime-secret-helpers';
 
 interface RuntimeSecretButtonProps {
-  adapter: ContractAdapter;
+  runtime: BuilderRuntime;
   formConfig: BuilderFormConfig;
   onFormConfigUpdated: (config: Partial<BuilderFormConfig>) => void;
 }
@@ -13,14 +15,14 @@ interface RuntimeSecretButtonProps {
 /**
  * Button to re-add a runtime secret field that was previously removed.
  * This is shown when a function requires a runtime secret but the field has been deleted.
- * Clicking this button will restore the field with adapter-provided configuration.
+ * Clicking this button will restore the field with runtime-provided configuration.
  */
 export function RuntimeSecretButton({
-  adapter,
+  runtime,
   formConfig,
   onFormConfigUpdated,
 }: RuntimeSecretButtonProps) {
-  const bindingInfo = adapter.getRuntimeFieldBinding?.();
+  const bindingInfo = runtime.typeMapping.getRuntimeFieldBinding?.();
   if (!bindingInfo) {
     return null;
   }

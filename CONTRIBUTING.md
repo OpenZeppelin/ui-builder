@@ -22,11 +22,11 @@ Key steps include:
 1.  **Familiarize Yourself:** Read the **[Adapter Architecture Guide](https://github.com/OpenZeppelin/openzeppelin-adapters/blob/main/docs/ADAPTER_ARCHITECTURE.md)** to understand the modular structure and responsibilities.
 2.  **Package Setup**: Create a new `packages/adapter-<chain-name>` package with appropriate `package.json` (depending on `@openzeppelin/ui-types`) and `tsconfig.json`.
 3.  **Network Configurations**: Define `YourEcosystemNetworkConfig` objects in `src/networks/`, ensuring they provide all necessary details (RPC URLs, chain IDs, etc.). Export a combined list (e.g., `export const suiNetworks = [...]`) and individual configurations from `src/networks/index.ts`.
-4.  **Adapter Implementation**: Implement the `ContractAdapter` interface from `@openzeppelin/ui-types` in `src/adapter.ts`. The constructor must accept its specific `NetworkConfig` (e.g., `constructor(networkConfig: SuiNetworkConfig)`) and use `this.networkConfig` internally.
-5.  **Exports**: Export your adapter class and the main networks array (and ideally individual network configs) from your adapter package's `src/index.ts`.
+4.  **Adapter Implementation**: Implement the capability interfaces from `@openzeppelin/ui-types` under `src/capabilities/`, expose them through `ecosystemDefinition.capabilities`, and compose profile runtimes through `createRuntime(profile, networkConfig, options)`.
+5.  **Exports**: Export your capability/profile subpaths plus `ecosystemDefinition` and the main networks array (and ideally individual network configs) from your adapter package's `src/index.ts`.
 6.  **Ecosystem Registration**: Register your new ecosystem in `apps/builder/src/core/ecosystemManager.ts` by:
-    - Adding an entry to `ecosystemRegistry` with the `AdapterClass` constructor and the `networksExportName` (the name of your exported network list).
-    - Updating the `switch` statement in `loadAdapterPackageModule` to enable dynamic import of your adapter package.
+    - Adding an entry to the ecosystem/module registry for the adapter package and its exported network list.
+    - Updating the dynamic import switch so the builder can load the package's `ecosystemDefinition` and network exports.
 7.  **Testing**: Add comprehensive unit and integration tests for your adapter's logic and network configurations.
 8.  **Documentation**: Update any relevant documentation.
 

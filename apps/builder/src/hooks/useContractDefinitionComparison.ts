@@ -2,17 +2,18 @@ import { useEffect, useState } from 'react';
 
 // Import the correct interface from types package
 import type {
-  ContractAdapter,
   ContractDefinitionComparisonResult,
   ContractDefinitionDifference,
 } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
+
 interface UseContractDefinitionComparisonProps {
   originalDefinition: string | null;
   currentDefinition: string | null;
   isLoadedConfigMode: boolean;
-  adapter?: ContractAdapter | null;
+  runtime?: BuilderRuntime | null;
 }
 
 interface UseContractDefinitionComparisonReturn {
@@ -27,7 +28,7 @@ export function useContractDefinitionComparison({
   originalDefinition,
   currentDefinition,
   isLoadedConfigMode,
-  adapter,
+  runtime,
 }: UseContractDefinitionComparisonProps): UseContractDefinitionComparisonReturn {
   const [comparisonResult, setComparisonResult] = useState<ContractDefinitionComparisonResult>({
     identical: true,
@@ -54,21 +55,21 @@ export function useContractDefinitionComparison({
               currentLength: currentDefinition.length,
             })
           );
-          if (!adapter || !adapter.compareContractDefinitions) {
+          if (!runtime?.contractLoading?.compareContractDefinitions) {
             logger.warn(
               'useContractDefinitionComparison',
-              'Active adapter is missing compareContractDefinitions; skipping detailed comparison.'
+              'Active runtime is missing compareContractDefinitions; skipping detailed comparison.'
             );
             setComparisonResult({
               identical: true,
               differences: [],
               severity: 'none',
-              summary: 'Comparison not available for this chain/adapter',
+              summary: 'Comparison not available for this chain/runtime',
             });
             return;
           }
 
-          const result = await adapter.compareContractDefinitions(
+          const result = await runtime.contractLoading.compareContractDefinitions(
             originalDefinition,
             currentDefinition
           );
@@ -121,7 +122,7 @@ export function useContractDefinitionComparison({
     originalDefinition,
     currentDefinition,
     isLoadedConfigMode,
-    adapter,
+    runtime,
     comparisonResult.identical,
     comparisonResult.differences.length,
   ]);

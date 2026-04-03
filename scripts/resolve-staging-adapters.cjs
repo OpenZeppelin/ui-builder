@@ -12,8 +12,13 @@
  * Example: node scripts/resolve-staging-adapters.cjs rc
  */
 
-const { execSync } = require('child_process');
+const { execFileSync } = require('child_process');
 const { ADAPTER_PACKAGES } = require('./lib/update-export-versions-core.cjs');
+
+const STAGING_ADAPTER_PACKAGES = [
+  ...ADAPTER_PACKAGES,
+  '@openzeppelin/adapters-vite',
+];
 
 const WORKSPACE_FILTER = '@openzeppelin/ui-builder-app';
 
@@ -28,9 +33,12 @@ const WORKSPACE_FILTER = '@openzeppelin/ui-builder-app';
  * @returns {string | null}
  */
 function getNpmTagVersion(packageName, tag) {
+  if (!/^[\w@/.-]+$/.test(tag)) {
+    throw new Error(`Invalid dist-tag: ${tag}`);
+  }
   try {
     return (
-      execSync(`npm view ${packageName}@${tag} version`, {
+      execFileSync('npm', ['view', `${packageName}@${tag}`, 'version'], {
         encoding: 'utf8',
         stdio: ['pipe', 'pipe', 'pipe'],
       }).trim() || null
@@ -49,8 +57,12 @@ function getNpmTagVersion(packageName, tag) {
  * @param {string} version
  */
 function parseSemver(version) {
-  const [core, ...prereleaseParts] = version.split('-');
+  const stripped = version.replace(/\+.*$/, '');
+  const [core, ...prereleaseParts] = stripped.split('-');
   const [major, minor, patch] = core.split('.').map(Number);
+  if (!Number.isFinite(major) || !Number.isFinite(minor) || !Number.isFinite(patch)) {
+    throw new Error(`Cannot parse semver: ${version}`);
+  }
   return { major, minor, patch, prerelease: prereleaseParts.join('-') || null };
 }
 
@@ -94,10 +106,13 @@ function pickBestVersion(rcVersion, latestVersion) {
     };
   }
   if (cmp === 0) {
+    const preferLatest = !latest.prerelease;
     return {
-      version: latestVersion,
-      source: 'latest',
-      reason: `same base; release ${latestVersion} beats pre-release ${rcVersion}`,
+      version: preferLatest ? latestVersion : rcVersion,
+      source: preferLatest ? 'latest' : 'rc',
+      reason: preferLatest
+        ? `same base; stable release ${latestVersion} beats pre-release ${rcVersion}`
+        : `same base; latest ${latestVersion} is also a pre-release, keeping rc ${rcVersion}`,
     };
   }
   return {
@@ -125,7 +140,7 @@ function main() {
   /** @type {string[]} */
   const packagesToAdd = [];
 
-  for (const pkg of ADAPTER_PACKAGES) {
+  for (const pkg of STAGING_ADAPTER_PACKAGES) {
     const tagVersion = getNpmTagVersion(pkg, distTag);
     const latestVersion = getNpmTagVersion(pkg, 'latest');
 
@@ -183,11 +198,11 @@ function main() {
   }
 
   // Surgical install: only the adapters that need overriding
-  const addCmd = `pnpm add ${packagesToAdd.join(' ')} --save-exact --filter ${WORKSPACE_FILTER}`;
-  console.log(`\n📦 Running: ${addCmd}\n`);
+  const addArgs = ['add', ...packagesToAdd, '--save-exact', '--filter', WORKSPACE_FILTER];
+  console.log(`\n📦 Running: pnpm ${addArgs.join(' ')}\n`);
 
   try {
-    execSync(addCmd, { stdio: 'inherit' });
+    execFileSync('pnpm', addArgs, { stdio: 'inherit' });
   } catch (error) {
     console.error('❌ Failed to install adapter overrides:', error.message);
     process.exit(1);

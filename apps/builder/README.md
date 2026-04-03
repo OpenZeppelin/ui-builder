@@ -29,7 +29,7 @@ builder/
 
 This package relies on:
 
-- **@openzeppelin/ui-react**: For core React context providers and hooks (`AdapterProvider`, `WalletStateProvider`, `useWalletState`).
+- **@openzeppelin/ui-react**: For core React context providers and hooks (`RuntimeProvider`, `WalletStateProvider`, `useWalletState`).
 - **@openzeppelin/ui-types**: Shared type definitions for contracts, adapters, and forms.
 - **@openzeppelin/ui-renderer**: The shared library for rendering the final transaction form and other components.
 - **@openzeppelin/ui-components**: The shared library for all common UI and form field components.
@@ -99,15 +99,15 @@ Please see the instructions in the [main project README](../../README.md#running
 
 The builder package uses an adapter pattern to support multiple blockchain ecosystems, leveraging shared providers and types:
 
-- **Builder**: Chain-agnostic application logic, UI components, and the export system. It consumes providers and hooks (like `AdapterProvider`, `WalletStateProvider`, `useWalletState`) from the `@openzeppelin/ui-react` package to manage global wallet/network state and adapter interactions.
-  - `ecosystemManager.ts`: Handles discovery of network configurations and adapter capabilities, providing functions like `getAdapter` and `getNetworkById` which are passed as props to the providers from `@openzeppelin/ui-react`.
-- **Adapters (`@openzeppelin/adapter-*`)**: Separate packages implementing the `ContractAdapter` interface. They are instantiated and managed via `AdapterProvider` (from `@openzeppelin/ui-react`). Their UI facilitation capabilities are orchestrated by `WalletStateProvider` (from `@openzeppelin/ui-react`):
-  - **React UI Context Provider**: Each adapter can provide its own React context provider to manage wallet state (e.g., `WagmiProvider` for EVM, or `MidnightWalletUiRoot` for the Midnight adapter). `WalletStateProvider` renders the appropriate provider for the active adapter, setting up the necessary environment for its UI components and facade hooks.
+- **Builder**: Chain-agnostic application logic, UI components, and the export system. It consumes providers and hooks (like `RuntimeProvider`, `WalletStateProvider`, `useWalletState`) from the `@openzeppelin/ui-react` package to manage global wallet/network state and runtime interactions.
+  - `ecosystemManager.ts`: Handles discovery of network configurations and runtime capabilities, providing functions like `getRuntime` and `getNetworkById` which are passed as props to the providers from `@openzeppelin/ui-react`.
+- **Adapters (`@openzeppelin/adapter-*`)**: Separate packages exposing profile-based runtimes and capabilities. They are instantiated and managed via `RuntimeProvider` (from `@openzeppelin/ui-react`). Their UI facilitation capabilities are orchestrated by `WalletStateProvider` (from `@openzeppelin/ui-react`):
+  - **React UI Context Provider**: Each adapter can provide its own React context provider to manage wallet state (e.g., `WagmiProvider` for EVM, or `MidnightWalletUiRoot` for the Midnight adapter). `WalletStateProvider` renders the appropriate provider for the active runtime's ecosystem, keeping wallet sessions alive across same-ecosystem network switches.
   - **Facade Hooks**: (e.g., `useAccount`, `useSwitchChain`, `connect`, `disconnect`) Provided by the adapter and exposed via `useWalletState().walletFacadeHooks` for reactive wallet interactions.
-  - **Standardized UI Components**: (e.g., `ConnectButton`) Retrieved via `useWalletState().activeAdapter.getEcosystemWalletComponents()` and are expected to use the facade hooks internally.
-  - **UI Components**: React components within this package (e.g., `WalletConnectionHeader`, `UIBuilder`, `NetworkSwitchManager`) utilize `useWalletState()` to access the active adapter, its facade hooks, and global wallet/network state to interact with different blockchains and manage UI accordingly.
+  - **Standardized UI Components**: (e.g., `ConnectButton`) Retrieved via `activeRuntime.uiKit.getEcosystemWalletComponents()` and are expected to use the facade hooks internally.
+  - **UI Components**: React components within this package (e.g., `WalletConnectionHeader`, `UIBuilder`, `NetworkSwitchManager`) utilize `useWalletState()` to access the active runtime, its facade hooks, and global wallet/network state to interact with different blockchains and manage UI accordingly.
   - **Styling System**: Centralized CSS variables and styling approach from the `@openzeppelin/ui-styles` package.
 
-This architecture allows for easy extension to support additional blockchain ecosystems by creating new adapter packages and registering them in `ecosystemManager.ts`. The provider model (from `@openzeppelin/ui-react`) ensures consistent state and adapter access throughout the application.
+This architecture allows for easy extension to support additional blockchain ecosystems by creating new adapter packages and registering them in `ecosystemManager.ts`. The provider model (from `@openzeppelin/ui-react`) ensures consistent state and runtime access throughout the application.
 
 For more detailed documentation about the adapter pattern, see the main project [README.md](../../README.md#adding-new-adapters) and the [Adapter Architecture Guide](https://github.com/OpenZeppelin/openzeppelin-adapters/blob/main/docs/ADAPTER_ARCHITECTURE.md).

@@ -8,14 +8,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@openzeppelin/ui-components';
-import { useWalletState } from '@openzeppelin/ui-react';
 import { AddressBookWidget } from '@openzeppelin/ui-renderer';
 import { useAddressBookWidgetProps } from '@openzeppelin/ui-storage';
 import type { NetworkConfig } from '@openzeppelin/ui-types';
 
-import { getAdapter, getEcosystemMetadata } from '../../core/ecosystemManager';
+import { getEcosystemMetadata, getRuntime } from '../../core/ecosystemManager';
 import { useAllNetworks } from '../../hooks/useAllNetworks';
 import { useBuilderAnalytics } from '../../hooks/useBuilderAnalytics';
+import { useBuilderWalletState } from '../../hooks/useBuilderWalletState';
 import { db } from '../../storage/database';
 
 const ECOSYSTEM_ADDRESS_PATH: Record<string, string> = {
@@ -30,7 +30,7 @@ interface AddressBookDialogProps {
 }
 
 export function AddressBookDialog({ open, onOpenChange }: AddressBookDialogProps) {
-  const { activeNetworkConfig, activeAdapter } = useWalletState();
+  const { activeRuntime, activeNetworkConfig } = useBuilderWalletState();
   const { networks } = useAllNetworks();
   const [filterNetworkIds, setFilterNetworkIds] = useState<string[]>([]);
   const { trackAddressBookOpened } = useBuilderAnalytics();
@@ -44,11 +44,11 @@ export function AddressBookDialog({ open, onOpenChange }: AddressBookDialogProps
       return;
     }
 
-    const networkId = activeNetworkConfig?.id ?? activeAdapter?.networkConfig.id ?? 'unknown';
+    const networkId = activeNetworkConfig?.id ?? activeRuntime?.networkConfig.id ?? 'unknown';
     const ecosystem =
-      activeAdapter?.networkConfig.ecosystem ?? activeNetworkConfig?.ecosystem ?? 'unknown';
+      activeRuntime?.networkConfig.ecosystem ?? activeNetworkConfig?.ecosystem ?? 'unknown';
     trackAddressBookOpened(networkId, ecosystem);
-  }, [open, activeNetworkConfig, activeAdapter, trackAddressBookOpened]);
+  }, [open, activeNetworkConfig, activeRuntime, trackAddressBookOpened]);
 
   const widgetProps = useAddressBookWidgetProps(db, {
     networkId: activeNetworkConfig?.id,
@@ -65,8 +65,8 @@ export function AddressBookDialog({ open, onOpenChange }: AddressBookDialogProps
     (address: string, networkId?: string) => {
       if (!networkId) return undefined;
 
-      if (activeAdapter && activeNetworkConfig?.id === networkId) {
-        return activeAdapter.getExplorerUrl(address) ?? undefined;
+      if (activeRuntime && activeNetworkConfig?.id === networkId) {
+        return activeRuntime.explorer.getExplorerUrl(address) ?? undefined;
       }
 
       const net = networks.find((n) => n.id === networkId);
@@ -82,18 +82,26 @@ export function AddressBookDialog({ open, onOpenChange }: AddressBookDialogProps
         return `${baseUrl}/${segment}/${address}`;
       }
     },
-    [activeAdapter, networks, activeNetworkConfig]
+    [activeRuntime, networks, activeNetworkConfig]
   );
 
   const addressPlaceholder = useMemo(
     () =>
-      activeAdapter
-        ? (getEcosystemMetadata(activeAdapter.networkConfig.ecosystem)?.addressExample ?? '0x...')
+      activeRuntime
+        ? (getEcosystemMetadata(activeRuntime.networkConfig.ecosystem)?.addressExample ?? '0x...')
         : '0x...',
-    [activeAdapter]
+    [activeRuntime]
   );
 
-  const resolveAdapter = useCallback(async (network: NetworkConfig) => getAdapter(network), []);
+  const resolveAddressing = useCallback(async (network: NetworkConfig) => {
+    const rt = await getRuntime(network);
+    const { addressing } = rt;
+    return {
+      ...addressing,
+      isValidAddress: addressing.isValidAddress.bind(addressing),
+      dispose: () => rt.dispose(),
+    };
+  }, []);
 
   const resolveAddressPlaceholder = useCallback(
     (network: NetworkConfig) => getEcosystemMetadata(network.ecosystem)?.addressExample ?? '0x...',
@@ -115,8 +123,8 @@ export function AddressBookDialog({ open, onOpenChange }: AddressBookDialogProps
           title="Saved Addresses"
           resolveNetwork={resolveNetwork}
           resolveExplorerUrl={resolveExplorerUrl}
-          adapter={activeAdapter ?? undefined}
-          resolveAdapter={resolveAdapter}
+          addressing={activeRuntime?.addressing}
+          resolveAddressing={resolveAddressing}
           addressPlaceholder={addressPlaceholder}
           resolveAddressPlaceholder={resolveAddressPlaceholder}
           networks={networks}

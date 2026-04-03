@@ -33,9 +33,11 @@ const STANDARD_FAMILIES = {
     defaultPath: '../openzeppelin-adapters',
     packageMap: {
       '@openzeppelin/adapters-vite': 'packages/adapters-vite',
+      '@openzeppelin/adapter-evm-core': 'packages/adapter-evm-core',
       '@openzeppelin/adapter-evm': 'packages/adapter-evm',
       '@openzeppelin/adapter-midnight': 'packages/adapter-midnight',
       '@openzeppelin/adapter-polkadot': 'packages/adapter-polkadot',
+      '@openzeppelin/adapter-runtime-utils': 'packages/adapter-runtime-utils',
       '@openzeppelin/adapter-solana': 'packages/adapter-solana',
       '@openzeppelin/adapter-stellar': 'packages/adapter-stellar',
     },
@@ -210,21 +212,51 @@ function rewriteDependencies(pkg, context, cacheDir, familyKey, family) {
   }
 }
 
-function readPackage(pkg, context) {
-  if (!isAnyLocalFamilyEnabled()) {
-    return pkg;
-  }
-
-  const workspaceRoot = __dirname;
-  const projectConfig = readProjectConfig(workspaceRoot);
-
-  for (const [familyKey, family] of Object.entries(projectConfig.families)) {
-    if (process.env[family.envFlag] !== 'true') {
-      continue;
+/**
+ * Widen `^X.Y.Z` ranges on `@openzeppelin/adapter*` packages to also include
+ * pre-release versions (`>=X.Y.Z-0 <(X+1).0.0`).
+ *
+ * This lets `pnpm install` resolve RC packages (e.g. 2.0.0-rc.1) when the
+ * stable version (e.g. 2.0.0) hasn't been published yet, without changing
+ * the declared range in package.json. Once the stable version ships, pnpm
+ * naturally resolves to it (highest match wins). The rewrite is harmless
+ * when stable versions are available — it's effectively a permanent no-op.
+ *
+ * Skips deps already rewritten to `file:` paths by local-dev mode.
+ */
+function allowAdapterPrereleases(pkg) {
+  for (const depType of ['dependencies', 'devDependencies']) {
+    if (!pkg[depType]) continue;
+    for (const [name, range] of Object.entries(pkg[depType])) {
+      if (!name.startsWith('@openzeppelin/adapter') && !name.startsWith('@openzeppelin/adapters-')) continue;
+      const m = range.match(/^\^(\d+)\.(\d+)\.(\d+)$/);
+      if (!m) continue;
+      const maj = Number(m[1]), min = Number(m[2]), pat = Number(m[3]);
+      const upper = maj > 0
+        ? `${maj + 1}.0.0`
+        : min > 0
+          ? `0.${min + 1}.0`
+          : `0.0.${pat + 1}`;
+      pkg[depType][name] = `>=${maj}.${min}.${pat}-0 <${upper}`;
     }
-
-    rewriteDependencies(pkg, context, projectConfig.cacheDir, familyKey, family);
   }
+}
+
+function readPackage(pkg, context) {
+  if (isAnyLocalFamilyEnabled()) {
+    const workspaceRoot = __dirname;
+    const projectConfig = readProjectConfig(workspaceRoot);
+
+    for (const [familyKey, family] of Object.entries(projectConfig.families)) {
+      if (process.env[family.envFlag] !== 'true') {
+        continue;
+      }
+
+      rewriteDependencies(pkg, context, projectConfig.cacheDir, familyKey, family);
+    }
+  }
+
+  allowAdapterPrereleases(pkg);
 
   return pkg;
 }

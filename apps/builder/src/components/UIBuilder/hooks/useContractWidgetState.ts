@@ -1,7 +1,9 @@
 import { useCallback, useRef } from 'react';
 
-import { FullContractAdapter, NetworkConfig } from '@openzeppelin/ui-types';
+import { NetworkConfig } from '@openzeppelin/ui-types';
 import type { ContractSchema } from '@openzeppelin/ui-types';
+
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 import { useWizardStepUiState } from './useWizardStepUiState';
 
@@ -52,7 +54,7 @@ export function useContractWidgetState() {
     (
       contractSchema: ContractSchema | null,
       contractAddress: string | null,
-      adapter: FullContractAdapter,
+      runtime: BuilderRuntime,
       networkConfig: NetworkConfig | null
     ) => {
       if (!contractAddress || !networkConfig) return null;
@@ -61,13 +63,13 @@ export function useContractWidgetState() {
       const hasViewFunctions =
         !!contractSchema &&
         contractSchema.functions
-          .filter((fn) => adapter.isViewFunction(fn))
+          .filter((fn) => runtime.schema.isViewFunction(fn))
           .some((fn) => fn.inputs.length === 0);
 
       return {
         contractSchema,
         contractAddress,
-        adapter,
+        runtime,
         networkConfig,
         isVisible: isWidgetVisible,
         onToggle: toggleWidget,
@@ -85,19 +87,19 @@ export function useContractWidgetState() {
    *
    * @param contractSchema The contract schema, which contains function definitions.
    * @param contractAddress The address of the contract.
-   * @param adapter The contract adapter for the current network.
+   * @param runtime The ecosystem runtime for the current network.
    */
   const handleWidgetVisibilityUpdate = useCallback(
     (
       contractSchema: ContractSchema | null,
       contractAddress: string | null,
-      adapter: FullContractAdapter | null
+      runtime: BuilderRuntime | null
     ) => {
-      if (!contractSchema || !contractAddress || !adapter) return;
+      if (!contractSchema || !contractAddress || !runtime) return;
 
       // Check if contract has any simple view functions (no parameters)
       const hasViewFunctions = contractSchema.functions
-        .filter((fn) => adapter.isViewFunction(fn))
+        .filter((fn) => runtime.schema.isViewFunction(fn))
         .some((fn) => fn.inputs.length === 0);
 
       // Handle contract address change, but only if there was a previous address.

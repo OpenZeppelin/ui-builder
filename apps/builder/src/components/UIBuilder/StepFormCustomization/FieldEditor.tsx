@@ -3,9 +3,10 @@ import debounce from 'lodash-es/debounce';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 
-import type { ContractAdapter } from '@openzeppelin/ui-types';
 import { FieldType, FormFieldType } from '@openzeppelin/ui-types';
 import { getDefaultValueForType } from '@openzeppelin/ui-utils';
+
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 import { coerceHardcodedValue } from './utils/fieldEditorUtils';
 
@@ -25,9 +26,9 @@ interface FieldEditorProps {
    */
   onUpdate: (updates: Partial<FormFieldType>) => void;
   /**
-   * Chain-specific adapter for type validation and mapping
+   * Chain-specific runtime for type validation and mapping
    */
-  adapter?: ContractAdapter;
+  runtime?: BuilderRuntime;
   /**
    * Original parameter type from the contract schema for validation warnings
    */
@@ -50,14 +51,14 @@ interface FieldEditorProps {
  * @param props - Component props
  * @param props.field - The field configuration being edited
  * @param props.onUpdate - Callback to update field properties in parent state
- * @param props.adapter - Chain adapter for type validation and conversion
+ * @param props.runtime - Chain runtime for type validation and conversion
  * @param props.originalParameterType - Original contract parameter type for validation
  */
 export const FieldEditor = React.memo(
   function FieldEditor({
     field,
     onUpdate,
-    adapter,
+    runtime,
     originalParameterType,
     onFieldValidationChange,
   }: FieldEditorProps) {
@@ -73,8 +74,8 @@ export const FieldEditor = React.memo(
 
     // Get field type groups using utility function
     const typeGroups = useMemo(
-      () => getFieldTypeGroups(adapter, originalParameterType),
-      [adapter, originalParameterType]
+      () => getFieldTypeGroups(runtime, originalParameterType),
+      [runtime, originalParameterType]
     );
 
     // Track previous field to detect meaningful changes
@@ -353,7 +354,7 @@ export const FieldEditor = React.memo(
         <FieldBasicSettings
           control={control}
           fieldTypeGroups={typeGroups}
-          adapter={adapter}
+          runtime={runtime}
           field={field}
           onFieldValidationChange={onFieldValidationChange}
           trigger={trigger}
@@ -361,11 +362,11 @@ export const FieldEditor = React.memo(
 
         <TypeWarningSection
           selectedType={selectedType}
-          adapter={adapter}
+          runtime={runtime}
           originalParameterType={originalParameterType}
         />
 
-        <FieldAdvancedSettings control={control} fieldType={selectedType} adapter={adapter} />
+        <FieldAdvancedSettings control={control} fieldType={selectedType} runtime={runtime} />
       </div>
     );
   },
@@ -374,7 +375,7 @@ export const FieldEditor = React.memo(
     return (
       prevProps.field.id === nextProps.field.id &&
       deepEqual(prevProps.field, nextProps.field) &&
-      prevProps.adapter === nextProps.adapter &&
+      prevProps.runtime === nextProps.runtime &&
       prevProps.originalParameterType === nextProps.originalParameterType
     );
   }

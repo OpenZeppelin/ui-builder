@@ -1,5 +1,6 @@
-import type { ContractAdapter } from '@openzeppelin/ui-types';
 import { FieldType } from '@openzeppelin/ui-types';
+
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 import { TypeConversionWarning } from './TypeConversionWarning';
 
@@ -10,9 +11,9 @@ interface TypeWarningSectionProps {
   selectedType: FieldType;
 
   /**
-   * The contract adapter for the selected blockchain
+   * The runtime for the selected blockchain
    */
-  adapter?: ContractAdapter;
+  runtime?: BuilderRuntime;
 
   /**
    * The original blockchain parameter type
@@ -26,7 +27,7 @@ interface TypeWarningSectionProps {
  */
 export function TypeWarningSection({
   selectedType,
-  adapter,
+  runtime,
   originalParameterType,
 }: TypeWarningSectionProps) {
   // Skip warning for runtime secret fields (not blockchain parameters)
@@ -34,13 +35,13 @@ export function TypeWarningSection({
     return null;
   }
 
-  // Only show warning if adapter and original parameter type are available
-  if (!adapter || !originalParameterType) {
+  // Only show warning if runtime and original parameter type are available
+  if (!runtime || !originalParameterType) {
     return null;
   }
 
-  // Get the recommended field type from the adapter
-  const recommendedType = adapter.getCompatibleFieldTypes(originalParameterType)[0];
+  // Get the recommended field type from the runtime
+  const recommendedType = runtime.typeMapping.getCompatibleFieldTypes(originalParameterType)[0];
 
   return (
     <TypeConversionWarning

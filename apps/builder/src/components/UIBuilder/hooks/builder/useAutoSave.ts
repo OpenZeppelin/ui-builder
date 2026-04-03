@@ -2,12 +2,12 @@ import { toast } from 'sonner';
 import useDeepCompareEffect from 'use-deep-compare-effect';
 import { useCallback, useEffect, useRef } from 'react';
 
-import { useWalletState } from '@openzeppelin/ui-react';
-import type { ContractAdapter } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
 import { useContractUIStorage } from '../../../../contexts/useContractUIStorage';
+import type { BuilderRuntime } from '../../../../core/runtimeAdapter';
 import { useBuilderAnalytics } from '../../../../hooks/useBuilderAnalytics';
+import { useBuilderWalletState } from '../../../../hooks/useBuilderWalletState';
 import { useStorageOperations } from '../../../../hooks/useStorageOperations';
 import { contractUIStorage, ContractUIStorage, type ContractUIRecord } from '../../../../storage';
 import { uiBuilderStore, type UIBuilderState } from '../uiBuilderStore';
@@ -43,13 +43,13 @@ function handleAutoSaveError(error: unknown): void {
  * This ensures that the original contract definition is preserved when updating
  * a loaded configuration, which is critical for ABI comparison functionality.
  *
- * Also respects adapter persistence policy to defer heavy artifacts.
+ * Also respects runtime persistence policy to defer heavy artifacts.
  */
 async function prepareRecordWithDefinition(
   currentState: UIBuilderState,
   configToSave: Omit<ContractUIRecord, 'id' | 'createdAt' | 'updatedAt'>,
   configId: string,
-  adapter?: ContractAdapter
+  runtime?: BuilderRuntime
 ): Promise<Partial<ContractUIRecord>> {
   const existingConfig = await contractUIStorage.get(configId);
 
@@ -68,7 +68,7 @@ async function prepareRecordWithDefinition(
     logger.info('Auto-save', 'Saving fresh contract definition');
   }
 
-  // Check if adapter wants to defer heavy artifacts
+  // Check if runtime wants to defer heavy artifacts
   let artifactsToSave = currentState.contractState.contractDefinitionArtifacts || undefined;
 
   // Filter out unprocessed ZIP file objects that can't be serialized
@@ -80,7 +80,7 @@ async function prepareRecordWithDefinition(
     if (hasUnprocessedZip) {
       logger.info(
         'Auto-save',
-        'Removing unprocessed File object from artifacts (will be converted by adapter)'
+        'Removing unprocessed File object from artifacts (will be converted by runtime)'
       );
       // Remove the File object but keep other fields like privateStateId
       const { contractArtifactsZip: _, ...rest } = artifactsToSave as Record<string, unknown>;
@@ -88,8 +88,12 @@ async function prepareRecordWithDefinition(
     }
   }
 
-  if (adapter && typeof adapter.getArtifactPersistencePolicy === 'function' && artifactsToSave) {
-    const policy = adapter.getArtifactPersistencePolicy();
+  if (
+    runtime &&
+    typeof runtime.contractLoading?.getArtifactPersistencePolicy === 'function' &&
+    artifactsToSave
+  ) {
+    const policy = runtime.contractLoading.getArtifactPersistencePolicy!();
     if (policy?.mode === 'deferredUntilFunctionSelected') {
       const threshold =
         policy.sizeThresholdBytes !== undefined ? policy.sizeThresholdBytes : 15 * 1024 * 1024;
@@ -134,7 +138,7 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): 
   const { updateContractUI, contractUIs } = useContractUIStorage();
   const { trackContractUiCreated } = useBuilderAnalytics();
   const storageOperations = useStorageOperations();
-  const { activeAdapter } = useWalletState();
+  const { activeRuntime } = useBuilderWalletState();
 
   // Subscribe to store state changes with our new, clean hook
   const state = useUIBuilderStore((s) => s);
@@ -240,9 +244,9 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): 
         logger.info('Auto-save: New record created', `ID: ${newConfigId}`);
 
         const networkId =
-          currentState.selectedNetworkConfigId ?? activeAdapter?.networkConfig.id ?? 'unknown';
+          currentState.selectedNetworkConfigId ?? activeRuntime?.networkConfig.id ?? 'unknown';
         const ecosystem =
-          currentState.selectedEcosystem ?? activeAdapter?.networkConfig.ecosystem ?? 'unknown';
+          currentState.selectedEcosystem ?? activeRuntime?.networkConfig.ecosystem ?? 'unknown';
         const totalRecords = (contractUIs?.length ?? 0) + 1;
         trackContractUiCreated(networkId, ecosystem, totalRecords);
 
@@ -281,7 +285,7 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): 
             currentState,
             configToSave,
             configId,
-            activeAdapter ?? undefined
+            activeRuntime ?? undefined
           )
         : ({
             ...configToSave,
@@ -320,7 +324,7 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): 
     isLoadingSavedConfigRef,
     updateContractUI,
     storageOperations,
-    activeAdapter,
+    activeRuntime,
     contractUIs,
     trackContractUiCreated,
   ]);

@@ -6,14 +6,14 @@
  * - "@@param-name@@" - Template variable markers (consistent across all templates)
  */
 /*------------TEMPLATE COMMENT END------------*/
-// @ts-expect-error - This is a placeholder for the correct adapter import
-import { AdapterPlaceholder, NetworkConfigPlaceholder } from '@@adapter-package-name@@';
+// @ts-expect-error - Template placeholder replaced during code generation
+import { ecosystemDefinition, NetworkConfigPlaceholder } from '@@adapter-package-name@@';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
 import { NetworkErrorNotificationProvider, Toaster } from '@openzeppelin/ui-components';
-import { AdapterProvider, WalletStateProvider } from '@openzeppelin/ui-react';
-import type { ContractAdapter, NativeConfigLoader, NetworkConfig } from '@openzeppelin/ui-types';
+import { RuntimeProvider, WalletStateProvider } from '@openzeppelin/ui-react';
+import type { EcosystemRuntime, NativeConfigLoader, NetworkConfig } from '@openzeppelin/ui-types';
 import { appConfigService, logger } from '@openzeppelin/ui-utils';
 
 // @ts-expect-error - this is a template file, so we don't have to worry about this import
@@ -33,26 +33,30 @@ const exportedNetworkConfig = NetworkConfigPlaceholder;
 
 /*------------TEMPLATE COMMENT START------------*/
 /**
- * AdapterPlaceholder will be replaced by the actual adapter class (e.g., EvmAdapter).
+ * `ecosystemDefinition` comes from the selected adapter package.
  */
 /*------------TEMPLATE COMMENT END------------*/
-// Function to resolve the single adapter for the exported app.
-const resolveAdapter = async (nc: NetworkConfig): Promise<ContractAdapter> => {
+// Function to resolve the single runtime for the exported app.
+const resolveRuntime = async (nc: NetworkConfig): Promise<EcosystemRuntime> => {
   if (nc.id === exportedNetworkConfig.id) {
-    // The network config type matches what the adapter expects at generation time
-    const adapter = new AdapterPlaceholder(nc as typeof exportedNetworkConfig);
+    if (typeof ecosystemDefinition.createRuntime !== 'function') {
+      throw new Error(
+        `Adapter package ${exportedNetworkConfig.ecosystem} does not expose createRuntime().`
+      );
+    }
+
+    const runtime = ecosystemDefinition.createRuntime(
+      'composer',
+      nc as typeof exportedNetworkConfig
+    );
     /*@@ADAPTER_BOOTSTRAP_CODE_INJECTION_POINT@@*/
-    return adapter;
+    return runtime;
   }
-  // This path should ideally not be reached in a single-form export context
-  // if nc.id always matches exportedNetworkConfig.id.
   logger.error(
     'ExportedApp',
-    `Adapter resolution failed: NetworkConfig ID mismatch. Expected ${exportedNetworkConfig.id}, got ${nc.id}`
+    `Runtime resolution failed: NetworkConfig ID mismatch. Expected ${exportedNetworkConfig.id}, got ${nc.id}`
   );
-  // Fallback or error handling: Re-throw or return a dummy/null adapter if absolutely necessary,
-  // but this indicates a fundamental issue in how the exported app is configured or used.
-  throw new Error(`Adapter resolution failed for network ID: ${nc.id}`);
+  throw new Error(`Runtime resolution failed for network ID: ${nc.id}`);
 };
 
 // Function to get the network config by ID, specific to this exported app.
@@ -107,7 +111,7 @@ async function startApp() {
   ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
       <NetworkErrorNotificationProvider>
-        <AdapterProvider resolveAdapter={resolveAdapter}>
+        <RuntimeProvider resolveRuntime={resolveRuntime}>
           <WalletStateProvider
             initialNetworkId={exportedNetworkConfig.id}
             getNetworkConfigById={getNetworkConfigById}
@@ -115,7 +119,7 @@ async function startApp() {
           >
             <App />
           </WalletStateProvider>
-        </AdapterProvider>
+        </RuntimeProvider>
         <Toaster position="top-right" />
       </NetworkErrorNotificationProvider>
     </React.StrictMode>

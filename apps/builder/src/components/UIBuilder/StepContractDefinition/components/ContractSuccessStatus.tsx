@@ -3,12 +3,13 @@ import { useMemo, useState } from 'react';
 
 import { Alert, AlertDescription, AlertTitle, Button } from '@openzeppelin/ui-components';
 import type {
-  ContractAdapter,
   ContractDefinitionComparisonResult,
   ContractSchema,
   ProxyInfo,
 } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
+
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 import { useContractUIStorage } from '../../../../contexts/useContractUIStorage';
 import {
@@ -34,7 +35,7 @@ interface ContractSuccessStatusProps {
     comparisonResult: ContractDefinitionComparisonResult;
   } | null;
   loadedConfigurationId: string | null;
-  adapter: ContractAdapter;
+  runtime: BuilderRuntime;
   onIgnoreProxy: () => void;
   requiresManualReload: boolean;
   onManualReload: () => void;
@@ -55,7 +56,7 @@ export function ContractSuccessStatus({
   proxyInfo,
   ignoreProxy,
   definitionComparison,
-  adapter,
+  runtime,
   onIgnoreProxy,
   requiresManualReload,
   onManualReload,
@@ -111,25 +112,25 @@ export function ContractSuccessStatus({
   const proxyExplorerUrl = useMemo(
     () =>
       proxyInfo?.proxyAddress
-        ? adapter?.getExplorerUrl(proxyInfo.proxyAddress) || undefined
+        ? runtime?.explorer.getExplorerUrl(proxyInfo.proxyAddress) || undefined
         : undefined,
-    [proxyInfo?.proxyAddress, adapter]
+    [proxyInfo?.proxyAddress, runtime]
   );
 
   const implementationExplorerUrl = useMemo(
     () =>
       proxyInfo?.implementationAddress
-        ? adapter?.getExplorerUrl(proxyInfo.implementationAddress) || undefined
+        ? runtime?.explorer.getExplorerUrl(proxyInfo.implementationAddress) || undefined
         : undefined,
-    [proxyInfo?.implementationAddress, adapter]
+    [proxyInfo?.implementationAddress, runtime]
   );
 
   const adminExplorerUrl = useMemo(
     () =>
       proxyInfo?.adminAddress
-        ? adapter?.getExplorerUrl(proxyInfo.adminAddress) || undefined
+        ? runtime?.explorer.getExplorerUrl(proxyInfo.adminAddress) || undefined
         : undefined,
-    [proxyInfo?.adminAddress, adapter]
+    [proxyInfo?.adminAddress, runtime]
   );
 
   return (

@@ -3,7 +3,9 @@ import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import type { AvailableUiKit, ContractAdapter } from '@openzeppelin/ui-types';
+import type { AvailableUiKit } from '@openzeppelin/ui-types';
+
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 import { UiKitSettings } from '../components/UiKitSettings';
 
@@ -56,31 +58,36 @@ Object.defineProperty(window, 'matchMedia', {
 });
 
 describe('UiKitSettings', () => {
-  const mockAdapter: Partial<ContractAdapter> = {
-    getAvailableUiKits: vi.fn().mockResolvedValue([
-      {
-        id: 'rainbowkit',
-        name: 'RainbowKit',
-        configFields: [],
-        hasCodeEditor: true,
-        defaultCode: '// Default RainbowKit config',
-        description: 'Custom config for export only',
-      },
-      {
-        id: 'connectkit',
-        name: 'ConnectKit',
-        configFields: [],
-        hasCodeEditor: false,
-      },
-    ] as AvailableUiKit[]),
-  };
+  const mockAdapter = {
+    uiKit: {
+      getAvailableUiKits: vi.fn().mockResolvedValue([
+        {
+          id: 'rainbowkit',
+          name: 'RainbowKit',
+          configFields: [],
+          hasCodeEditor: true,
+          defaultCode: '// Default RainbowKit config',
+          description: 'Custom config for export only',
+        },
+        {
+          id: 'connectkit',
+          name: 'ConnectKit',
+          configFields: [],
+          hasCodeEditor: false,
+        },
+      ] as AvailableUiKit[]),
+    },
+    addressing: { isValidAddress: vi.fn(() => true) },
+    typeMapping: { mapParameterTypeToFieldType: vi.fn(() => 'text') },
+    networkConfig: { id: 'evm:mainnet', ecosystem: 'evm' },
+  } as unknown as BuilderRuntime;
 
   it('should update config immediately when typing custom code', async () => {
     const onUpdateConfig = vi.fn();
 
     render(
       <UiKitSettings
-        adapter={mockAdapter as ContractAdapter}
+        runtime={mockAdapter}
         onUpdateConfig={onUpdateConfig}
         currentConfig={{ kitName: 'rainbowkit', kitConfig: {} }}
       />
@@ -112,7 +119,7 @@ describe('UiKitSettings', () => {
 
     render(
       <UiKitSettings
-        adapter={mockAdapter as ContractAdapter}
+        runtime={mockAdapter}
         onUpdateConfig={onUpdateConfig}
         currentConfig={{ kitName: 'rainbowkit', kitConfig: {} }}
       />
@@ -141,7 +148,7 @@ describe('UiKitSettings', () => {
 
     render(
       <UiKitSettings
-        adapter={mockAdapter as ContractAdapter}
+        runtime={mockAdapter}
         onUpdateConfig={onUpdateConfig}
         currentConfig={{
           kitName: 'rainbowkit',
@@ -166,7 +173,7 @@ describe('UiKitSettings', () => {
 
     render(
       <UiKitSettings
-        adapter={mockAdapter as ContractAdapter}
+        runtime={mockAdapter}
         onUpdateConfig={onUpdateConfig}
         currentConfig={{ kitName: 'rainbowkit', kitConfig: {} }}
       />

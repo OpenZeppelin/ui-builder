@@ -1,7 +1,9 @@
 import { useEffect } from 'react';
 
-import type { ContractAdapter, ContractSchema, FormValues } from '@openzeppelin/ui-types';
+import type { ContractSchema, FormValues } from '@openzeppelin/ui-types';
 import { hasMissingRequiredContractInputs } from '@openzeppelin/ui-utils';
+
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 import { contractDefinitionService } from '../../../../services/ContractDefinitionService';
 import { uiBuilderStore } from '../../hooks/uiBuilderStore';
@@ -17,7 +19,7 @@ interface UseAutoContractLoadProps {
   canAttemptLoad: (values: FormValues) => boolean;
   markAttempted: (values: FormValues) => void;
   loadContract: (values: FormValues) => Promise<void>;
-  adapter?: ContractAdapter | null;
+  runtime?: BuilderRuntime | null;
 }
 
 /**
@@ -34,7 +36,7 @@ export function useAutoContractLoad({
   canAttemptLoad,
   markAttempted,
   loadContract,
-  adapter,
+  runtime,
 }: UseAutoContractLoadProps) {
   useEffect(() => {
     const attemptAutomaticLoad = async () => {
@@ -58,10 +60,10 @@ export function useAutoContractLoad({
         }
       }
 
-      // Block auto-loads until adapter-declared required inputs are present
+      // Block auto-loads until runtime-declared required inputs are present
       if (
         !formIsValid ||
-        (adapter && hasMissingRequiredContractInputs(adapter, debouncedValues)) ||
+        (runtime && hasMissingRequiredContractInputs(runtime.contractLoading, debouncedValues)) ||
         !canAttemptLoad(debouncedValues)
       ) {
         return;
@@ -96,6 +98,6 @@ export function useAutoContractLoad({
     contractSchema,
     canAttemptLoad,
     markAttempted,
-    adapter,
+    runtime,
   ]);
 }

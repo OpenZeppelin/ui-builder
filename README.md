@@ -6,20 +6,20 @@
 
 This project is currently in development.
 
-[![CI](https://github.com/OpenZeppelin/ui-builder/actions/workflows/ci.yml/badge.svg)](https://github.com/OpenZeppelin/ui-builder/actions/workflows/ci.yml)
-[![Coverage](https://github.com/OpenZeppelin/ui-builder/actions/workflows/coverage.yml/badge.svg)](https://github.com/OpenZeppelin/ui-builder/actions/workflows/coverage.yml)
-[![Dependencies](https://github.com/OpenZeppelin/ui-builder/actions/workflows/dependencies.yml/badge.svg)](https://github.com/OpenZeppelin/ui-builder/actions/workflows/dependencies.yml)
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/OpenZeppelin/ui-builder/badge)](https://api.securityscorecards.dev/projects/github.com/OpenZeppelin/ui-builder)
-[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+[CI](https://github.com/OpenZeppelin/ui-builder/actions/workflows/ci.yml)
+[Coverage](https://github.com/OpenZeppelin/ui-builder/actions/workflows/coverage.yml)
+[Dependencies](https://github.com/OpenZeppelin/ui-builder/actions/workflows/dependencies.yml)
+[OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/OpenZeppelin/ui-builder)
+[License: AGPL v3](https://www.gnu.org/licenses/agpl-3.0)
 
-[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-brightgreen.svg)](https://conventionalcommits.org)
-[![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB)](https://reactjs.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Vite](https://img.shields.io/badge/Vite-B73BFE?logo=vite&logoColor=FFD62E)](https://vitejs.dev/)
-[![pnpm](https://img.shields.io/badge/pnpm-F69220?logo=pnpm&logoColor=white)](https://pnpm.io/)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
+[Conventional Commits](https://conventionalcommits.org)
+[Commitizen friendly](http://commitizen.github.io/cz-cli/)
+[TypeScript](https://www.typescriptlang.org/)
+[React](https://reactjs.org/)
+[Tailwind CSS](https://tailwindcss.com/)
+[Vite](https://vitejs.dev/)
+[pnpm](https://pnpm.io/)
+[PRs Welcome](http://makeapullrequest.com)
 
 ## Table of Contents
 
@@ -79,7 +79,7 @@ workflows, and export scripts.
 Core UI packages are maintained in the [openzeppelin-ui](https://github.com/OpenZeppelin/openzeppelin-ui)
 monorepo:
 
-- **react**: Core React context providers and hooks (AdapterProvider, WalletStateProvider, useWalletState) for managing global wallet/network state and adapter interactions.
+- **react**: Core React context providers and hooks (RuntimeProvider, WalletStateProvider, useWalletState) for managing global wallet/network state and runtime interactions.
 - **renderer**: React components for rendering blockchain transaction forms, contract state displays, execution configuration, and transaction status tracking.
 - **components**: Shared React UI components, including basic primitives (buttons, inputs, cards) and specialized form field components.
 - **storage**: Local storage services built on IndexedDB for persisting contract UI configurations, providing history, auto-save, and import/export capabilities.
@@ -190,7 +190,6 @@ integration for consuming apps is provided by `@openzeppelin/adapters-vite`.
 For a consistent and reliable development environment, it is highly recommended to run the application using Docker. This avoids potential issues with local Node.js, pnpm, or operating system configurations.
 
 1. **Prerequisites**: Make sure you have Docker and Docker Compose installed on your system.
-
 2. **Build and Run the Container**:
 
    ```bash
@@ -269,7 +268,6 @@ The application uses a modular, domain-driven adapter pattern to support multipl
   - The `ecosystemManager.ts` for discovering network configurations and adapter capabilities.
   - **Modular State Management**: Decomposed hook architecture with specialized responsibilities.
   - **Application Sidebar**: Complete UI for managing saved configurations with import/export capabilities
-
 - **Storage System (`@openzeppelin/ui-storage`)**: IndexedDB-based persistence layer built on
   Dexie.js providing:
   - **Auto-Save Engine**: Debounced saving with in-memory caching and global coordination
@@ -277,32 +275,26 @@ The application uses a modular, domain-driven adapter pattern to support multipl
   - **Import/Export**: JSON-based configuration sharing with validation
   - **CRUD Operations**: Complete lifecycle management for contract UI configurations
   - **Performance Optimization**: Efficient handling of 1000+ records with reactive updates
-
 - **Adapters (`@openzeppelin/adapter-*`)**: Individual packages maintained in
   `openzeppelin-adapters` containing chain-specific implementations (for example `adapter-evm` and
-  `adapter-stellar`). Each adapter conforms to the common `ContractAdapter` interface defined in
-  `@openzeppelin/ui-types`. Adapters are instantiated with a specific `NetworkConfig`, making them
-  network-aware. The Builder app (via providers from `@openzeppelin/ui-react`) dynamically loads and
-  uses these adapters. Furthermore, adapters can optionally provide UI-specific functionalities:
-  - **React UI Context Provider** (e.g., for `wagmi/react` on EVM): `WalletStateProvider` (from `@openzeppelin/ui-react`) consumes this to set up the necessary app-wide context for the active adapter.
+  `adapter-stellar`). Each adapter exposes profile-based runtimes and capability factories.
+  Runtimes are instantiated with a specific `NetworkConfig`, making them network-aware. The Builder
+  app (via `RuntimeProvider` from `@openzeppelin/ui-react`) dynamically loads and manages these
+  runtimes. Furthermore, adapters can optionally provide UI-specific functionalities:
+  - **React UI Context Provider** (e.g., for `wagmi/react` on EVM): `WalletStateProvider` (from `@openzeppelin/ui-react`) consumes this to set up the necessary app-wide context for the active runtime's ecosystem.
   - **Facade Hooks** (e.g., `useAccount`, `useSwitchChain`): These are exposed by `WalletStateProvider` (via `useWalletState().walletFacadeHooks` from `@openzeppelin/ui-react`) for UI components to interact with wallet functionalities reactively and agnostically.
-  - **Standardized UI Components** (e.g., `ConnectButton`): These components are retrieved via `activeAdapter.getEcosystemWalletComponents()` and are expected to internally use the facade hooks.
-
+  - **Standardized UI Components** (e.g., `ConnectButton`): These components are retrieved via `activeRuntime.uiKit.getEcosystemWalletComponents()` and are expected to internally use the facade hooks.
 - **Renderer (`@openzeppelin/ui-renderer`)**: Shared library containing app rendering components
   and common utilities (like logging).
-
 - **React Core (`@openzeppelin/ui-react`)**: Centralized React state management providing:
-  - **Adapter Provider**: Singleton pattern for adapter instance management
-  - **Wallet State Provider**: Global wallet/network state coordination
-  - **Context Hooks**: `useWalletState()` and `useAdapterContext()` for consistent state access
-
+  - **Runtime Provider**: Singleton pattern for ecosystem runtime instance management
+  - **Wallet State Provider**: Global wallet/network state coordination with ecosystem-scoped wallet sessions
+  - **Context Hooks**: `useWalletState()` and `useRuntimeContext()` for consistent state access
 - **UI Components (`@openzeppelin/ui-components`)**: Comprehensive component library including:
   - **Basic Primitives**: Buttons, inputs, cards, dialogs following shadcn/ui patterns
   - **Form Fields**: Specialized components for React Hook Form integration
   - **Field Utilities**: Validation, accessibility, and layout helpers
-
-- **Types**: Shared TypeScript type definitions across all packages, including the crucial `ContractAdapter` interface and types for adapter UI enhancements.
-
+- **Types**: Shared TypeScript type definitions across all packages, including capability interfaces, runtime/profile contracts, and adapter UI enhancement types.
 - **Styling System**: Centralized CSS variables and styling approach used across all packages.
 
 This architecture allows for easy extension to support additional blockchain ecosystems without modifying the builder application logic. The `builder` package dynamically loads and uses adapters via `ecosystemManager.ts` and the provider model (from `@openzeppelin/ui-react`) and the export system includes the specific adapter package needed for the target chain in exported forms. It utilizes **custom Vite plugins** to create **virtual modules**, enabling reliable loading of shared assets (like configuration files between packages) across package boundaries, ensuring consistency between development, testing, and exported builds.
@@ -318,7 +310,7 @@ This project is governed by the UI Builder Constitution. Please read it before c
 The primary build target in this repository is the Builder app, while adapter package builds and
 adapter-specific validation live in `openzeppelin-adapters`.
 
-For more detailed documentation about the adapter pattern, implementation guidelines, and validation rules, see the documentation within the [`packages/types/src/adapters/base.ts`](https://github.com/OpenZeppelin/openzeppelin-ui/blob/main/packages/types/src/adapters/base.ts) file where the `ContractAdapter` interface is defined.
+For more detailed documentation about the capability-based adapter pattern, implementation guidelines, and validation rules, see [docs/ADAPTER_ARCHITECTURE.md](https://github.com/OpenZeppelin/openzeppelin-adapters/blob/main/docs/ADAPTER_ARCHITECTURE.md) and the adapter/runtime types under [packages/types/src/adapters/](https://github.com/OpenZeppelin/openzeppelin-ui/tree/main/packages/types/src/adapters).
 
 ## Component Architecture
 
@@ -326,7 +318,7 @@ The project follows a structured component architecture centered around app rend
 
 ### Renderer Components
 
-The [`@openzeppelin/ui-renderer`](https://github.com/OpenZeppelin/openzeppelin-ui/tree/main/packages/renderer) package (maintained in the external openzeppelin-ui repo) provides:
+The [@openzeppelin/ui-renderer](https://github.com/OpenZeppelin/openzeppelin-ui/tree/main/packages/renderer) package (maintained in the external openzeppelin-ui repo) provides:
 
 - **TransactionForm**: Core component for rendering blockchain transaction forms with dynamic field generation
 - **ContractStateWidget**: Widget for querying and displaying contract state through view functions
@@ -532,4 +524,3 @@ The structure of this JSON file includes sections for:
 
 Refer to the README included with the exported application for detailed instructions on configuring `public/app.config.json`.
 
-<!-- Adapter-specific guides are documented in their respective package READMEs. -->

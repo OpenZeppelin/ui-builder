@@ -11,16 +11,63 @@ import { useMemo, useState } from 'react';
 import { Card, CardContent } from '@openzeppelin/ui-components';
 import { ContractActionBar, ContractStateWidget, TransactionForm } from '@openzeppelin/ui-renderer';
 import type {
-  ContractAdapter,
+  ComposerEcosystemRuntime,
   ContractSchema,
   ExecutionConfig,
   RenderFormSchema,
+  TransactionFormCapabilities,
 } from '@openzeppelin/ui-types';
 import { cn } from '@openzeppelin/ui-utils';
 
+export type BuilderAdapter = TransactionFormCapabilities;
+
+// eslint-disable-next-line react-refresh/only-export-components -- template file, non-component exports are intentional
+export function toBuilderAdapter(runtime: ComposerEcosystemRuntime | null): BuilderAdapter | null {
+  if (!runtime) {
+    return null;
+  }
+
+  const { addressing, explorer, schema, typeMapping, query, execution, relayer } = runtime;
+
+  return {
+    networkConfig: runtime.networkConfig,
+    dispose: runtime.dispose.bind(runtime),
+    isValidAddress: addressing.isValidAddress.bind(addressing),
+    getExplorerUrl: explorer.getExplorerUrl.bind(explorer),
+    getExplorerTxUrl: explorer.getExplorerTxUrl?.bind(explorer),
+    getWritableFunctions: schema.getWritableFunctions.bind(schema),
+    isViewFunction: schema.isViewFunction.bind(schema),
+    filterAutoQueryableFunctions: schema.filterAutoQueryableFunctions?.bind(schema),
+    getFunctionDecorations: schema.getFunctionDecorations?.bind(schema),
+    mapParameterTypeToFieldType: typeMapping.mapParameterTypeToFieldType.bind(typeMapping),
+    getCompatibleFieldTypes: typeMapping.getCompatibleFieldTypes.bind(typeMapping),
+    generateDefaultField: typeMapping.generateDefaultField.bind(typeMapping),
+    getTypeMappingInfo: typeMapping.getTypeMappingInfo.bind(typeMapping),
+    getRuntimeFieldBinding: typeMapping.getRuntimeFieldBinding?.bind(typeMapping),
+    queryViewFunction: query.queryViewFunction.bind(query),
+    formatFunctionResult: query.formatFunctionResult.bind(query),
+    getCurrentBlock: query.getCurrentBlock.bind(query),
+    formatTransactionData: execution.formatTransactionData.bind(execution),
+    signAndBroadcast: execution.signAndBroadcast.bind(execution),
+    getSupportedExecutionMethods: execution.getSupportedExecutionMethods.bind(execution),
+    validateExecutionConfig: execution.validateExecutionConfig.bind(execution),
+    waitForTransactionConfirmation: execution.waitForTransactionConfirmation?.bind(execution),
+    getRelayers: relayer.getRelayers.bind(relayer),
+    getRelayer: relayer.getRelayer.bind(relayer),
+    getNetworkServiceForms: relayer.getNetworkServiceForms.bind(relayer),
+    getDefaultServiceConfig: relayer.getDefaultServiceConfig.bind(relayer),
+    validateNetworkServiceConfig: relayer.validateNetworkServiceConfig?.bind(relayer),
+    testNetworkServiceConnection: relayer.testNetworkServiceConnection?.bind(relayer),
+    validateRpcEndpoint: relayer.validateRpcEndpoint?.bind(relayer),
+    testRpcConnection: relayer.testRpcConnection?.bind(relayer),
+    validateExplorerConfig: relayer.validateExplorerConfig?.bind(relayer),
+    testExplorerConnection: relayer.testExplorerConnection?.bind(relayer),
+  };
+}
+
 // Props for GeneratedForm
 interface GeneratedFormProps {
-  adapter: ContractAdapter;
+  adapter: BuilderAdapter;
   isWalletConnected?: boolean;
 }
 
@@ -134,7 +181,8 @@ export default function GeneratedForm({ adapter, isWalletConnected }: GeneratedF
               <ContractStateWidget
                 contractSchema={schemaToUse}
                 contractAddress={contractAddress}
-                adapter={adapter}
+                query={adapter}
+                schema={adapter}
                 isVisible={isWidgetVisible}
                 onToggle={toggleWidget}
                 error={loadError}

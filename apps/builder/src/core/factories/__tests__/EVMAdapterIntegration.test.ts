@@ -1,10 +1,12 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 
-import type { ContractAdapter, ContractSchema, EvmNetworkConfig } from '@openzeppelin/ui-types';
+import type { ContractSchema, EvmNetworkConfig } from '@openzeppelin/ui-types';
+
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 import { TEST_FIXTURES } from './fixtures/evm-test-fixtures';
 
-import { getAdapter } from '../../ecosystemManager';
+import { getRuntime } from '../../ecosystemManager';
 import { FormSchemaFactory } from '../FormSchemaFactory';
 
 /**
@@ -36,13 +38,12 @@ const mockEvmNetworkConfig: EvmNetworkConfig = {
 
 describe('EVM Adapter Integration Tests', () => {
   const factory = new FormSchemaFactory();
-  let adapter: ContractAdapter; // Type it as ContractAdapter
+  let runtime: BuilderRuntime;
   let erc20Schema: ContractSchema;
   let inputTesterSchema: ContractSchema;
 
   beforeAll(async () => {
-    // Await the adapter initialization
-    adapter = await getAdapter(mockEvmNetworkConfig);
+    runtime = await getRuntime(mockEvmNetworkConfig);
 
     // Create mock schemas directly instead of loading them
     erc20Schema = {
@@ -199,7 +200,7 @@ describe('EVM Adapter Integration Tests', () => {
       expect(transferFunction).toBeDefined();
       if (!transferFunction) return; // TypeScript check
 
-      const formSchema = factory.generateFormSchema(adapter, erc20Schema, transferFunction.id);
+      const formSchema = factory.generateFormSchema(runtime, erc20Schema, transferFunction.id);
 
       // Validate basic schema properties
       expect(formSchema.id).toBe(`form-${transferFunction.id}`);
@@ -252,7 +253,7 @@ describe('EVM Adapter Integration Tests', () => {
       expect(approveFunction).toBeDefined();
       if (!approveFunction) return; // TypeScript check
 
-      const formSchema = factory.generateFormSchema(adapter, erc20Schema, approveFunction.id);
+      const formSchema = factory.generateFormSchema(runtime, erc20Schema, approveFunction.id);
 
       // Validate basic schema properties
       expect(formSchema.id).toBe(`form-${approveFunction.id}`);
@@ -280,7 +281,7 @@ describe('EVM Adapter Integration Tests', () => {
       expect(boolFunction).toBeDefined();
       if (!boolFunction) return; // TypeScript check
 
-      const formSchema = factory.generateFormSchema(adapter, inputTesterSchema, boolFunction.id);
+      const formSchema = factory.generateFormSchema(runtime, inputTesterSchema, boolFunction.id);
 
       // Validate the boolean field
       expect(formSchema.fields).toHaveLength(1);
@@ -309,7 +310,7 @@ describe('EVM Adapter Integration Tests', () => {
       expect(arrayFunction).toBeDefined();
       if (!arrayFunction) return; // TypeScript check
 
-      const formSchema = factory.generateFormSchema(adapter, inputTesterSchema, arrayFunction.id);
+      const formSchema = factory.generateFormSchema(runtime, inputTesterSchema, arrayFunction.id);
 
       // Validate the array field
       expect(formSchema.fields).toHaveLength(1);
@@ -329,7 +330,7 @@ describe('EVM Adapter Integration Tests', () => {
       expect(structFunction).toBeDefined();
       if (!structFunction) return;
 
-      const formSchema = factory.generateFormSchema(adapter, inputTesterSchema, structFunction.id);
+      const formSchema = factory.generateFormSchema(runtime, inputTesterSchema, structFunction.id);
 
       // Verify that complex struct parameters are mapped to object fields
       expect(formSchema.fields).toHaveLength(1);
@@ -349,7 +350,7 @@ describe('EVM Adapter Integration Tests', () => {
       // Test uint8 field
       const uint8Function = intFixture.functions.find((f) => f.id === 'function-uint8');
       expect(uint8Function).toBeDefined();
-      const uint8Schema = factory.generateFormSchema(adapter, intFixture, 'function-uint8');
+      const uint8Schema = factory.generateFormSchema(runtime, intFixture, 'function-uint8');
 
       expect(uint8Schema.fields).toHaveLength(1);
       const uint8Field = uint8Schema.fields[0];
@@ -368,7 +369,7 @@ describe('EVM Adapter Integration Tests', () => {
       // Test uint256 field - now uses bigint to handle large values safely
       const uint256Function = intFixture.functions.find((f) => f.id === 'function-uint256');
       expect(uint256Function).toBeDefined();
-      const uint256Schema = factory.generateFormSchema(adapter, intFixture, 'function-uint256');
+      const uint256Schema = factory.generateFormSchema(runtime, intFixture, 'function-uint256');
 
       expect(uint256Schema.fields).toHaveLength(1);
       const uint256Field = uint256Schema.fields[0];
@@ -392,7 +393,7 @@ describe('EVM Adapter Integration Tests', () => {
       // Test dynamic bytes field
       const bytesFunction = byteFixture.functions.find((f) => f.id === 'function-bytes');
       expect(bytesFunction).toBeDefined();
-      const bytesSchema = factory.generateFormSchema(adapter, byteFixture, 'function-bytes');
+      const bytesSchema = factory.generateFormSchema(runtime, byteFixture, 'function-bytes');
 
       expect(bytesSchema.fields).toHaveLength(1);
       const bytesField = bytesSchema.fields[0];
@@ -402,7 +403,7 @@ describe('EVM Adapter Integration Tests', () => {
       // Test bytes32 field
       const bytes32Function = byteFixture.functions.find((f) => f.id === 'function-bytes32');
       expect(bytes32Function).toBeDefined();
-      const bytes32Schema = factory.generateFormSchema(adapter, byteFixture, 'function-bytes32');
+      const bytes32Schema = factory.generateFormSchema(runtime, byteFixture, 'function-bytes32');
 
       expect(bytes32Schema.fields).toHaveLength(1);
       const bytes32Field = bytes32Schema.fields[0];
@@ -423,7 +424,7 @@ describe('EVM Adapter Integration Tests', () => {
       );
       expect(dynamicArrayFunction).toBeDefined();
       const dynamicArraySchema = factory.generateFormSchema(
-        adapter,
+        runtime,
         arrayFixture,
         'function-dynamic-array'
       );
@@ -438,7 +439,7 @@ describe('EVM Adapter Integration Tests', () => {
       );
       expect(fixedArrayFunction).toBeDefined();
       const fixedArraySchema = factory.generateFormSchema(
-        adapter,
+        runtime,
         arrayFixture,
         'function-fixed-array'
       );
@@ -462,7 +463,7 @@ describe('EVM Adapter Integration Tests', () => {
       expect(emptyInputsFunction).toBeDefined();
 
       const emptyInputsSchema = factory.generateFormSchema(
-        adapter,
+        runtime,
         errorFixture,
         'function-empty-inputs'
       );
@@ -476,7 +477,7 @@ describe('EVM Adapter Integration Tests', () => {
     it('should throw error when function is not found', () => {
       // Test non-existent function ID
       expect(() => {
-        factory.generateFormSchema(adapter, erc20Schema, 'non-existent-function');
+        factory.generateFormSchema(runtime, erc20Schema, 'non-existent-function');
       }).toThrow('Function non-existent-function not found in contract schema');
     });
 
@@ -489,7 +490,7 @@ describe('EVM Adapter Integration Tests', () => {
 
       // Should generate a schema with a fallback field type that can handle unknown types
       const unsupportedTypeSchema = factory.generateFormSchema(
-        adapter,
+        runtime,
         errorFixture,
         'function-unsupported-type'
       );
@@ -497,18 +498,18 @@ describe('EVM Adapter Integration Tests', () => {
       expect(unsupportedTypeSchema.fields).toHaveLength(1);
       const customTypeField = unsupportedTypeSchema.fields[0];
 
-      // The adapter should provide a fallback field type for unknown types
+      // The runtime should provide a fallback field type for unknown types
       expect(customTypeField.type).toBeDefined();
     });
   });
 
   describe('End-to-End Form Generation', () => {
     it('should generate forms for all ERC20 functions', async () => {
-      const writableFunctions = adapter.getWritableFunctions(erc20Schema);
+      const writableFunctions = runtime.schema.getWritableFunctions(erc20Schema);
 
       // Loop through all writable functions and generate schemas
       for (const func of writableFunctions) {
-        const formSchema = factory.generateFormSchema(adapter, erc20Schema, func.id);
+        const formSchema = factory.generateFormSchema(runtime, erc20Schema, func.id);
 
         // Verify basic schema structure
         expect(formSchema.id).toBeDefined();
@@ -532,7 +533,7 @@ describe('EVM Adapter Integration Tests', () => {
       expect(complexFunction).toBeDefined();
       if (!complexFunction) return;
 
-      const formSchema = factory.generateFormSchema(adapter, inputTesterSchema, complexFunction.id);
+      const formSchema = factory.generateFormSchema(runtime, inputTesterSchema, complexFunction.id);
 
       // Verify each field has appropriate transforms based on its type
       for (const field of formSchema.fields) {
@@ -562,21 +563,21 @@ describe('EVM Adapter Integration Tests', () => {
       }
     });
 
-    it('should handle the complete workflow from adapter to form schema', async () => {
+    it('should handle the complete workflow from runtime to form schema', async () => {
       // This test validates the entire flow from contract loading to form generation
 
       // 1. Use the already defined erc20Schema instead of loading a mock contract
       const contract = erc20Schema;
 
       // 2. Get writable functions
-      const writableFunctions = adapter.getWritableFunctions(contract);
+      const writableFunctions = runtime.schema.getWritableFunctions(contract);
       expect(writableFunctions.length).toBeGreaterThan(0);
 
       // 3. Get a function to test
       const testFunction = writableFunctions[0];
 
       // 4. Generate a form schema
-      const formSchema = factory.generateFormSchema(adapter, contract, testFunction.id);
+      const formSchema = factory.generateFormSchema(runtime, contract, testFunction.id);
 
       // 5. Verify the schema is complete and valid
       expect(formSchema.id).toBe(`form-${testFunction.id}`);
@@ -594,7 +595,7 @@ describe('EVM Adapter Integration Tests', () => {
         expect(field.name).toBe(input.name);
 
         // Field should have a type mapped from the parameter type
-        const expectedType = adapter.mapParameterTypeToFieldType(input.type);
+        const expectedType = runtime.typeMapping.mapParameterTypeToFieldType(input.type);
         expect(field.type).toBe(expectedType);
 
         // Field should have transforms

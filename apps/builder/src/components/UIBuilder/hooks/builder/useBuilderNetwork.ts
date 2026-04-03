@@ -1,20 +1,20 @@
 import { shallow } from 'zustand/shallow';
 import { useCallback, useEffect } from 'react';
 
-import { useWalletState } from '@openzeppelin/ui-react';
 import { Ecosystem } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
+import { useBuilderWalletState } from '../../../../hooks/useBuilderWalletState';
 import { STEP_INDICES } from '../../constants/stepIndices';
 import { uiBuilderStore } from '../uiBuilderStore';
 import { useUIBuilderStore } from '../useUIBuilderStore';
 
 /**
- * @notice A hook to manage network and adapter interactions.
+ * @notice A hook to manage network and runtime interactions.
  * @returns An object with functions to handle network selection and clear switch state.
  */
 export function useBuilderNetwork() {
-  const { setActiveNetworkId, activeAdapter, isAdapterLoading } = useWalletState();
+  const { activeRuntime, isRuntimeLoading, setActiveNetworkId } = useBuilderWalletState();
 
   // Subscribe to store state for reactive auto-advance
   const { pendingNetworkId, currentStepIndex } = useUIBuilderStore(
@@ -45,7 +45,7 @@ export function useBuilderNetwork() {
         networkToSwitchTo: networkId, // Mark for network switch
       }));
 
-      // Set the network ID and trigger adapter loading
+      // Set the network ID and trigger runtime loading
       setActiveNetworkId(networkId);
     },
     [setActiveNetworkId]
@@ -54,14 +54,14 @@ export function useBuilderNetwork() {
   useEffect(() => {
     if (
       pendingNetworkId &&
-      activeAdapter &&
-      !isAdapterLoading &&
-      activeAdapter.networkConfig.id === pendingNetworkId &&
+      activeRuntime &&
+      !isRuntimeLoading &&
+      activeRuntime.networkConfig.id === pendingNetworkId &&
       currentStepIndex === STEP_INDICES.CHAIN_SELECT
     ) {
       logger.info(
         'useBuilderNetwork',
-        `Auto-advancing to next step after adapter ready for network: ${pendingNetworkId}`
+        `Auto-advancing to next step after runtime ready for network: ${pendingNetworkId}`
       );
 
       uiBuilderStore.updateState(() => ({
@@ -72,9 +72,9 @@ export function useBuilderNetwork() {
   }, [
     pendingNetworkId,
     currentStepIndex,
-    activeAdapter,
-    isAdapterLoading,
-    activeAdapter?.networkConfig.id,
+    activeRuntime,
+    isRuntimeLoading,
+    activeRuntime?.networkConfig.id,
   ]);
 
   const clearNetworkToSwitchTo = useCallback(() => {

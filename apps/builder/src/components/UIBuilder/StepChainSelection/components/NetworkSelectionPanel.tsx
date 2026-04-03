@@ -2,9 +2,9 @@ import { Search } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
 import { Input } from '@openzeppelin/ui-components';
-import { useAdapterContext } from '@openzeppelin/ui-react';
+import { useRuntimeContext } from '@openzeppelin/ui-react';
 import { NetworkSettingsDialog } from '@openzeppelin/ui-renderer';
-import { ContractAdapter, Ecosystem, NetworkConfig } from '@openzeppelin/ui-types';
+import type { Ecosystem, NetworkConfig, RelayerCapability } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
 import { getEcosystemMetadata } from '../../../../core/ecosystemManager';
@@ -28,8 +28,8 @@ export function NetworkSelectionPanel({
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [settingsNetwork, setSettingsNetwork] = useState<NetworkConfig | null>(null);
-  const [settingsAdapter, setSettingsAdapter] = useState<ContractAdapter | null>(null);
-  const { getAdapterForNetwork } = useAdapterContext();
+  const [settingsRelayer, setSettingsRelayer] = useState<RelayerCapability | null>(null);
+  const { getRuntimeForNetwork } = useRuntimeContext();
   const pendingNetworkId = useUIBuilderStore((s) => s.pendingNetworkId);
 
   // Local state set synchronously on click for instant feedback,
@@ -52,16 +52,16 @@ export function NetworkSelectionPanel({
     [onNetworkSelected]
   );
 
-  // Get adapter for the settings network
+  // Resolve the relayer capability for the settings dialog.
   useEffect(() => {
     if (!settingsNetwork) {
-      setSettingsAdapter(null);
+      setSettingsRelayer(null);
       return;
     }
 
-    const { adapter } = getAdapterForNetwork(settingsNetwork);
-    setSettingsAdapter(adapter);
-  }, [settingsNetwork, getAdapterForNetwork]);
+    const { runtime } = getRuntimeForNetwork(settingsNetwork);
+    setSettingsRelayer(runtime?.relayer ?? null);
+  }, [settingsNetwork, getRuntimeForNetwork]);
 
   // Note: Network settings handler for error notifications is now registered
   // globally in NetworkErrorHandler component to ensure it's always available
@@ -104,7 +104,7 @@ export function NetworkSelectionPanel({
 
   const handleCloseNetworkSettings = () => {
     setSettingsNetwork(null);
-    setSettingsAdapter(null);
+    setSettingsRelayer(null);
   };
 
   return (
@@ -173,7 +173,7 @@ export function NetworkSelectionPanel({
         isOpen={!!settingsNetwork}
         onOpenChange={(open: boolean) => !open && handleCloseNetworkSettings()}
         networkConfig={settingsNetwork}
-        adapter={settingsAdapter}
+        relayer={settingsRelayer}
       />
     </div>
   );

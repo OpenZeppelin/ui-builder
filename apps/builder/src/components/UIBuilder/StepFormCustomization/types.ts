@@ -1,7 +1,9 @@
 import type { Control, UseFormReturn } from 'react-hook-form';
 
-import type { ContractAdapter, ExecutionMethodType, RelayerDetails } from '@openzeppelin/ui-types';
+import type { ExecutionMethodType, RelayerDetails } from '@openzeppelin/ui-types';
 import { FormFieldType, FormValues } from '@openzeppelin/ui-types';
+
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 /**
  * Form values interface for the field editor form
@@ -34,22 +36,22 @@ export interface ExecutionMethodFormData {
  */
 export interface EoaConfigurationProps {
   control: Control<ExecutionMethodFormData>;
-  adapter: ContractAdapter | null;
+  runtime: BuilderRuntime | null;
   watchedEoaOption: 'any' | 'specific' | undefined;
 }
 
 export interface RelayerConfigurationProps {
   control: Control<ExecutionMethodFormData>;
-  adapter: ContractAdapter | null;
+  runtime: BuilderRuntime | null;
   setValue: UseFormReturn<ExecutionMethodFormData>['setValue'];
 }
 
 export interface PrimaryMethodSelectorProps {
   control: Control<ExecutionMethodFormData>;
-  adapterAvailable: boolean;
+  runtimeAvailable: boolean;
   options: { value: string; label: string; disabled?: boolean }[];
   watchedEoaOption?: 'any' | 'specific' | undefined;
-  adapter?: ContractAdapter | null;
+  runtime?: BuilderRuntime | null;
   setValue: UseFormReturn<ExecutionMethodFormData>['setValue'];
   isWidgetExpanded?: boolean;
 }
