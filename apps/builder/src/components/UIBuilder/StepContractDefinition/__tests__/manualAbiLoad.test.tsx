@@ -54,8 +54,12 @@ describe('Manual ABI loading deduplication', () => {
     } as const;
 
     mockAdapter = {
-      // minimal adapter surface used by useContractDefinition
       networkConfig: mockNetworkConfig,
+      contractLoading: {
+        loadContract: vi.fn().mockResolvedValue(mockSchema),
+        loadContractWithMetadata: loadSpy,
+        getContractDefinitionInputs: () => [],
+      },
       loadContract: vi.fn().mockResolvedValue(mockSchema),
       loadContractWithMetadata: loadSpy,
       getWritableFunctions: () => [],

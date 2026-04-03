@@ -54,6 +54,11 @@ describe('Deep link auto-load deduplication', () => {
 
     mockAdapter = {
       networkConfig: mockNetworkConfig,
+      contractLoading: {
+        loadContract: vi.fn().mockResolvedValue(mockSchema),
+        loadContractWithMetadata: loadSpy,
+        getContractDefinitionInputs: () => [],
+      },
       loadContract: vi.fn().mockResolvedValue(mockSchema),
       loadContractWithMetadata: loadSpy,
       getWritableFunctions: () => [],
