@@ -99,7 +99,7 @@ export function useFormConfig({
         }
       }
     }
-  }, [contractSchema, selectedFunction, runtime, onFormConfigUpdated, configInitialized.current]);
+  }, [contractSchema, selectedFunction, runtime, onFormConfigUpdated]);
 
   /**
    * Effect 4: Auto-add runtime secret field for functions requiring a runtime secret.

@@ -95,7 +95,7 @@ export function StepFormCustomization({
   } = useFormConfig({
     contractSchema,
     selectedFunction,
-    runtime,
+    runtime: effectiveRuntime ?? null,
     onFormConfigUpdated,
     existingFormConfig: currentFormConfig,
   });
