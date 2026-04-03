@@ -106,10 +106,13 @@ function pickBestVersion(rcVersion, latestVersion) {
     };
   }
   if (cmp === 0) {
+    const preferLatest = !latest.prerelease;
     return {
-      version: latestVersion,
-      source: 'latest',
-      reason: `same base; release ${latestVersion} beats pre-release ${rcVersion}`,
+      version: preferLatest ? latestVersion : rcVersion,
+      source: preferLatest ? 'latest' : 'rc',
+      reason: preferLatest
+        ? `same base; stable release ${latestVersion} beats pre-release ${rcVersion}`
+        : `same base; latest ${latestVersion} is also a pre-release, keeping rc ${rcVersion}`,
     };
   }
   return {

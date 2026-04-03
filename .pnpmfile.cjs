@@ -228,11 +228,16 @@ function allowAdapterPrereleases(pkg) {
   for (const depType of ['dependencies', 'devDependencies']) {
     if (!pkg[depType]) continue;
     for (const [name, range] of Object.entries(pkg[depType])) {
-      if (!name.startsWith('@openzeppelin/adapter') && name !== '@openzeppelin/adapters-vite') continue;
+      if (!name.startsWith('@openzeppelin/adapter') && !name.startsWith('@openzeppelin/adapters-')) continue;
       const m = range.match(/^\^(\d+)\.(\d+)\.(\d+)$/);
       if (!m) continue;
-      const [, maj, min, pat] = m;
-      pkg[depType][name] = `>=${maj}.${min}.${pat}-0 <${Number(maj) + 1}.0.0`;
+      const maj = Number(m[1]), min = Number(m[2]), pat = Number(m[3]);
+      const upper = maj > 0
+        ? `${maj + 1}.0.0`
+        : min > 0
+          ? `0.${min + 1}.0`
+          : `0.0.${pat + 1}`;
+      pkg[depType][name] = `>=${maj}.${min}.${pat}-0 <${upper}`;
     }
   }
 }
