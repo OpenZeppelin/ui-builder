@@ -57,8 +57,12 @@ function getNpmTagVersion(packageName, tag) {
  * @param {string} version
  */
 function parseSemver(version) {
-  const [core, ...prereleaseParts] = version.split('-');
+  const stripped = version.replace(/\+.*$/, '');
+  const [core, ...prereleaseParts] = stripped.split('-');
   const [major, minor, patch] = core.split('.').map(Number);
+  if (!Number.isFinite(major) || !Number.isFinite(minor) || !Number.isFinite(patch)) {
+    throw new Error(`Cannot parse semver: ${version}`);
+  }
   return { major, minor, patch, prerelease: prereleaseParts.join('-') || null };
 }
 
