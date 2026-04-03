@@ -160,59 +160,70 @@ export class AppExportSystem {
         getEcosystemDefinition(networkConfig.ecosystem),
       ]);
 
-      // 1. Generate all necessary code components
-      logger.info('Export System', 'Generating code components...');
-      const mainTsxCode = await this.appCodeGenerator!.generateMainTsx(networkConfig);
-      const appComponentCode = await this.appCodeGenerator!.generateAppComponent(
-        networkConfig.ecosystem,
-        functionId
-      );
-      const formComponentCode = await this.appCodeGenerator!.generateFormComponent(
-        formConfig,
-        contractSchema,
-        networkConfig,
-        functionId
-      );
+      try {
+        // 1. Generate all necessary code components
+        logger.info('Export System', 'Generating code components...');
+        const mainTsxCode = await this.appCodeGenerator!.generateMainTsx(networkConfig);
+        const appComponentCode = await this.appCodeGenerator!.generateAppComponent(
+          networkConfig.ecosystem,
+          functionId
+        );
+        const formComponentCode = await this.appCodeGenerator!.generateFormComponent(
+          formConfig,
+          contractSchema,
+          networkConfig,
+          functionId
+        );
 
-      // 2. Prepare custom files object
-      const customFiles = {
-        'src/main.tsx': mainTsxCode,
-        'src/App.tsx': appComponentCode,
-        'src/components/GeneratedForm.tsx': formComponentCode,
-      };
+        // 2. Prepare custom files object
+        const customFiles = {
+          'src/main.tsx': mainTsxCode,
+          'src/App.tsx': appComponentCode,
+          'src/components/GeneratedForm.tsx': formComponentCode,
+        };
 
-      // 3. Assemble Project Files
-      logger.info('Export System', 'Assembling project files...');
-      const projectFiles = await this.assembleProjectFiles(
-        formConfig,
-        contractSchema,
-        networkConfig,
-        functionId,
-        exportOptions,
-        customFiles,
-        runtime,
-        ecosystemDefinition
-      );
-      logger.info('Export System', `Project files assembled: ${Object.keys(projectFiles).length}`);
+        // 3. Assemble Project Files
+        logger.info('Export System', 'Assembling project files...');
+        const projectFiles = await this.assembleProjectFiles(
+          formConfig,
+          contractSchema,
+          networkConfig,
+          functionId,
+          exportOptions,
+          customFiles,
+          runtime,
+          ecosystemDefinition
+        );
+        logger.info(
+          'Export System',
+          `Project files assembled: ${Object.keys(projectFiles).length}`
+        );
 
-      // 4. Create ZIP file
-      logger.info('Export System', 'Generating ZIP file...');
-      const fileName = this.generateFileName(functionId);
-      const zipResult = await this.createZipFile(projectFiles, fileName, exportOptions.onProgress);
-      logger.info('Export System', `ZIP file generated: ${zipResult.fileName}`);
+        // 4. Create ZIP file
+        logger.info('Export System', 'Generating ZIP file...');
+        const fileName = this.generateFileName(functionId);
+        const zipResult = await this.createZipFile(
+          projectFiles,
+          fileName,
+          exportOptions.onProgress
+        );
+        logger.info('Export System', `ZIP file generated: ${zipResult.fileName}`);
 
-      // 5. Prepare and return the final export result
-      const dependencies = await this.packageManager!.getDependencies(
-        formConfig,
-        networkConfig.ecosystem
-      );
-      const finalResult: ExportResult = {
-        data: zipResult.data,
-        fileName: zipResult.fileName,
-        dependencies,
-      };
-      logger.info('Export System', 'Export process complete.');
-      return finalResult;
+        // 5. Prepare and return the final export result
+        const dependencies = await this.packageManager!.getDependencies(
+          formConfig,
+          networkConfig.ecosystem
+        );
+        const finalResult: ExportResult = {
+          data: zipResult.data,
+          fileName: zipResult.fileName,
+          dependencies,
+        };
+        logger.info('Export System', 'Export process complete.');
+        return finalResult;
+      } finally {
+        runtime.dispose();
+      }
     } catch (error) {
       logger.error('Export System', 'Export failed:', error);
       throw new Error(`Export failed: ${(error as Error).message}`);

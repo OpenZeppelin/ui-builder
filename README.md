@@ -225,7 +225,7 @@ and runtime integration code
 ### External Package Repositories
 
 - **[openzeppelin-adapters](https://github.com/OpenZeppelin/openzeppelin-adapters)** - Adapter
-implementations published as `@openzeppelin/adapter-`*
+implementations published as `@openzeppelin/adapter-*`
 - **[openzeppelin-ui](https://github.com/OpenZeppelin/openzeppelin-ui)** - Shared renderer, React,
 components, storage, types, styles, and utils packages
 
@@ -427,7 +427,7 @@ repository.
 
 To add support for a new ecosystem end-to-end:
 
-1. Implement and publish the adapter from `openzeppelin-adapters` under `@openzeppelin/adapter-`*.
+1. Implement and publish the adapter from `openzeppelin-adapters` under `@openzeppelin/adapter-*`.
 2. Register the new package in `apps/builder/src/core/ecosystemManager.ts`.
 3. Update export configuration and tests so generated apps include the new package correctly.
 4. Verify the Builder app still builds and exports successfully.
