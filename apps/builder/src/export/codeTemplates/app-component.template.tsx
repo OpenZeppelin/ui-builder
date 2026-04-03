@@ -6,37 +6,38 @@
  * - "@@param-name@@" - Template variable markers (consistent across all templates)
  */
 /*------------TEMPLATE COMMENT END------------*/
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { Footer } from '@openzeppelin/ui-components';
 import { useDerivedAccountStatus, useWalletState } from '@openzeppelin/ui-react';
 import { WalletConnectionWithSettings } from '@openzeppelin/ui-renderer';
-import type { ContractAdapter } from '@openzeppelin/ui-types';
+import type { ComposerEcosystemRuntime } from '@openzeppelin/ui-types';
 
 // @ts-expect-error - This import will be processed during code generation
-import GeneratedForm from './components/GeneratedForm';
+import GeneratedForm, { toBuilderAdapter } from './components/GeneratedForm';
 
 /**
  * App Component
  *
  * Main application component that wraps the form.
- * Uses useWalletState to get the active adapter.
- * Caches the adapter once available to prevent form remounts during wallet connection.
+ * Uses useWalletState to get the active runtime.
+ * Caches the first resolved runtime to prevent form remounts during wallet connection.
  */
 export function App() {
-  const { activeAdapter } = useWalletState();
+  const { activeRuntime, isRuntimeLoading } = useWalletState();
   const { isConnected: isWalletConnectedForForm } = useDerivedAccountStatus();
 
-  // Persist the adapter used by the form once it first becomes available to avoid remounts
-  // This prevents form resets when the adapter briefly transitions during wallet connection
-  const [adapterForForm, setAdapterForForm] = useState<ContractAdapter | null>(null);
+  // Persist the runtime used by the form once it first becomes available to avoid remounts
+  // when wallet state briefly transitions.
+  const [runtimeForForm, setRuntimeForForm] = useState<ComposerEcosystemRuntime | null>(null);
 
   useEffect(() => {
-    if (activeAdapter) {
-      // Don't replace an existing adapter instance to keep the form mounted
-      setAdapterForForm((prev) => prev ?? activeAdapter);
+    if (activeRuntime) {
+      setRuntimeForForm((prev) => prev ?? (activeRuntime as ComposerEcosystemRuntime));
     }
-  }, [activeAdapter]);
+  }, [activeRuntime]);
+
+  const adapterForForm = useMemo(() => toBuilderAdapter(runtimeForForm), [runtimeForForm]);
 
   return (
     <div className="app">
@@ -62,7 +63,9 @@ export function App() {
             <GeneratedForm adapter={adapterForForm} isWalletConnected={isWalletConnectedForForm} />
           ) : (
             // Only shown before the first adapter resolves, never shown again
-            <div className="app-loading">Loading adapter...</div>
+            <div className="app-loading">
+              {isRuntimeLoading ? 'Loading runtime...' : 'Loading form...'}
+            </div>
           )}
         </div>
       </main>

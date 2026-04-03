@@ -1,5 +1,4 @@
 import type {
-  ContractAdapter,
   EoaExecutionConfig,
   ExecutionConfig,
   ExecutionMethodType,
@@ -8,24 +7,26 @@ import type {
 } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
+
 import { ExecutionMethodFormData } from '../types';
 
 /**
  * Validates the EOA-specific configuration for the UI builder.
  * @param config The execution configuration to validate.
- * @param adapter The contract adapter, used for address validation.
+ * @param runtime The builder runtime, used for address validation.
  * @returns An error message string if validation fails, otherwise null.
  */
 const _validateEoaForBuilder = (
   config: ExecutionConfig,
-  adapter: ContractAdapter
+  runtime: BuilderRuntime
 ): string | null => {
   const eoaConfig = config as EoaExecutionConfig;
   if (!eoaConfig.allowAny) {
     if (!eoaConfig.specificAddress) {
       return 'Please provide the specific EOA address.';
     }
-    if (!adapter.isValidAddress(eoaConfig.specificAddress)) {
+    if (!runtime.addressing.isValidAddress(eoaConfig.specificAddress)) {
       return `Invalid EOA address format: ${eoaConfig.specificAddress}`;
     }
   }
@@ -39,7 +40,7 @@ const _validateEoaForBuilder = (
  */
 const _validateRelayerForBuilder = (
   config: ExecutionConfig,
-  _adapter: ContractAdapter
+  _runtime: BuilderRuntime
 ): string | null => {
   const relayerConfig = config as RelayerExecutionConfig;
   if (!relayerConfig.serviceUrl) {
@@ -57,7 +58,7 @@ const _validateRelayerForBuilder = (
  */
 export const executionMethodValidatorMap: Record<
   ExecutionMethodType,
-  (config: ExecutionConfig, adapter: ContractAdapter) => string | null
+  (config: ExecutionConfig, runtime: BuilderRuntime) => string | null
 > = {
   eoa: _validateEoaForBuilder,
   relayer: _validateRelayerForBuilder,

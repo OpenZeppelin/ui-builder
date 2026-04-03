@@ -13,8 +13,10 @@
  * - Integration with React Suspense and Error Boundaries
  * - DevTools for debugging query states
  */
-import { ContractAdapter, FormValues } from '@openzeppelin/ui-types';
+import { FormValues } from '@openzeppelin/ui-types';
 import { logger, simpleHash } from '@openzeppelin/ui-utils';
+
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 import { ContractLoadResult, loadContractDefinitionWithMetadata } from './ContractLoader';
 
@@ -22,7 +24,7 @@ import { ContractLoadResult, loadContractDefinitionWithMetadata } from './Contra
  * Contract definition request configuration
  */
 interface ContractDefinitionRequest {
-  adapter: ContractAdapter;
+  runtime: BuilderRuntime;
   formValues: FormValues;
   networkId: string;
   contractAddress: string;
@@ -90,7 +92,7 @@ class ContractDefinitionService {
     request: ContractDefinitionRequest,
     onSuccess: (result: ContractLoadResult, formValues: FormValues) => void
   ): Promise<boolean> {
-    const { adapter, formValues, networkId, contractAddress } = request;
+    const { runtime, formValues, networkId, contractAddress } = request;
     const definitionStr =
       typeof formValues.contractDefinition === 'string' ? formValues.contractDefinition : undefined;
     const requestKey = this.getRequestKey(networkId, contractAddress, definitionStr);
@@ -120,7 +122,7 @@ class ContractDefinitionService {
 
     try {
       logger.info('ContractDefinitionService', `Loading ${contractAddress} on ${networkId}`);
-      const result = await loadContractDefinitionWithMetadata(adapter, formValues);
+      const result = await loadContractDefinitionWithMetadata(runtime, formValues);
 
       // Success
       this.notify(requestKey, {

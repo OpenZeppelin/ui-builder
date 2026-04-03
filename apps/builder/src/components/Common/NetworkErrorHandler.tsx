@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { useNetworkErrors } from '@openzeppelin/ui-components';
-import { useAdapterContext } from '@openzeppelin/ui-react';
+import { useRuntimeContext } from '@openzeppelin/ui-react';
 import { NetworkSettingsDialog } from '@openzeppelin/ui-renderer';
-import { ContractAdapter, NetworkConfig } from '@openzeppelin/ui-types';
+import type { NetworkConfig, RelayerCapability } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
 import { networkService } from '../../core/networks/service';
@@ -37,21 +37,21 @@ import { networkService } from '../../core/networks/service';
  */
 export function NetworkErrorHandler() {
   const { setOpenNetworkSettingsHandler } = useNetworkErrors();
-  const { getAdapterForNetwork } = useAdapterContext();
+  const { getRuntimeForNetwork } = useRuntimeContext();
 
   const [settingsNetwork, setSettingsNetwork] = useState<NetworkConfig | null>(null);
-  const [settingsAdapter, setSettingsAdapter] = useState<ContractAdapter | null>(null);
+  const [settingsRelayer, setSettingsRelayer] = useState<RelayerCapability | null>(null);
 
-  // Get adapter for the settings network
+  // Resolve the relayer capability for the settings network.
   useEffect(() => {
     if (!settingsNetwork) {
-      setSettingsAdapter(null);
+      setSettingsRelayer(null);
       return;
     }
 
-    const { adapter } = getAdapterForNetwork(settingsNetwork);
-    setSettingsAdapter(adapter);
-  }, [settingsNetwork, getAdapterForNetwork]);
+    const { runtime } = getRuntimeForNetwork(settingsNetwork);
+    setSettingsRelayer(runtime?.relayer ?? null);
+  }, [settingsNetwork, getRuntimeForNetwork]);
 
   // Create a stable callback for opening network settings
   const openNetworkSettings = useCallback(async (networkId: string) => {
@@ -80,7 +80,7 @@ export function NetworkErrorHandler() {
 
   const handleCloseNetworkSettings = () => {
     setSettingsNetwork(null);
-    setSettingsAdapter(null);
+    setSettingsRelayer(null);
   };
 
   return (
@@ -88,7 +88,7 @@ export function NetworkErrorHandler() {
       isOpen={!!settingsNetwork}
       onOpenChange={(open: boolean) => !open && handleCloseNetworkSettings()}
       networkConfig={settingsNetwork}
-      adapter={settingsAdapter}
+      relayer={settingsRelayer}
     />
   );
 }

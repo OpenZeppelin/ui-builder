@@ -1,11 +1,13 @@
 import { useCallback, useRef, useState } from 'react';
 
-import type { ContractAdapter, FormValues } from '@openzeppelin/ui-types';
+import type { FormValues } from '@openzeppelin/ui-types';
 import {
   buildRequiredInputSnapshot,
   hasMissingRequiredContractInputs,
   simpleHash,
 } from '@openzeppelin/ui-utils';
+
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 import { loadContractDefinitionWithMetadata } from '../../../../services/ContractLoader';
 import { uiBuilderStore } from '../../hooks/uiBuilderStore';
@@ -21,7 +23,7 @@ interface CircuitBreakerState {
 }
 
 interface UseContractLoaderProps {
-  adapter: ContractAdapter | null;
+  runtime: BuilderRuntime | null;
   ignoreProxy: boolean;
 }
 
@@ -58,10 +60,10 @@ interface UseContractLoaderProps {
  * - Poor user experience from constant error messages
  * - Unnecessary API quota consumption
  *
- * @param adapter - The blockchain-specific adapter for loading contracts
+ * @param runtime - The blockchain-specific runtime for loading contracts
  * @param ignoreProxy - Whether to skip proxy detection and use the proxy's ABI directly
  */
-export function useContractLoader({ adapter, ignoreProxy }: UseContractLoaderProps) {
+export function useContractLoader({ runtime, ignoreProxy }: UseContractLoaderProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [circuitBreakerActive, setCircuitBreakerActive] = useState(false);
 
@@ -83,13 +85,13 @@ export function useContractLoader({ adapter, ignoreProxy }: UseContractLoaderPro
       data: FormValues,
       options?: { skipProxyDetection?: boolean; treatAsImplementation?: boolean }
     ) => {
-      if (!adapter || loadingRef.current) return;
+      if (!runtime || loadingRef.current) return;
       // Narrow contractAddress to string before validation
       const address =
         typeof data.contractAddress === 'string' ? data.contractAddress.trim() : undefined;
       if (!address) return;
       // Do not attempt loads for invalid/partial addresses while the user is typing
-      if (!adapter.isValidAddress(address)) return;
+      if (!runtime.addressing.isValidAddress(address)) return;
 
       // Upstream gating prevents early loads; loader preflight enforces safety.
 
@@ -135,7 +137,7 @@ export function useContractLoader({ adapter, ignoreProxy }: UseContractLoaderPro
           },
         };
 
-        const result = await loadContractDefinitionWithMetadata(adapter, enhancedData);
+        const result = await loadContractDefinitionWithMetadata(runtime, enhancedData);
 
         // Reset circuit breaker on success
         circuitBreakerRef.current = null;
@@ -148,7 +150,7 @@ export function useContractLoader({ adapter, ignoreProxy }: UseContractLoaderPro
           original: result.contractDefinitionOriginal ?? '',
           proxyInfo: result.proxyInfo,
           contractDefinitionArtifacts: result.contractDefinitionArtifacts ?? null,
-          requiredInputSnapshot: buildRequiredInputSnapshot(adapter, data),
+          requiredInputSnapshot: buildRequiredInputSnapshot(runtime.contractLoading, data),
         });
       } catch (err) {
         // Update circuit breaker
@@ -170,7 +172,7 @@ export function useContractLoader({ adapter, ignoreProxy }: UseContractLoaderPro
         loadingRef.current = false;
       }
     },
-    [adapter]
+    [runtime]
   );
   /**
    * Check if we should attempt to load based on form values
@@ -193,20 +195,21 @@ export function useContractLoader({ adapter, ignoreProxy }: UseContractLoaderPro
       // Cache validation result to avoid repeated isValidAddress calls on the same address
       if (lastValidatedAddressRef.current?.address === address) {
         if (!lastValidatedAddressRef.current.isValid) return false;
-      } else if (adapter && !adapter.isValidAddress(address)) {
+      } else if (runtime && !runtime.addressing.isValidAddress(address)) {
         lastValidatedAddressRef.current = { address, isValid: false };
         return false;
       } else {
         lastValidatedAddressRef.current = { address, isValid: true };
       }
 
-      // Gate on adapter-declared required inputs to avoid noisy preflight errors
-      if (adapter && hasMissingRequiredContractInputs(adapter, formValues)) return false;
+      // Gate on runtime-declared required inputs to avoid noisy preflight errors
+      if (runtime && hasMissingRequiredContractInputs(runtime.contractLoading, formValues))
+        return false;
 
       const currentAttempt = JSON.stringify(formValues);
       return currentAttempt !== lastAttemptedRef.current;
     },
-    [adapter]
+    [runtime]
   );
 
   /**

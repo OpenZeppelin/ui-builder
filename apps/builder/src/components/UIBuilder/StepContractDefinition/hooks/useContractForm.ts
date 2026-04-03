@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-import type { ContractAdapter, FormValues } from '@openzeppelin/ui-types';
+import type { FormValues } from '@openzeppelin/ui-types';
+
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 import { useDebounce } from '../../hooks';
 import { uiBuilderStore } from '../../hooks/uiBuilderStore';
 
 interface UseContractFormProps {
-  adapter: ContractAdapter | null;
+  runtime: BuilderRuntime | null;
   existingFormValues: FormValues | null;
   loadedConfigurationId: string | null;
   networkId: string | null;
@@ -17,7 +19,7 @@ interface UseContractFormProps {
 }
 
 export function useContractForm({
-  adapter,
+  runtime,
   existingFormValues,
   loadedConfigurationId,
   networkId,
@@ -44,7 +46,10 @@ export function useContractForm({
 
   // Handle manual definition validation
   useEffect(() => {
-    if (!adapter?.validateContractDefinition || typeof debouncedManualDefinition !== 'string') {
+    if (
+      !runtime?.contractLoading?.validateContractDefinition ||
+      typeof debouncedManualDefinition !== 'string'
+    ) {
       setValidationError(null);
       return;
     }
@@ -62,7 +67,7 @@ export function useContractForm({
     // Reset the flag when user enters something
     hasUserClearedManualDefinition.current = false;
 
-    const validation = adapter.validateContractDefinition(trimmed);
+    const validation = runtime!.contractLoading.validateContractDefinition!(trimmed);
     if (!validation.valid && validation.errors?.length) {
       const errorMsg =
         validation.errors.length === 1
@@ -83,7 +88,7 @@ export function useContractForm({
         }));
       }
     }
-  }, [adapter, debouncedManualDefinition, contractError, manualContractDefinitionValue]);
+  }, [runtime, debouncedManualDefinition, contractError, manualContractDefinitionValue]);
 
   // Handle form reset on network change or configuration load
   const handleFormReset = useCallback(() => {

@@ -14,9 +14,9 @@ export interface ExtendedRuntimeBinding {
 
 /**
  * Build initial metadata for runtime secret field,
- * seeding property name input default if adapter provides it.
+ * seeding property name input default if runtime provides it.
  *
- * @param binding - Extended runtime binding from adapter
+ * @param binding - Extended runtime binding from runtime
  * @returns Metadata object with seeded property name if applicable,
  *          or the original metadata, or undefined if no metadata exists
  */

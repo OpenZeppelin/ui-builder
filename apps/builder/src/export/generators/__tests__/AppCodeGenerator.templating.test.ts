@@ -277,7 +277,7 @@ describe('AppCodeGenerator Templating System', () => {
       );
 
       // Verify that the component is structured to accept a generic adapter
-      expect(code).toContain('adapter: ContractAdapter');
+      expect(code).toContain('adapter: BuilderAdapter');
       expect(code).toContain("functionId: 'transferTokens'");
 
       // Verify that specific VARIABLE template placeholders were replaced

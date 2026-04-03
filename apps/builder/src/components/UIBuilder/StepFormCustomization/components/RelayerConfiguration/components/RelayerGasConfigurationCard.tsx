@@ -9,11 +9,12 @@ import {
   CardHeader,
   CardTitle,
 } from '@openzeppelin/ui-components';
-import type { ContractAdapter } from '@openzeppelin/ui-types';
+
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 interface RelayerGasConfigurationCardProps {
   isActive: boolean;
-  adapter: ContractAdapter | null;
+  runtime: BuilderRuntime | null;
   transactionOptions: Record<string, unknown>;
   onSetupStepChange: (step: 'configuration') => void;
   onTransactionOptionsChange: (options: Record<string, unknown>) => void;
@@ -21,17 +22,17 @@ interface RelayerGasConfigurationCardProps {
 
 export function RelayerGasConfigurationCard({
   isActive,
-  adapter,
+  runtime,
   transactionOptions,
   onSetupStepChange,
   onTransactionOptionsChange,
 }: RelayerGasConfigurationCardProps): React.ReactElement {
-  const labels = adapter?.getUiLabels?.() || {};
+  const labels = runtime?.uiLabels.getUiLabels?.() || {};
   const hasCustomOptions = Boolean(
     transactionOptions.speed || transactionOptions.gasPrice || transactionOptions.maxFeePerGas
   );
 
-  if (!adapter?.getRelayerOptionsComponent) {
+  if (!runtime?.uiKit.getRelayerOptionsComponent) {
     return <></>;
   }
 
@@ -97,7 +98,7 @@ export function RelayerGasConfigurationCard({
       {isActive && (
         <CardContent className="pt-0">
           {(() => {
-            const RelayerOptionsComponent = adapter.getRelayerOptionsComponent();
+            const RelayerOptionsComponent = runtime.uiKit.getRelayerOptionsComponent();
             if (!RelayerOptionsComponent) return null;
 
             return (

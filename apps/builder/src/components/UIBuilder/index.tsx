@@ -40,7 +40,7 @@ export function UIBuilder() {
   // Handle wallet reconnection with mismatched chain
   useWalletReconnectionHandler(
     state.selectedNetworkConfigId,
-    state.selectedAdapter,
+    state.selectedRuntime,
     state.networkToSwitchTo,
     handleRequeueNetworkSwitch
   );
@@ -88,7 +88,7 @@ export function UIBuilder() {
   // 3. isAdapterReady is set to true -> NetworkSwitchManager mounts
   // 4. NetworkSwitchManager handles the actual wallet switch
   useEffect(() => {
-    if (!state.selectedAdapter || !state.networkToSwitchTo || !state.selectedNetworkConfigId) {
+    if (!state.selectedRuntime || !state.networkToSwitchTo || !state.selectedNetworkConfigId) {
       // If networkToSwitchTo is cleared (e.g., switch complete), ensure isAdapterReady is false.
       if (!state.networkToSwitchTo && isAdapterReady) {
         logger.info('UIBuilder', 'Target network cleared, ensuring isAdapterReady is false.');
@@ -98,10 +98,10 @@ export function UIBuilder() {
     }
 
     // If the adapter is now loaded for the network we want to switch to, mark it as ready.
-    if (state.selectedNetworkConfigId === state.networkToSwitchTo && state.selectedAdapter) {
+    if (state.selectedNetworkConfigId === state.networkToSwitchTo && state.selectedRuntime) {
       logger.info(
         'UIBuilder',
-        `✅ Adapter available for target network ${state.selectedNetworkConfigId}. (Current selectedAdapter ID: ${state.selectedAdapter.networkConfig.id}). Setting isAdapterReady.`
+        `✅ Adapter available for target network ${state.selectedNetworkConfigId}. (Current selectedRuntime ID: ${state.selectedRuntime.networkConfig.id}). Setting isAdapterReady.`
       );
       if (!isAdapterReady) {
         setIsAdapterReady(true);
@@ -119,7 +119,7 @@ export function UIBuilder() {
       }
     }
   }, [
-    state.selectedAdapter,
+    state.selectedRuntime,
     state.networkToSwitchTo,
     state.selectedNetworkConfigId,
     isAdapterReady,
@@ -135,19 +135,19 @@ export function UIBuilder() {
   // Memoize the mounting conditions to prevent unnecessary re-renders
   const shouldMountNetworkSwitcher = useMemo(() => {
     const decision = !!(
-      state.selectedAdapter &&
+      state.selectedRuntime &&
       state.networkToSwitchTo &&
       isAdapterReady && // Indicates the switching process has been initiated
-      state.selectedAdapter.networkConfig.id === state.networkToSwitchTo // Ensures the adapter in current render scope is correct
+      state.selectedRuntime.networkConfig.id === state.networkToSwitchTo // Ensures the adapter in current render scope is correct
     );
     if (decision) {
       logger.info(
         'UIBuilder',
-        `MOUNTING NetworkSwitchManager. Adapter ID: ${state.selectedAdapter?.networkConfig.id}, Target: ${state.networkToSwitchTo ?? 'null'}`
+        `MOUNTING NetworkSwitchManager. Adapter ID: ${state.selectedRuntime?.networkConfig.id}, Target: ${state.networkToSwitchTo ?? 'null'}`
       );
     }
     return decision;
-  }, [state.selectedAdapter, state.networkToSwitchTo, isAdapterReady]);
+  }, [state.selectedRuntime, state.networkToSwitchTo, isAdapterReady]);
 
   // Wrapper to intercept step changes and prevent/override navigation when trimmed-only
   const handleStepChange = useCallback(
@@ -183,7 +183,8 @@ export function UIBuilder() {
     <ContractStateWidget
       contractSchema={widget.sidebar.contractSchema}
       contractAddress={widget.sidebar.contractAddress}
-      adapter={widget.sidebar.adapter}
+      query={widget.sidebar.runtime.query}
+      schema={widget.sidebar.runtime.schema}
       isVisible={widget.sidebar.isVisible}
       onToggle={widget.sidebar.onToggle}
     />
@@ -207,7 +208,7 @@ export function UIBuilder() {
       title: 'Load Contract',
       component: (
         <StepContractDefinition
-          adapter={state.selectedAdapter}
+          runtime={state.selectedRuntime}
           networkConfig={state.selectedNetwork}
           existingFormValues={state.contractState.formValues}
           loadedConfigurationId={state.loadedConfigurationId}
@@ -230,7 +231,7 @@ export function UIBuilder() {
           networkConfig={state.selectedNetwork}
           onToggleContractState={widget.toggle}
           isWidgetExpanded={state.isWidgetVisible}
-          adapter={state.selectedAdapter ?? undefined}
+          runtime={state.selectedRuntime ?? undefined}
         />
       ),
       isValid: !!state.selectedFunction,
@@ -251,7 +252,7 @@ export function UIBuilder() {
           onUiKitConfigUpdated={actions.config.uiKit}
           currentUiKitConfig={state.formConfig?.uiKitConfig}
           currentFormConfig={state.formConfig}
-          adapter={state.selectedAdapter ?? undefined}
+          runtime={state.selectedRuntime ?? undefined}
         />
       ),
       isValid: state.isExecutionStepValid,
@@ -281,9 +282,10 @@ export function UIBuilder() {
 
   return (
     <>
-      {shouldMountNetworkSwitcher && state.selectedAdapter && state.networkToSwitchTo && (
+      {shouldMountNetworkSwitcher && state.selectedRuntime && state.networkToSwitchTo && (
         <NetworkSwitchManager
-          adapter={state.selectedAdapter}
+          wallet={state.selectedRuntime.wallet}
+          networkCatalog={state.selectedRuntime.networkCatalog}
           targetNetworkId={state.networkToSwitchTo}
           onNetworkSwitchComplete={handleNetworkSwitchComplete}
         />

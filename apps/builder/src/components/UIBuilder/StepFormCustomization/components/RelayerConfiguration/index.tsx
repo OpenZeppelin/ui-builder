@@ -15,7 +15,7 @@ import { useRelayerConfiguration, useRelayerDetails, useRelayerFetch } from './h
 
 export function RelayerConfiguration({
   control,
-  adapter,
+  runtime,
   setValue,
 }: RelayerConfigurationProps): React.ReactElement {
   const { trackRelayerServiceConfigured } = useBuilderAnalytics();
@@ -23,7 +23,7 @@ export function RelayerConfiguration({
 
   const { setupStep, setSetupStep, localControl, sessionApiKey } = useRelayerConfiguration({
     control,
-    adapter,
+    runtime,
     setValue,
   });
 
@@ -60,13 +60,13 @@ export function RelayerConfiguration({
   );
 
   const { fetchRelayers, fetchedRelayers, isLoading, error, clearError } = useRelayerFetch({
-    adapter,
+    runtime,
     onRelayersFetched: handleRelayersFetched,
   });
 
   // Handle enhanced relayer details
   const { enhancedDetails, loading: loadingEnhancedDetails } = useRelayerDetails({
-    adapter,
+    runtime,
     relayerId: selectedRelayerId,
     serviceUrl: relayerServiceUrl,
     apiKey: sessionApiKey,
@@ -82,7 +82,7 @@ export function RelayerConfiguration({
   }, [selectedRelayerId, fetchedRelayers, setValue]);
 
   useEffect(() => {
-    if (hasTrackedConfiguredRef.current || !adapter) {
+    if (hasTrackedConfiguredRef.current || !runtime) {
       return;
     }
     const fullyConfigured =
@@ -96,9 +96,9 @@ export function RelayerConfiguration({
     }
 
     hasTrackedConfiguredRef.current = true;
-    trackRelayerServiceConfigured(adapter.networkConfig.id, adapter.networkConfig.ecosystem);
+    trackRelayerServiceConfigured(runtime.networkConfig.id, runtime.networkConfig.ecosystem);
   }, [
-    adapter,
+    runtime,
     relayerServiceUrl,
     sessionApiKey,
     selectedRelayerId,
@@ -146,15 +146,15 @@ export function RelayerConfiguration({
           loadingEnhancedDetails={loadingEnhancedDetails}
           isLoading={isLoading}
           onEdit={() => setSetupStep('selection')}
-          adapter={adapter}
+          runtime={runtime}
         />
       )}
 
       {/* Step 3: Transaction Configuration */}
-      {isSelectionComplete && adapter?.getRelayerOptionsComponent && (
+      {isSelectionComplete && runtime?.uiKit.getRelayerOptionsComponent && (
         <RelayerGasConfigurationCard
           isActive={setupStep === 'configuration'}
-          adapter={adapter}
+          runtime={runtime}
           transactionOptions={transactionOptions}
           onSetupStepChange={setSetupStep}
           onTransactionOptionsChange={(newOptions) => {

@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
-import { useWalletState } from '@openzeppelin/ui-react';
-import type { ContractAdapter, FormValues } from '@openzeppelin/ui-types';
+import type { FormValues } from '@openzeppelin/ui-types';
 import {
   buildRequiredInputSnapshot,
   hasMissingRequiredContractInputs,
 } from '@openzeppelin/ui-utils';
 
+import type { BuilderRuntime } from '../../../core/runtimeAdapter';
+import { useBuilderWalletState } from '../../../hooks/useBuilderWalletState';
 import { useContractDefinition } from '../../../hooks/useContractDefinition';
 import { useContractDefinitionComparison } from '../../../hooks/useContractDefinitionComparison';
 import {
@@ -28,8 +29,8 @@ import { useUIBuilderStore } from './useUIBuilderStore';
  */
 export function useUIBuilderState() {
   const state = useUIBuilderStore((s) => s);
-  const { activeNetworkConfig, activeAdapter, isAdapterLoading, reconfigureActiveAdapterUiKit } =
-    useWalletState();
+  const { activeNetworkConfig, activeRuntime, isRuntimeLoading, reconfigureActiveUiKit } =
+    useBuilderWalletState();
 
   const savedConfigIdRef = useRef<string | null>(null);
   const isLoadingSavedConfigRef = useRef<boolean>(false);
@@ -49,8 +50,9 @@ export function useUIBuilderState() {
 
   // Memoize address validation result to avoid repeated validation calls across renders
   const isValidAddr = useMemo(
-    () => (activeAdapter && memoAddress ? activeAdapter.isValidAddress(memoAddress) : false),
-    [activeAdapter, memoAddress]
+    () =>
+      activeRuntime && memoAddress ? activeRuntime.addressing.isValidAddress(memoAddress) : false,
+    [activeRuntime, memoAddress]
   );
 
   const autoSave = useAutoSave(isLoadingSavedConfigRef);
@@ -64,13 +66,13 @@ export function useUIBuilderState() {
     originalDefinition: state.contractState.definitionOriginal,
     currentDefinition: state.contractState.definitionJson,
     isLoadedConfigMode: !!state.loadedConfigurationId,
-    adapter: activeAdapter,
+    runtime: activeRuntime,
   });
 
-  // Helper: check if adapter-declared required fields are missing in provided values
+  // Helper: check if runtime-declared required fields are missing in provided values
   const hasMissingRequiredFields = useCallback(
-    (adapter: ContractAdapter | null | undefined, values: FormValues): boolean =>
-      hasMissingRequiredContractInputs(adapter, values),
+    (runtime: BuilderRuntime | null | undefined, values: FormValues): boolean =>
+      hasMissingRequiredContractInputs(runtime?.contractLoading, values),
     []
   );
 
@@ -85,7 +87,10 @@ export function useUIBuilderState() {
         metadata: metadata ?? {},
         original: originalDefinition ?? '',
         contractDefinitionArtifacts: artifacts ?? null,
-        requiredInputSnapshot: buildRequiredInputSnapshot(activeAdapter, formValues),
+        requiredInputSnapshot: buildRequiredInputSnapshot(
+          activeRuntime?.contractLoading ?? null,
+          formValues
+        ),
       });
     },
     onError: (err) => {
@@ -97,12 +102,12 @@ export function useUIBuilderState() {
   const load = useCallback(
     async (id: string) => {
       const loadedData = await lifecycle.load(id);
-      if (loadedData?.uiKitConfig && reconfigureActiveAdapterUiKit) {
-        reconfigureActiveAdapterUiKit(loadedData.uiKitConfig);
+      if (loadedData?.uiKitConfig && reconfigureActiveUiKit) {
+        reconfigureActiveUiKit(loadedData.uiKitConfig);
       }
       return loadedData;
     },
-    [lifecycle, reconfigureActiveAdapterUiKit]
+    [lifecycle, reconfigureActiveUiKit]
   );
 
   // Auto-load contract definition when needed
@@ -116,18 +121,18 @@ export function useUIBuilderState() {
     if (
       state.needsContractDefinitionLoad &&
       memoAddress &&
-      activeAdapter &&
+      activeRuntime &&
       // Use memoized validation to avoid repeated isValidAddress calls
       isValidAddr &&
-      (state.selectedNetworkConfigId === activeAdapter.networkConfig.id ||
+      (state.selectedNetworkConfigId === activeRuntime.networkConfig.id ||
         !state.selectedNetworkConfigId)
     ) {
-      // Prevent triggering loads for adapters (e.g., Midnight) that require multiple artifacts
+      // Prevent triggering loads for runtimes (e.g., Midnight) that require multiple artifacts
       const candidateValues = {
         ...(state.contractState.formValues || ({} as FormValues)),
         contractAddress: state.contractState.address,
       } as FormValues;
-      if (hasMissingRequiredFields(activeAdapter, candidateValues)) {
+      if (hasMissingRequiredFields(activeRuntime, candidateValues)) {
         return;
       }
 
@@ -145,7 +150,7 @@ export function useUIBuilderState() {
     isValidAddr,
     state.selectedNetworkConfigId,
     state.isLoadingConfiguration,
-    activeAdapter?.networkConfig.id,
+    activeRuntime?.networkConfig.id,
     contractDefinition.load,
     hasMissingRequiredFields,
     state.contractState.formValues,
@@ -159,38 +164,38 @@ export function useUIBuilderState() {
     contractWidget.handleWidgetVisibilityUpdate(
       state.contractState.schema,
       state.contractState.address,
-      activeAdapter
+      activeRuntime
     );
-  }, [state.contractState.schema, state.contractState.address, activeAdapter]);
+  }, [state.contractState.schema, state.contractState.address, activeRuntime]);
 
   const sidebarWidget = useMemo(
     () =>
-      state.contractState.address && activeAdapter && activeNetworkConfig
+      state.contractState.address && activeRuntime && activeNetworkConfig
         ? contractWidget.createWidgetProps(
             state.contractState.schema,
             state.contractState.address,
-            activeAdapter,
+            activeRuntime,
             activeNetworkConfig
           )
         : null,
     [
       state.contractState.schema,
       state.contractState.address,
-      activeAdapter,
+      activeRuntime,
       activeNetworkConfig,
       contractWidget,
     ]
   );
 
   const handleExportApp = useCallback(() => {
-    if (!activeNetworkConfig || !activeAdapter || !state.selectedFunction) return;
+    if (!activeNetworkConfig || !activeRuntime || !state.selectedFunction) return;
     void completeStep.exportApp(
       state.formConfig,
       activeNetworkConfig,
       state.selectedFunction,
       state.contractState.schema
     );
-  }, [completeStep, state, activeNetworkConfig, activeAdapter]);
+  }, [completeStep, state, activeNetworkConfig, activeRuntime]);
 
   const handleFunctionSelected = useCallback(
     (functionId: string | null) => {
@@ -203,8 +208,8 @@ export function useUIBuilderState() {
     state: {
       ...state,
       selectedNetwork: activeNetworkConfig,
-      selectedAdapter: activeAdapter,
-      adapterLoading: isAdapterLoading,
+      selectedRuntime: activeRuntime,
+      runtimeLoading: isRuntimeLoading,
       exportLoading: completeStep.loading,
       isWidgetVisible: contractWidget.isWidgetVisible,
       // Override schema loading state with our service state

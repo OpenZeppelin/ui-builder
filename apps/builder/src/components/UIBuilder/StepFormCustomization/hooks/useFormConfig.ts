@@ -1,8 +1,10 @@
 import { deepEqual } from 'fast-equals';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import type { ContractAdapter, ContractSchema, FormFieldType } from '@openzeppelin/ui-types';
+import type { ContractSchema, FormFieldType } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
+
+import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 import type { BuilderFormConfig } from '../../../../core/types/FormTypes';
 import {
@@ -15,7 +17,7 @@ import { buildInitialMetadata, type ExtendedRuntimeBinding } from '../utils/runt
 interface UseFormConfigProps {
   contractSchema: ContractSchema | null;
   selectedFunction: string | null;
-  adapter: ContractAdapter | null;
+  runtime: BuilderRuntime | null;
   onFormConfigUpdated: (config: BuilderFormConfig) => void;
   existingFormConfig?: BuilderFormConfig | null;
 }
@@ -23,7 +25,7 @@ interface UseFormConfigProps {
 export function useFormConfig({
   contractSchema,
   selectedFunction,
-  adapter,
+  runtime,
   onFormConfigUpdated,
   existingFormConfig,
 }: UseFormConfigProps) {
@@ -72,9 +74,9 @@ export function useFormConfig({
       (fn) => fn.id === selectedFunction
     );
 
-    if (contractSchema && selectedFunction && selectedFunctionDetails && adapter) {
+    if (contractSchema && selectedFunction && selectedFunctionDetails && runtime) {
       try {
-        const newConfig = generateFormConfig(adapter, contractSchema, selectedFunction);
+        const newConfig = generateFormConfig(runtime, contractSchema, selectedFunction);
         setFormConfig(newConfig);
         onFormConfigUpdated(newConfig);
         configInitialized.current = true;
@@ -97,16 +99,16 @@ export function useFormConfig({
         }
       }
     }
-  }, [contractSchema, selectedFunction, adapter, onFormConfigUpdated, configInitialized.current]);
+  }, [contractSchema, selectedFunction, runtime, onFormConfigUpdated, configInitialized.current]);
 
   /**
    * Effect 4: Auto-add runtime secret field for functions requiring a runtime secret.
    * When a function is marked as requiring a runtime secret,
-   * and the adapter provides runtime field binding, ensure the field is present in the form.
+   * and the runtime provides runtime field binding, ensure the field is present in the form.
    * Users can remove it or customize it (hide, hardcode) like other fields.
    */
   useEffect(() => {
-    if (!formConfig || !adapter || !selectedFunction) {
+    if (!formConfig || !runtime || !selectedFunction) {
       return;
     }
 
@@ -118,10 +120,10 @@ export function useFormConfig({
     // Check if this function needs a runtime secret
     const checkNeedSecret = async () => {
       try {
-        const decorations = await adapter.getFunctionDecorations?.();
+        const decorations = await runtime.schema.getFunctionDecorations?.();
         const functionDecoration = decorations?.[selectedFunction];
         const needsSecret = functionDecoration?.requiresRuntimeSecret;
-        const bindingInfo = adapter.getRuntimeFieldBinding?.();
+        const bindingInfo = runtime.typeMapping.getRuntimeFieldBinding?.();
 
         if (!needsSecret || !bindingInfo) {
           return;
@@ -172,7 +174,7 @@ export function useFormConfig({
     };
 
     void checkNeedSecret();
-  }, [formConfig, adapter, selectedFunction, onFormConfigUpdated]);
+  }, [formConfig, runtime, selectedFunction, onFormConfigUpdated]);
 
   /**
    * Track field count changes to detect when user removes runtime secret field
