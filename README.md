@@ -99,7 +99,7 @@ For more details, see the [Builder README](./apps/builder/README.md).
 
 Adapter implementations live in the
 [openzeppelin-adapters](https://github.com/OpenZeppelin/openzeppelin-adapters) repository and are
-published under the `@openzeppelin/adapter-`* namespace. Shared Vite/Vitest
+published under the `@openzeppelin/adapter-*` namespace. Shared Vite/Vitest
 integration for consuming apps is provided by `@openzeppelin/adapters-vite`.
 
 #### Public Adapter Packages
@@ -300,7 +300,7 @@ This project is governed by the UI Builder Constitution. Please read it before c
 The primary build target in this repository is the Builder app, while adapter package builds and
 adapter-specific validation live in `openzeppelin-adapters`.
 
-For more detailed documentation about the capability-based adapter pattern, implementation guidelines, and validation rules, see `[docs/ADAPTER_ARCHITECTURE.md](https://github.com/OpenZeppelin/openzeppelin-adapters/blob/main/docs/ADAPTER_ARCHITECTURE.md)` and the adapter/runtime types under `[packages/types/src/adapters/](https://github.com/OpenZeppelin/openzeppelin-ui/tree/main/packages/types/src/adapters)`.
+For more detailed documentation about the capability-based adapter pattern, implementation guidelines, and validation rules, see [docs/ADAPTER_ARCHITECTURE.md](https://github.com/OpenZeppelin/openzeppelin-adapters/blob/main/docs/ADAPTER_ARCHITECTURE.md) and the adapter/runtime types under [packages/types/src/adapters/](https://github.com/OpenZeppelin/openzeppelin-ui/tree/main/packages/types/src/adapters).
 
 ## Component Architecture
 
@@ -308,7 +308,7 @@ The project follows a structured component architecture centered around app rend
 
 ### Renderer Components
 
-The `[@openzeppelin/ui-renderer](https://github.com/OpenZeppelin/openzeppelin-ui/tree/main/packages/renderer)` package (maintained in the external openzeppelin-ui repo) provides:
+The [@openzeppelin/ui-renderer](https://github.com/OpenZeppelin/openzeppelin-ui/tree/main/packages/renderer) package (maintained in the external openzeppelin-ui repo) provides:
 
 - **TransactionForm**: Core component for rendering blockchain transaction forms with dynamic field generation
 - **ContractStateWidget**: Widget for querying and displaying contract state through view functions
@@ -465,7 +465,7 @@ This project uses GitHub Actions for continuous integration and delivery:
 - **Security Workflow**: Checks for security vulnerabilities
 - **Dependencies Workflow**: Checks for outdated dependencies
 
-Shared libraries (`@openzeppelin/ui-`*, `@openzeppelin/adapter-*`, etc.) are published from their own repositories; this repo ships the Builder web app only.
+Shared libraries (`@openzeppelin/ui-*`, `@openzeppelin/adapter-*`, etc.) are published from their own repositories; this repo ships the Builder web app only.
 
 ## Monorepo Configuration
 

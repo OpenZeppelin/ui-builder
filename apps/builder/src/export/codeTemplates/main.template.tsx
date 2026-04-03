@@ -6,6 +6,7 @@
  * - "@@param-name@@" - Template variable markers (consistent across all templates)
  */
 /*------------TEMPLATE COMMENT END------------*/
+// @ts-expect-error - Template placeholder replaced during code generation
 import { ecosystemDefinition, NetworkConfigPlaceholder } from '@@adapter-package-name@@';
 import React from 'react';
 import ReactDOM from 'react-dom/client';

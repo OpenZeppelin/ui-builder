@@ -38,6 +38,7 @@ export function toBuilderAdapter(runtime: ComposerEcosystemRuntime | null): Buil
     getWritableFunctions: schema.getWritableFunctions.bind(schema),
     isViewFunction: schema.isViewFunction.bind(schema),
     filterAutoQueryableFunctions: schema.filterAutoQueryableFunctions?.bind(schema),
+    getFunctionDecorations: schema.getFunctionDecorations?.bind(schema),
     mapParameterTypeToFieldType: typeMapping.mapParameterTypeToFieldType.bind(typeMapping),
     getCompatibleFieldTypes: typeMapping.getCompatibleFieldTypes.bind(typeMapping),
     generateDefaultField: typeMapping.generateDefaultField.bind(typeMapping),

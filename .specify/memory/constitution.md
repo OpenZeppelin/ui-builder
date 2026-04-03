@@ -23,7 +23,9 @@ packages (`packages/adapter-*` in the adapter monorepo).
 ecosystem manager (`apps/builder/src/core/...`), using `createRuntime` — not ad hoc monolithic adapter classes.
 - Adapter packages MUST NOT declare chain-specific dependencies in chain-agnostic
 imports; they own their network concerns.
-- Validation rules originate in the adapter interface; `isValidAddress(address: string, addressType?: string)` supports chain-specific behavior.
+- Validation rules originate in the relevant runtime capability; the addressing
+  capability's `isValidAddress(address: string, addressType?: string)` supports
+  chain-specific behavior.
 - The EVM adapter is the reference implementation; all new adapters MUST mirror
 its structure, naming, and patterns. Stellar mirrors EVM wherever applicable.
 - Rationale: Preserves ecosystem neutrality and predictable adapter boundaries to

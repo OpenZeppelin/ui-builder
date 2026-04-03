@@ -63,7 +63,7 @@ export function useNetworkServiceHealthCheck(
     for (const serviceForm of serviceForms) {
       try {
         // Get the current service configuration values
-        // Priority: 1. User overrides, 2. Adapter defaults
+        // Priority: 1. User overrides, 2. Runtime defaults
         let serviceValues = getUserServiceConfigOverride(networkConfig.id, serviceForm.id);
 
         if (!serviceValues) {
