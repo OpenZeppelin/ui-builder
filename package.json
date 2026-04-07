@@ -84,7 +84,7 @@
     "prettier": "3.6.2",
     "prettier-plugin-tailwindcss": "0.6.14",
     "tsup": "^8.5.1",
-    "vite": "7.3.1",
+    "vite": "7.3.2",
     "vitest": "^3.2.4"
   },
   "engines": {
@@ -93,7 +93,7 @@
   "packageManager": "pnpm@10.28.2",
   "pnpm": {
     "overrides": {
-      "vite": "7.3.1",
+      "vite": "7.3.2",
       "use-sync-external-store": "^1.2.0",
       "valtio": "^1.13.2",
       "@paulmillr/qr": "npm:qr@^0.5.0",
