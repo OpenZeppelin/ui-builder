@@ -341,9 +341,9 @@ export default function GeneratedForm({ adapter, isWalletConnected }: GeneratedF
 exports[`Export Snapshot Tests > evm Export Snapshots > should match snapshot for package.json structure > package-json-evm 1`] = `
 {
   "dependencies": {
-    "@openzeppelin/adapter-evm": "^1.1.0",
+    "@openzeppelin/adapter-evm": "^2.0.0",
     "@openzeppelin/ui-components": "^2.0.0",
-    "@openzeppelin/ui-react": "^2.0.0",
+    "@openzeppelin/ui-react": "^2.0.1",
     "@openzeppelin/ui-renderer": "^2.0.0",
     "@openzeppelin/ui-types": "^2.0.0",
     "@openzeppelin/ui-utils": "^2.0.0",
@@ -708,9 +708,9 @@ export default function GeneratedForm({ adapter, isWalletConnected }: GeneratedF
 exports[`Export Snapshot Tests > polkadot Export Snapshots > should match snapshot for package.json structure > package-json-polkadot 1`] = `
 {
   "dependencies": {
-    "@openzeppelin/adapter-polkadot": "^1.1.0",
+    "@openzeppelin/adapter-polkadot": "^2.0.0",
     "@openzeppelin/ui-components": "^2.0.0",
-    "@openzeppelin/ui-react": "^2.0.0",
+    "@openzeppelin/ui-react": "^2.0.1",
     "@openzeppelin/ui-renderer": "^2.0.0",
     "@openzeppelin/ui-types": "^2.0.0",
     "@openzeppelin/ui-utils": "^2.0.0",
