@@ -36,7 +36,7 @@
     "@openzeppelin/adapter-solana": "^2.0.0",
     "@openzeppelin/adapter-stellar": "^2.0.0",
     "@openzeppelin/ui-components": "^2.0.0",
-    "@openzeppelin/ui-react": "^2.0.0",
+    "@openzeppelin/ui-react": "^2.0.1",
     "@openzeppelin/ui-renderer": "^2.0.0",
     "@openzeppelin/ui-storage": "^1.2.0",
     "@openzeppelin/ui-styles": "^1.0.0",
