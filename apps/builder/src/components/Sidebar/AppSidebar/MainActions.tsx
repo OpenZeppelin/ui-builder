@@ -9,7 +9,6 @@ import {
 import { useState } from 'react';
 
 import { SidebarButton } from '@openzeppelin/ui-components';
-import { cn } from '@openzeppelin/ui-utils';
 
 import { useContractUIStorage } from '../../../contexts/useContractUIStorage';
 import { useBuilderAnalytics } from '../../../hooks/useBuilderAnalytics';
@@ -55,16 +54,14 @@ export default function MainActions({
   const [showAddressBook, setShowAddressBook] = useState(false);
 
   return (
-    <div className="flex flex-col w-full">
-      <div className={cn(isInNewUIMode && 'bg-neutral-100 rounded-lg')}>
-        <SidebarButton
-          icon={<SquarePen className="size-4" />}
-          onClick={onCreateNew}
-          isSelected={isInNewUIMode}
-        >
-          New Contract UI
-        </SidebarButton>
-      </div>
+    <div className="flex w-full flex-col">
+      <SidebarButton
+        icon={<SquarePen className="size-4" />}
+        onClick={onCreateNew}
+        isSelected={isInNewUIMode}
+      >
+        New Contract UI
+      </SidebarButton>
 
       <SidebarButton icon={<LayoutPanelTop className="size-4" />} badge="Coming Soon" disabled>
         Templates
