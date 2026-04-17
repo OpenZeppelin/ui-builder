@@ -84,28 +84,20 @@ export default function ContractUIItem({
       <div
         onClick={onLoad}
         className={cn(
-          'group relative flex items-center justify-between h-11 px-3 py-2.5 cursor-pointer w-[225px] rounded-lg transition-all duration-300 ease-in-out',
+          'group relative flex h-11 w-[225px] cursor-pointer items-center justify-between rounded-lg px-3 py-2.5 transition-all duration-300 ease-in-out',
           // Background animation for operations in progress (with artificial delay)
-          showLoadingAnimation && 'bg-muted animate-pulse [animation-duration:1200ms] opacity-30',
-          // Selected state
-          isCurrentlyLoaded
-            ? // TODO: Replace with OpenZeppelin theme colors for selected state
-              // Should use semantic token like 'bg-sidebar-item-selected'
-              'bg-neutral-100'
-            : 'hover:before:content-[""] hover:before:absolute hover:before:inset-x-0 hover:before:top-1 hover:before:bottom-1 hover:before:bg-muted/80 hover:before:rounded-lg hover:before:-z-10'
+          showLoadingAnimation && 'animate-pulse bg-muted opacity-30 [animation-duration:1200ms]',
+          // Selected / hover — align with `SidebarButton` (`text-selected bg-selected/10`)
+          !showLoadingAnimation &&
+            (isCurrentlyLoaded
+              ? 'bg-selected/10 text-selected'
+              : 'text-muted-foreground hover:bg-muted/50')
         )}
       >
         {/* Content */}
         <div className="min-w-0 flex-1 flex items-center gap-2">
           <div className="min-w-0 flex-1">
-            <h3
-              className={cn(
-                'font-semibold text-sm truncate',
-                // TODO: Replace hard-coded text colors with OpenZeppelin theme
-                // Should use semantic tokens like 'text-sidebar-item-selected' and 'text-sidebar-item'
-                isCurrentlyLoaded ? 'text-[#111928]' : 'text-gray-600'
-              )}
-            >
+            <h3 className="truncate text-sm font-semibold">
               {animatedTitle}
               {isTitleAnimating && <span className="animate-pulse text-current">|</span>}
             </h3>
