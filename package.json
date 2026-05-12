@@ -10,7 +10,7 @@
     ]
   },
   "scripts": {
-    "clean": "pnpm -r --if-present clean",
+    "clean": "pnpm -r --if-present run clean",
     "install-deps": "pnpm install --frozen-lockfile --ignore-scripts --prefer-offline",
     "dev": "pnpm --filter=@openzeppelin/ui-builder-app dev",
     "dev:local": "LOCAL_UI_PATH=${LOCAL_UI_PATH:-../openzeppelin-ui} && LOCAL_ADAPTERS_PATH=${LOCAL_ADAPTERS_PATH:-../openzeppelin-adapters} && LOCAL_UI_PATH=\"$LOCAL_UI_PATH\" LOCAL_ADAPTERS_PATH=\"$LOCAL_ADAPTERS_PATH\" oz-ui-dev use local --project \"$PWD\" --family ui --family adapters",
@@ -20,7 +20,7 @@
     "docker:dev": "docker-compose up --build",
     "docs": "oz-docs -c docs",
     "docs:watch": "oz-docs watch docs",
-    "build": "pnpm clean && NODE_OPTIONS='--max-old-space-size=8192' pnpm -r build",
+    "build": "pnpm run clean && NODE_OPTIONS='--max-old-space-size=8192' pnpm -r build",
     "test": "node --test .pnpmfile.test.cjs && pnpm -r test && pnpm test:scripts",
     "test:scripts": "vitest run --config vitest.scripts.config.ts",
     "test:watch": "pnpm -r test:watch",
