@@ -2,6 +2,7 @@ import { logger } from '@openzeppelin/ui-utils';
 
 import type { ExportOptions } from '../../core/types/ExportTypes';
 import { AdapterConfigLoader } from '../AdapterConfigLoader';
+import { renderExportedPnpmWorkspaceYaml } from '../constants/pnpmOnlyBuiltDependencies';
 import { generateViteConfig } from '../generators/ViteConfigGenerator';
 import type { TemplateManager } from '../TemplateManager';
 
@@ -36,6 +37,8 @@ export async function addCoreTemplateFiles(
   // Start with template files and overwrite/add custom files
   const projectFiles: Record<string, string> = { ...templateFilesRaw };
   Object.assign(projectFiles, customFiles);
+
+  projectFiles['pnpm-workspace.yaml'] = renderExportedPnpmWorkspaceYaml();
 
   // Load adapter config to get Vite configuration requirements
   const adapterConfigLoader = new AdapterConfigLoader();

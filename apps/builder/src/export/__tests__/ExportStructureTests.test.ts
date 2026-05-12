@@ -51,6 +51,7 @@ describe('Export Structure Tests', () => {
 
       const requiredCoreFiles = [
         'package.json',
+        'pnpm-workspace.yaml',
         'src/App.tsx',
         'src/components/GeneratedForm.tsx',
         'src/main.tsx',

@@ -13,17 +13,17 @@ if [ -s "$HOME/.nvm/nvm.sh" ]; then
   export NVM_DIR="$HOME/.nvm"
   \. "$NVM_DIR/nvm.sh" # This loads nvm
   
-  # Use Node.js 20+
-  nvm use 20 >/dev/null 2>&1
+  # Use Node.js 22+
+  nvm use 22 >/dev/null 2>&1
   
   echo "✅ Using Node.js $(node -v) from NVM"
 fi
 
-# Require Node.js 20+ as specified in package.json
+# Require Node.js 22+ as specified in package.json
 node_version=$(node -v | cut -d. -f1 | sed 's/v//')
-if [ "$node_version" -lt 20 ]; then
-  echo "❌ Error: Node.js version $(node -v) is incompatible. This project requires Node.js 20.11.1+."
-  echo "❌ Commit validation aborted. Please use Node.js 20+ for development."
+if [ "$node_version" -lt 22 ]; then
+  echo "❌ Error: Node.js version $(node -v) is incompatible. This project requires Node.js 22.13.0+."
+  echo "❌ Commit validation aborted. Please use Node.js 22+ for development."
   exit 1
 fi
 
