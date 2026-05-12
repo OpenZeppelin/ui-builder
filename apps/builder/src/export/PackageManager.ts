@@ -39,6 +39,8 @@ import type { RendererConfig } from '@openzeppelin/ui-renderer';
 import { Ecosystem, UiKitConfiguration } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
+import { PNPM_ONLY_BUILT_DEPENDENCIES } from './constants/pnpmOnlyBuiltDependencies';
+
 import { adapterPackageMap } from '../core/ecosystemManager';
 import type { ExportOptions } from '../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../core/types/FormTypes';
@@ -423,14 +425,25 @@ export class PackageManager {
         packageJson.overrides = overrides;
       }
 
-      // Add pnpm.patchedDependencies if any patches are required
-      // This enables adapters (like Midnight) to specify patches for browser compatibility
+      // pnpm 11+ ignores dependency postinstall/build scripts unless allowlisted on the root
+      // package (see repo `pnpm-workspace.yaml` allowBuilds). Exported apps are not workspaces,
+      // so we mirror that allowlist via `onlyBuiltDependencies`.
+      const pnpmConfig: Record<string, unknown> = {
+        ...(packageJson.pnpm as Record<string, unknown> | undefined),
+      };
       if (Object.keys(patchedDependencies).length > 0) {
-        packageJson.pnpm = {
-          ...(packageJson.pnpm || {}),
-          patchedDependencies,
+        pnpmConfig.patchedDependencies = {
+          ...(pnpmConfig.patchedDependencies as Record<string, string> | undefined),
+          ...patchedDependencies,
         };
       }
+      pnpmConfig.onlyBuiltDependencies = [
+        ...new Set([
+          ...((pnpmConfig.onlyBuiltDependencies as string[] | undefined) ?? []),
+          ...PNPM_ONLY_BUILT_DEPENDENCIES,
+        ]),
+      ].sort();
+      packageJson.pnpm = pnpmConfig;
 
       // Add upgrade instructions if workspace dependencies are present
       this.addUpgradeInstructions(packageJson);
