@@ -88,9 +88,10 @@
     "vitest": "^3.2.4"
   },
   "engines": {
-    "node": ">=20.19.0"
+    "node": ">=22.13.0",
+    "pnpm": ">=11"
   },
-  "packageManager": "pnpm@10.28.2",
+  "packageManager": "pnpm@11.1.0",
   "pnpm": {
     "overrides": {
       "vite": "7.3.1",
@@ -121,7 +122,11 @@
       "@midnight-ntwrk/midnight-js-network-id@2.0.2": "patches/@midnight-ntwrk__midnight-js-network-id@2.0.2.patch",
       "@midnight-ntwrk/midnight-js-types@2.0.2": "patches/@midnight-ntwrk__midnight-js-types@2.0.2.patch",
       "@midnight-ntwrk/midnight-js-utils@2.0.2": "patches/@midnight-ntwrk__midnight-js-utils@2.0.2.patch"
-    }
+    },
+    "minimumReleaseAge": 10080,
+    "minimumReleaseAgeExclude": [
+      "@openzeppelin/*"
+    ]
   },
   "dependencies": {
     "jszip": "^3.10.1"

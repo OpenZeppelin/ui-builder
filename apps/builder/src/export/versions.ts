@@ -12,10 +12,10 @@ export const packageVersions = {
   '@openzeppelin/adapter-solana': '2.0.0',
   '@openzeppelin/adapter-stellar': '2.0.0',
   '@openzeppelin/ui-react': '2.0.1',
-  '@openzeppelin/ui-renderer': '2.0.0',
+  '@openzeppelin/ui-renderer': '2.0.1',
   '@openzeppelin/ui-storage': '1.2.1',
   '@openzeppelin/ui-types': '2.0.0',
-  '@openzeppelin/ui-components': '2.2.0',
+  '@openzeppelin/ui-components': '2.3.1',
   '@openzeppelin/ui-utils': '2.0.0',
   '@openzeppelin/ui-styles': '1.1.0',
 };
