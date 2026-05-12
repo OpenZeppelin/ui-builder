@@ -342,11 +342,11 @@ exports[`Export Snapshot Tests > evm Export Snapshots > should match snapshot fo
 {
   "dependencies": {
     "@openzeppelin/adapter-evm": "^2.0.1",
-    "@openzeppelin/ui-components": "^2.2.0",
-    "@openzeppelin/ui-react": "^2.0.1",
-    "@openzeppelin/ui-renderer": "^2.0.0",
-    "@openzeppelin/ui-types": "^2.0.0",
-    "@openzeppelin/ui-utils": "^2.0.0",
+    "@openzeppelin/ui-components": "^3.0.0",
+    "@openzeppelin/ui-react": "^3.0.0",
+    "@openzeppelin/ui-renderer": "^3.0.0",
+    "@openzeppelin/ui-types": "^3.0.0",
+    "@openzeppelin/ui-utils": "^3.0.0",
     "@tanstack/react-query": "^5.0.0",
     "@wagmi/core": "^2.20.3",
     "react": "^19.2.1",
@@ -709,11 +709,11 @@ exports[`Export Snapshot Tests > polkadot Export Snapshots > should match snapsh
 {
   "dependencies": {
     "@openzeppelin/adapter-polkadot": "^2.0.0",
-    "@openzeppelin/ui-components": "^2.2.0",
-    "@openzeppelin/ui-react": "^2.0.1",
-    "@openzeppelin/ui-renderer": "^2.0.0",
-    "@openzeppelin/ui-types": "^2.0.0",
-    "@openzeppelin/ui-utils": "^2.0.0",
+    "@openzeppelin/ui-components": "^3.0.0",
+    "@openzeppelin/ui-react": "^3.0.0",
+    "@openzeppelin/ui-renderer": "^3.0.0",
+    "@openzeppelin/ui-types": "^3.0.0",
+    "@openzeppelin/ui-utils": "^3.0.0",
     "@tanstack/react-query": "^5.0.0",
     "@wagmi/core": "^2.20.3",
     "react": "^19.2.1",
