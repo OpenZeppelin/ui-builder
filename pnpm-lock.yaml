@@ -4,6 +4,8 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+pnpmfileChecksum: sha256-GpDhWpq2qJt+XIguH48t7ijYcmd8IvNUIRI0RwUTn8Y=
+
 importers:
 
   .:
@@ -106,19 +108,19 @@ importers:
         specifier: ^12.9.0
         version: 12.9.0(react@19.2.4)
       '@openzeppelin/adapter-evm':
-        specifier: ^2.0.0
+        specifier: '>=2.0.0-0 <3.0.0'
         version: 2.0.0(abc59de9370e99bc462001014585c183)
       '@openzeppelin/adapter-midnight':
-        specifier: ^2.0.0
+        specifier: '>=2.0.0-0 <3.0.0'
         version: 2.0.0(@openzeppelin/ui-components@3.0.0(@babel/runtime@7.29.2)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(tailwindcss@4.2.2)(typescript@5.9.3))(@openzeppelin/ui-react@3.0.0(@babel/runtime@7.29.2)(@tanstack/react-query@5.96.2(react@19.2.4))(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(tailwindcss@4.2.2)(typescript@5.9.3))(@openzeppelin/ui-types@3.0.0)(@openzeppelin/ui-utils@3.0.0)(@types/react@19.2.14)(bufferutil@4.1.0)(crossws@0.3.5)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(utf-8-validate@6.0.6)
       '@openzeppelin/adapter-polkadot':
-        specifier: ^2.0.0
+        specifier: '>=2.0.0-0 <3.0.0'
         version: 2.0.0(45af91f293345fc4186f85559869d581)
       '@openzeppelin/adapter-solana':
-        specifier: ^2.0.0
+        specifier: '>=2.0.0-0 <3.0.0'
         version: 2.0.0(@openzeppelin/ui-types@3.0.0)(@openzeppelin/ui-utils@3.0.0)(bufferutil@4.1.0)(fastestsmallesttextencoderdecoder@1.0.22)(react-native@0.83.1(@babel/core@7.29.0)(@types/react@19.2.14)(bufferutil@4.1.0)(react@19.2.4)(utf-8-validate@6.0.6))(react@19.2.4)(typescript@5.9.3)(utf-8-validate@6.0.6)
       '@openzeppelin/adapter-stellar':
-        specifier: ^2.0.0
+        specifier: '>=2.0.0-0 <3.0.0'
         version: 2.0.0(b49eeeb96ea9207816752cdd5431953f)
       '@openzeppelin/ui-components':
         specifier: ^3.0.0
@@ -275,7 +277,7 @@ importers:
         specifier: 4.0.0
         version: 4.0.0
       '@openzeppelin/adapters-vite':
-        specifier: ^2.0.0
+        specifier: '>=2.0.0-0 <3.0.0'
         version: 2.0.0(72c7d3ce6e2c28f47d65452f01f58303)
       '@tailwindcss/vite':
         specifier: ^4.2.2
