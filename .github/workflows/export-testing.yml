@@ -119,8 +119,7 @@ jobs:
         env:
           NODE_OPTIONS: "--max-old-space-size=8192"
 
-      - name: Run packed export e2e test
+      - name: Run packed export e2e test (${{ matrix.chain }})
+        run: node apps/builder/src/export/cli/export-app.cjs export --env packed -c ${{ matrix.chain }} -o exports/ci-test-${{ matrix.chain }}
         env:
           NODE_OPTIONS: "--max-old-space-size=8192"
-          CHAIN: ${{ matrix.chain }}
-        run: node apps/builder/src/export/cli/export-app.cjs export --env packed -c "$CHAIN" -o "exports/ci-test-$CHAIN"
