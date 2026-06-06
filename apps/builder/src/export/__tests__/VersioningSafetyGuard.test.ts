@@ -31,9 +31,11 @@ const mockAdapterConfig: AdapterConfig = {
 };
 
 vi.mock('../AdapterConfigLoader', () => ({
-  AdapterConfigLoader: vi.fn().mockImplementation(() => ({
-    loadConfig: vi.fn().mockResolvedValue(mockAdapterConfig),
-  })),
+  AdapterConfigLoader: vi.fn().mockImplementation(function () {
+    return {
+      loadConfig: vi.fn().mockResolvedValue(mockAdapterConfig),
+    };
+  }),
 }));
 
 const mockRendererConfig = {

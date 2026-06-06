@@ -26,45 +26,47 @@ vi.mock('../../../core/adapterRegistry', () => {
 // Mock the PackageManager module
 vi.mock('../../PackageManager', () => {
   // Mock implementation
-  const MockPackageManager = vi.fn().mockImplementation(() => ({
-    // Mock methods used by AppCodeGenerator -> generateTemplateProject
-    updatePackageJson: vi
-      .fn()
-      .mockImplementation(
-        async (
-          originalContent: string,
-          _formConfig: BuilderFormConfig,
-          ecosystem: Ecosystem,
-          _functionId: string,
-          options?: Partial<ExportOptions>
-        ) => {
-          const packageJson = JSON.parse(originalContent);
-          packageJson.name = options?.projectName || 'default-test-name';
-          // Simulate adding dependencies based on ecosystem
-          packageJson.dependencies = {
-            ...(packageJson.dependencies || {}),
+  const MockPackageManager = vi.fn().mockImplementation(function () {
+    return {
+      // Mock methods used by AppCodeGenerator -> generateTemplateProject
+      updatePackageJson: vi
+        .fn()
+        .mockImplementation(
+          async (
+            originalContent: string,
+            _formConfig: BuilderFormConfig,
+            ecosystem: Ecosystem,
+            _functionId: string,
+            options?: Partial<ExportOptions>
+          ) => {
+            const packageJson = JSON.parse(originalContent);
+            packageJson.name = options?.projectName || 'default-test-name';
+            // Simulate adding dependencies based on ecosystem
+            packageJson.dependencies = {
+              ...(packageJson.dependencies || {}),
+              '@openzeppelin/ui-renderer': '^1.0.0',
+              '@openzeppelin/ui-types': '^0.1.0',
+              [`@openzeppelin/adapter-${ecosystem}`]: '^0.0.1', // Add caret version
+            };
+            return JSON.stringify(packageJson, null, 2);
+          }
+        ),
+      getDependencies: vi
+        .fn()
+        .mockImplementation(async (_formConfig: BuilderFormConfig, ecosystem: Ecosystem) => {
+          return {
             '@openzeppelin/ui-renderer': '^1.0.0',
             '@openzeppelin/ui-types': '^0.1.0',
-            [`@openzeppelin/adapter-${ecosystem}`]: '^0.0.1', // Add caret version
+            [`@openzeppelin/adapter-${ecosystem}`]: '^0.0.1',
           };
-          return JSON.stringify(packageJson, null, 2);
-        }
-      ),
-    getDependencies: vi
-      .fn()
-      .mockImplementation(async (_formConfig: BuilderFormConfig, ecosystem: Ecosystem) => {
-        return {
-          '@openzeppelin/ui-renderer': '^1.0.0',
-          '@openzeppelin/ui-types': '^0.1.0',
-          [`@openzeppelin/adapter-${ecosystem}`]: '^0.0.1',
-        };
-      }),
-    getDevDependencies: vi
-      .fn()
-      .mockImplementation(async (_formConfig: BuilderFormConfig, _ecosystem: Ecosystem) => {
-        return {};
-      }),
-  }));
+        }),
+      getDevDependencies: vi
+        .fn()
+        .mockImplementation(async (_formConfig: BuilderFormConfig, _ecosystem: Ecosystem) => {
+          return {};
+        }),
+    };
+  });
   return { PackageManager: MockPackageManager };
 });
 
@@ -73,50 +75,52 @@ vi.mock('../../TemplateManager', async (importOriginal) => {
   const original = await importOriginal<typeof import('../../TemplateManager')>();
   return {
     ...original,
-    TemplateManager: vi.fn().mockImplementation(() => ({
-      createProject: vi
-        .fn()
-        .mockImplementation(
-          async (
-            _templateName: string,
-            customFiles: Record<string, string>,
-            options: Partial<ExportOptions>
-          ) => {
-            // Create a simple template structure reflecting the *new* base template
-            const baseTemplate: Record<string, string> = {
-              'src/App.tsx': '// Base App.tsx placeholder content',
-              // The base template now has GeneratedForm.tsx as the placeholder file
-              'src/components/GeneratedForm.tsx':
-                'export function GeneratedForm() { return <div>Placeholder Content</div>; }',
-              'src/main.tsx': '// Base main.tsx placeholder content',
-              'package.json': '{"name":"template","dependencies":{}}',
-            };
-
-            // Process the template - merge custom files, overwriting base placeholders
-            const result = { ...baseTemplate, ...customFiles };
-
-            // No explicit deletion needed anymore - overwriting handles it.
-
-            // Simulate PackageManager update for package.json (as before)
-            if (result['package.json']) {
-              const packageJson = JSON.parse(result['package.json']);
-              packageJson.name = options?.projectName || 'default-test-name';
-              packageJson.dependencies = {
-                ...(packageJson.dependencies || {}),
-                '@openzeppelin/ui-renderer': '^1.0.0',
-                '@openzeppelin/ui-types': '^0.1.0',
-                [`@openzeppelin/adapter-${options.ecosystem || 'evm'}`]: '^0.0.1',
+    TemplateManager: vi.fn().mockImplementation(function () {
+      return {
+        createProject: vi
+          .fn()
+          .mockImplementation(
+            async (
+              _templateName: string,
+              customFiles: Record<string, string>,
+              options: Partial<ExportOptions>
+            ) => {
+              // Create a simple template structure reflecting the *new* base template
+              const baseTemplate: Record<string, string> = {
+                'src/App.tsx': '// Base App.tsx placeholder content',
+                // The base template now has GeneratedForm.tsx as the placeholder file
+                'src/components/GeneratedForm.tsx':
+                  'export function GeneratedForm() { return <div>Placeholder Content</div>; }',
+                'src/main.tsx': '// Base main.tsx placeholder content',
+                'package.json': '{"name":"template","dependencies":{}}',
               };
-              result['package.json'] = JSON.stringify(packageJson, null, 2);
-            }
 
-            return result;
-          }
-        ),
-      // Mock getAvailableTemplates and getTemplateFiles if needed by other tests
-      getAvailableTemplates: vi.fn().mockResolvedValue(['typescript-react-vite']),
-      getTemplateFiles: vi.fn().mockResolvedValue({}), // Simplified mock
-    })),
+              // Process the template - merge custom files, overwriting base placeholders
+              const result = { ...baseTemplate, ...customFiles };
+
+              // No explicit deletion needed anymore - overwriting handles it.
+
+              // Simulate PackageManager update for package.json (as before)
+              if (result['package.json']) {
+                const packageJson = JSON.parse(result['package.json']);
+                packageJson.name = options?.projectName || 'default-test-name';
+                packageJson.dependencies = {
+                  ...(packageJson.dependencies || {}),
+                  '@openzeppelin/ui-renderer': '^1.0.0',
+                  '@openzeppelin/ui-types': '^0.1.0',
+                  [`@openzeppelin/adapter-${options.ecosystem || 'evm'}`]: '^0.0.1',
+                };
+                result['package.json'] = JSON.stringify(packageJson, null, 2);
+              }
+
+              return result;
+            }
+          ),
+        // Mock getAvailableTemplates and getTemplateFiles if needed by other tests
+        getAvailableTemplates: vi.fn().mockResolvedValue(['typescript-react-vite']),
+        getTemplateFiles: vi.fn().mockResolvedValue({}), // Simplified mock
+      };
+    }),
   };
 });
 
@@ -129,7 +133,9 @@ const mockTemplateProcessor = {
 
 // Mock the TemplateProcessor module to use the instance above
 vi.mock('../TemplateProcessor', () => ({
-  TemplateProcessor: vi.fn(() => mockTemplateProcessor),
+  TemplateProcessor: vi.fn(function () {
+    return mockTemplateProcessor;
+  }),
 }));
 
 // Mock formSchemaFactory used internally by generator
