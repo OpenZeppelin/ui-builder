@@ -341,11 +341,11 @@ export default function GeneratedForm({ adapter, isWalletConnected }: GeneratedF
 exports[`Export Snapshot Tests > evm Export Snapshots > should match snapshot for package.json structure > package-json-evm 1`] = `
 {
   "dependencies": {
-    "@openzeppelin/adapter-evm": "^2.0.2",
+    "@openzeppelin/adapter-evm": "^2.1.0",
     "@openzeppelin/ui-components": "^3.0.0",
     "@openzeppelin/ui-react": "^3.0.0",
     "@openzeppelin/ui-renderer": "^3.0.0",
-    "@openzeppelin/ui-types": "^3.0.0",
+    "@openzeppelin/ui-types": "^3.1.0",
     "@openzeppelin/ui-utils": "^3.0.0",
     "@tanstack/react-query": "^5.0.0",
     "@wagmi/core": "^2.20.3",
@@ -708,11 +708,11 @@ export default function GeneratedForm({ adapter, isWalletConnected }: GeneratedF
 exports[`Export Snapshot Tests > polkadot Export Snapshots > should match snapshot for package.json structure > package-json-polkadot 1`] = `
 {
   "dependencies": {
-    "@openzeppelin/adapter-polkadot": "^2.0.2",
+    "@openzeppelin/adapter-polkadot": "^2.1.0",
     "@openzeppelin/ui-components": "^3.0.0",
     "@openzeppelin/ui-react": "^3.0.0",
     "@openzeppelin/ui-renderer": "^3.0.0",
-    "@openzeppelin/ui-types": "^3.0.0",
+    "@openzeppelin/ui-types": "^3.1.0",
     "@openzeppelin/ui-utils": "^3.0.0",
     "@tanstack/react-query": "^5.0.0",
     "@wagmi/core": "^2.20.3",
