@@ -58,6 +58,13 @@ const virtualModuleMocks: Record<string, string> = {
 };
 
 const adapterVitestConfig = await adapters.vitest({
+  server: {
+    fs: {
+      // Allow reading adapter patch files from sibling openzeppelin-adapters checkout
+      // (used by copyAdapterPatchFiles snapshot/integration tests).
+      allow: [path.resolve(__dirname, '../..'), path.resolve(__dirname, '../../../openzeppelin-adapters')],
+    },
+  },
   plugins: [
     // Include React plugin from shared config
     react(),
@@ -117,13 +124,6 @@ const adapterVitestConfig = await adapters.vitest({
     testTimeout: 30000,
     hookTimeout: 30000,
     teardownTimeout: 30000,
-    // Run export tests sequentially to avoid resource contention during
-    // heavy EVM adapter dynamic imports (which take ~12s each)
-    poolOptions: {
-      threads: {
-        singleThread: false,
-      },
-    },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'json-summary'],

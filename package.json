@@ -73,7 +73,7 @@
     "@typescript-eslint/eslint-plugin": "^8.58.0",
     "@typescript-eslint/parser": "^8.58.0",
     "@vitejs/plugin-react": "^4.7.0",
-    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/coverage-v8": "^4.1.0",
     "commitizen": "^4.3.1",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-jsdoc": "^50.8.0",
@@ -85,7 +85,7 @@
     "prettier-plugin-tailwindcss": "0.6.14",
     "tsup": "^8.5.1",
     "vite": "7.3.2",
-    "vitest": "^3.2.4"
+    "vitest": "^4.1.0"
   },
   "engines": {
     "node": ">=22.13.0",
@@ -93,27 +93,6 @@
   },
   "packageManager": "pnpm@11.1.0",
   "pnpm": {
-    "overrides": {
-      "vite": "7.3.2",
-      "use-sync-external-store": "^1.2.0",
-      "valtio": "^1.13.2",
-      "@paulmillr/qr": "npm:qr@^0.5.0",
-      "@walletconnect/modal": "2.7.0",
-      "@types/react": "^19.2.14",
-      "@types/node": "24.10.13",
-      "prettier": "3.6.2",
-      "prettier-plugin-tailwindcss": "0.6.14",
-      "@ianvs/prettier-plugin-sort-imports": "4.5.1",
-      "@wagmi/core": "^2.20.3",
-      "ua-parser-js": "1.0.41",
-      "glob": "^11.1.0",
-      "@midnight-ntwrk/midnight-js-contracts": "2.0.2",
-      "@midnight-ntwrk/midnight-js-http-client-proof-provider": "2.0.2",
-      "@midnight-ntwrk/midnight-js-indexer-public-data-provider": "2.0.2",
-      "@midnight-ntwrk/midnight-js-network-id": "2.0.2",
-      "@midnight-ntwrk/midnight-js-types": "2.0.2",
-      "@midnight-ntwrk/midnight-js-utils": "2.0.2"
-    },
     "patchedDependencies": {
       "@midnight-ntwrk/compact-runtime@0.9.0": "patches/@midnight-ntwrk__compact-runtime@0.9.0.patch",
       "@midnight-ntwrk/midnight-js-contracts@2.0.2": "patches/@midnight-ntwrk__midnight-js-contracts@2.0.2.patch",
@@ -122,11 +101,7 @@
       "@midnight-ntwrk/midnight-js-network-id@2.0.2": "patches/@midnight-ntwrk__midnight-js-network-id@2.0.2.patch",
       "@midnight-ntwrk/midnight-js-types@2.0.2": "patches/@midnight-ntwrk__midnight-js-types@2.0.2.patch",
       "@midnight-ntwrk/midnight-js-utils@2.0.2": "patches/@midnight-ntwrk__midnight-js-utils@2.0.2.patch"
-    },
-    "minimumReleaseAge": 10080,
-    "minimumReleaseAgeExclude": [
-      "@openzeppelin/*"
-    ]
+    }
   },
   "dependencies": {
     "jszip": "^3.10.1"
