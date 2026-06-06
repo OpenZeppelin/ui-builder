@@ -49,6 +49,7 @@ overrides:
   'picomatch@>=4.0.0 <4.0.4': ^4.0.4
   'follow-redirects@<=1.15.11': ^1.16.0
   'postcss@<8.5.10': ^8.5.10
+  'ws@>=8.0.0 <8.20.1': ^8.20.1
 allowBuilds:
   '@openzeppelin/adapter-stellar': true
   '@swc/core': true
