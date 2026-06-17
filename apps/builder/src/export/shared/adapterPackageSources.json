@@ -14,7 +14,6 @@
     "@openzeppelin/adapter-stellar": "adapter-stellar"
   },
   "patchSourceDescriptions": [
-    "sibling openzeppelin-adapters checkout",
     "installed @openzeppelin/adapter-* package",
     "legacy ui-builder workspace fallback"
   ]
