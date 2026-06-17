@@ -9,11 +9,21 @@ const {
   setActiveNetworkIdMock,
   trackEcosystemSelectionMock,
   trackNetworkSelectionMock,
+  getNetworkByIdMock,
+  isNetworkSelectableMock,
+  getDisabledNetworkRejectionToastMock,
+  contractUIStorageGetMock,
+  toastErrorMock,
 } = vi.hoisted(() => ({
   parseDeepLinkMock: vi.fn(),
   setActiveNetworkIdMock: vi.fn(),
   trackEcosystemSelectionMock: vi.fn(),
   trackNetworkSelectionMock: vi.fn(),
+  getNetworkByIdMock: vi.fn(),
+  isNetworkSelectableMock: vi.fn(),
+  getDisabledNetworkRejectionToastMock: vi.fn(),
+  contractUIStorageGetMock: vi.fn(),
+  toastErrorMock: vi.fn(),
 }));
 
 vi.mock('@openzeppelin/ui-utils', () => ({
@@ -26,18 +36,24 @@ vi.mock('@openzeppelin/ui-utils', () => ({
   routerService: {
     navigate: vi.fn(),
   },
+  isNetworkSelectable: isNetworkSelectableMock,
+  getDisabledNetworkRejectionToast: getDisabledNetworkRejectionToastMock,
 }));
 
 vi.mock('sonner', () => ({
   toast: {
-    error: vi.fn(),
+    error: toastErrorMock,
   },
 }));
 
 vi.mock('../../../../../storage', () => ({
   contractUIStorage: {
-    get: vi.fn(),
+    get: contractUIStorageGetMock,
   },
+}));
+
+vi.mock('@/core/ecosystemManager', () => ({
+  getNetworkById: getNetworkByIdMock,
 }));
 
 vi.mock('@openzeppelin/ui-react', () => ({
@@ -121,5 +137,61 @@ describe('useBuilderLifecycle deep link ecosystem sync', () => {
     });
 
     expect(trackEcosystemSelectionMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('useBuilderLifecycle saved configuration loading', () => {
+  const createRefs = () => ({
+    loadingRef: { current: false },
+    savedIdRef: { current: null as string | null },
+  });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    uiBuilderStore.resetWizard();
+  });
+
+  it('rejects loading a saved configuration on a disabled mainnet network', async () => {
+    contractUIStorageGetMock.mockResolvedValue({
+      id: 'saved-mainnet',
+      title: 'Old Mainnet UI',
+      ecosystem: 'evm',
+      networkId: 'ethereum-mainnet',
+      contractAddress: '0xabc',
+      functionId: 'transfer',
+      formConfig: { functionId: 'transfer', title: 'Old Mainnet UI', fields: [] },
+    });
+    getNetworkByIdMock.mockResolvedValue({
+      id: 'ethereum-mainnet',
+      name: 'Ethereum Mainnet',
+      type: 'mainnet',
+    });
+    isNetworkSelectableMock.mockReturnValue(false);
+    getDisabledNetworkRejectionToastMock.mockReturnValue({
+      title: 'Mainnet networks are disabled on this hosted UI Builder',
+      description:
+        'Testnet and devnet networks remain available here. To use mainnet, deploy UI Builder yourself from the source repository.',
+    });
+
+    const { loadingRef, savedIdRef } = createRefs();
+    const autoSave = { pause: vi.fn(), resume: vi.fn(), isPaused: false };
+
+    const { result } = renderHook(() => useBuilderLifecycle(loadingRef, savedIdRef, autoSave));
+
+    await act(async () => {
+      await result.current.load('saved-mainnet');
+    });
+
+    expect(getDisabledNetworkRejectionToastMock).toHaveBeenCalledWith('UI Builder');
+    expect(toastErrorMock).toHaveBeenCalledWith(
+      'Mainnet networks are disabled on this hosted UI Builder',
+      expect.objectContaining({
+        description:
+          'Testnet and devnet networks remain available here. To use mainnet, deploy UI Builder yourself from the source repository.',
+      })
+    );
+    expect(setActiveNetworkIdMock).not.toHaveBeenCalled();
+    expect(savedIdRef.current).toBeNull();
+    expect(uiBuilderStore.getState().loadedConfigurationId).toBeNull();
   });
 });

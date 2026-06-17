@@ -186,6 +186,18 @@ describe('generateAndAddAppConfig', () => {
       });
     });
 
+    it('should not include hosted-only mainnet disable flag in exported app.config.json.example', async () => {
+      const projectFiles: Record<string, string> = {};
+      const networkConfig = createNetworkConfig('evm', 'ethereum-sepolia');
+      const formConfig = createFormConfig('custom');
+
+      await generateAndAddAppConfig(projectFiles, networkConfig, mockTemplateProcessor, formConfig);
+
+      const exampleConfig = JSON.parse(projectFiles['public/app.config.json.example']);
+      expect(exampleConfig.featureFlags?.mainnet_networks_disabled).toBeUndefined();
+      expect(exampleConfig.disabledNetworkIds).toBeUndefined();
+    });
+
     it('should not generate app.config.json for custom kit', async () => {
       const projectFiles: Record<string, string> = {};
       const networkConfig = createNetworkConfig('solana', 'solana-devnet');

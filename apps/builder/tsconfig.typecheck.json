@@ -2,6 +2,9 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "noEmit": true,
+    "emitDeclarationOnly": false,
+    "declaration": false,
+    "declarationMap": false,
     "paths": {
       "@/*": ["./src/*"]
     }

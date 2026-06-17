@@ -233,13 +233,14 @@ pnpm dev        # Restart dev server
 
 ### Switching Between Modes
 
-If you experience issues after switching between local and npm modes:
+`oz-ui-dev use local` and `oz-ui-dev use remote` automatically clear root and workspace `node_modules` before reinstalling, so pnpm re-applies `.pnpmfile.cjs` rewrites. You should not need a manual cleanup in normal use.
+
+If you still experience stale resolution after switching modes:
 
 ```bash
-# Clean and reinstall
 pnpm clean
 rm -rf node_modules
-pnpm install  # or pnpm dev:local
+pnpm dev:local
 ```
 
 ### Verifying Local Mode is Active
@@ -251,6 +252,34 @@ Using local packages for /path/to/ui-builder
   ui: 7 tarballs -> /path/to/ui-builder/.packed-packages/local-dev/ui.json
   adapters: 5 tarballs -> /path/to/ui-builder/.packed-packages/local-dev/adapters.json
 ```
+
+### Testing hosted mainnet disable locally
+
+Hosted UI Builder builds set `mainnet_networks_disabled` via Docker (`VITE_APP_CFG_FEATURE_FLAG_MAINNET_NETWORKS_DISABLED=true`). Self-hosted local dev does not enable that policy by default.
+
+To test the hosted mainnet-disable UX locally, add to `apps/builder/public/app.config.local.json`:
+
+```json
+{
+  "featureFlags": {
+    "mainnet_networks_disabled": true
+  }
+}
+```
+
+Or set in `apps/builder/.env.local`:
+
+```bash
+VITE_APP_CFG_FEATURE_FLAG_MAINNET_NETWORKS_DISABLED=true
+```
+
+Dev-only sidebar tools (mainnet seed helpers) require `show_dev_tools`:
+
+```bash
+VITE_APP_CFG_FEATURE_FLAG_SHOW_DEV_TOOLS=true
+```
+
+Do not enable `show_dev_tools` in staging or production deployments.
 
 ## Best Practices
 

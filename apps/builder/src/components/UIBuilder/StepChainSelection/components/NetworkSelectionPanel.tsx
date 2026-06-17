@@ -1,11 +1,11 @@
 import { Search } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
-import { Input } from '@openzeppelin/ui-components';
+import { Input, NetworkAvailabilityNotice } from '@openzeppelin/ui-components';
 import { useRuntimeContext } from '@openzeppelin/ui-react';
 import { NetworkSettingsDialog } from '@openzeppelin/ui-renderer';
 import type { Ecosystem, NetworkConfig, RelayerCapability } from '@openzeppelin/ui-types';
-import { logger } from '@openzeppelin/ui-utils';
+import { getNetworkAvailability, isNetworkSelectable, logger } from '@openzeppelin/ui-utils';
 
 import { getEcosystemMetadata } from '../../../../core/ecosystemManager';
 import { networkService } from '../../../../core/networks/service';
@@ -46,10 +46,15 @@ export function NetworkSelectionPanel({
 
   const handleNetworkClick = useCallback(
     (networkId: string) => {
+      const network = networks.find((item) => item.id === networkId);
+      if (network && !isNetworkSelectable(network)) {
+        return;
+      }
+
       setClickedNetworkId(networkId);
       onNetworkSelected(networkId);
     },
-    [onNetworkSelected]
+    [networks, onNetworkSelected]
   );
 
   // Resolve the relayer capability for the settings dialog.
@@ -109,6 +114,11 @@ export function NetworkSelectionPanel({
 
   return (
     <div className="space-y-4">
+      <NetworkAvailabilityNotice
+        appName="UI Builder"
+        selfHostRepoUrl="https://github.com/OpenZeppelin/ui-builder"
+      />
+
       {/* Search filter */}
       <div className="relative">
         <div className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground">
@@ -202,17 +212,23 @@ function NetworkGroup({
 
       {/* Vertical stack container for row-based layout */}
       <div className="space-y-2">
-        {networks.map((network) => (
-          <div key={network.id} className="relative">
-            <NetworkRow
-              network={network}
-              isSelected={network.id === selectedNetworkId}
-              isLoading={network.id === loadingNetworkId}
-              onSelect={() => onNetworkSelected(network.id)}
-              onOpenSettings={(e) => onOpenNetworkSettings(network, e)}
-            />
-          </div>
-        ))}
+        {networks.map((network) => {
+          const availability = getNetworkAvailability(network);
+
+          return (
+            <div key={network.id} className="relative">
+              <NetworkRow
+                network={network}
+                isSelected={network.id === selectedNetworkId}
+                isLoading={network.id === loadingNetworkId}
+                disabled={!availability.selectable}
+                disabledLabel={availability.disabledLabel}
+                onSelect={() => onNetworkSelected(network.id)}
+                onOpenSettings={(e) => onOpenNetworkSettings(network, e)}
+              />
+            </div>
+          );
+        })}
       </div>
     </div>
   );

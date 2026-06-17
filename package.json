@@ -64,7 +64,7 @@
     "@commitlint/cz-commitlint": "^19.8.1",
     "@ianvs/prettier-plugin-sort-imports": "4.5.1",
     "@openzeppelin/docs-utils": "^0.1.6",
-    "@openzeppelin/ui-dev-cli": "^0.5.1",
+    "@openzeppelin/ui-dev-cli": "^0.6.1",
     "@tailwindcss/postcss": "^4.2.2",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -112,7 +112,11 @@
       "@midnight-ntwrk/midnight-js-indexer-public-data-provider": "2.0.2",
       "@midnight-ntwrk/midnight-js-network-id": "2.0.2",
       "@midnight-ntwrk/midnight-js-types": "2.0.2",
-      "@midnight-ntwrk/midnight-js-utils": "2.0.2"
+      "@midnight-ntwrk/midnight-js-utils": "2.0.2",
+      "@openzeppelin/ui-types": "3.1.1",
+      "@openzeppelin/ui-utils": "3.0.1",
+      "@openzeppelin/ui-components": "3.0.1",
+      "react-hook-form": "7.79.0"
     },
     "patchedDependencies": {
       "@midnight-ntwrk/compact-runtime@0.9.0": "patches/@midnight-ntwrk__compact-runtime@0.9.0.patch",

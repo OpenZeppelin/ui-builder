@@ -3,7 +3,13 @@ import { useCallback } from 'react';
 
 import { useWalletState } from '@openzeppelin/ui-react';
 import { ContractSchema, type Ecosystem } from '@openzeppelin/ui-types';
-import { logger, parseDeepLink, routerService } from '@openzeppelin/ui-utils';
+import {
+  getDisabledNetworkRejectionToast,
+  isNetworkSelectable,
+  logger,
+  parseDeepLink,
+  routerService,
+} from '@openzeppelin/ui-utils';
 
 import { extractDeepLinkParams, resolveNetworkIdFromDeepLink } from '@/core/deeplink';
 import { getNetworkById } from '@/core/ecosystemManager';
@@ -53,6 +59,15 @@ export function useBuilderLifecycle(
           logger.error('Contract UI not found', `ID: ${id}`);
           toast.error('Configuration not found', {
             description: 'The selected configuration could not be loaded.',
+          });
+          return;
+        }
+
+        const savedNetwork = await getNetworkById(savedUI.networkId);
+        if (savedNetwork && !isNetworkSelectable(savedNetwork)) {
+          const toastCopy = getDisabledNetworkRejectionToast('UI Builder');
+          toast.error(toastCopy.title, {
+            description: toastCopy.description,
           });
           return;
         }
@@ -198,6 +213,18 @@ export function useBuilderLifecycle(
 
       if (resolvedNetworkId && urlAddress) {
         const network = await getNetworkById(resolvedNetworkId);
+        if (network && !isNetworkSelectable(network)) {
+          const toastCopy = getDisabledNetworkRejectionToast('UI Builder');
+          toast.error(toastCopy.title, {
+            description: toastCopy.description,
+          });
+
+          if (typeof window !== 'undefined' && window.location.search) {
+            routerService.navigate(window.location.pathname);
+          }
+          return;
+        }
+
         if (network) {
           // Track network selection from deep link
           trackNetworkSelection(network.id, urlEcosystem);
