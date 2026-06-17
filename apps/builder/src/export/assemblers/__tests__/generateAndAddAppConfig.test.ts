@@ -324,6 +324,7 @@ describe('generateAndAddAppConfig', () => {
       const formConfig = createFormConfig('stellar-wallets-kit');
 
       const formatJsonSpy = vi.spyOn(mockTemplateProcessor, 'formatJson');
+      formatJsonSpy.mockClear();
 
       await generateAndAddAppConfig(projectFiles, networkConfig, mockTemplateProcessor, formConfig);
 

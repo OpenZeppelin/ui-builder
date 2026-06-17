@@ -30,19 +30,21 @@ const mockMidnightAdapterConfig: AdapterConfig = {
 
 // Mock AdapterConfigLoader
 vi.mock('../../AdapterConfigLoader', () => ({
-  AdapterConfigLoader: vi.fn().mockImplementation(() => ({
-    loadConfig: vi.fn().mockImplementation(async (ecosystem: Ecosystem) => {
-      if (ecosystem === 'midnight') {
-        return mockMidnightAdapterConfig;
-      }
-      // Return config without patchedDependencies for other ecosystems
-      return {
-        dependencies: {
-          runtime: { viem: '^2.0.0' },
-        },
-      };
-    }),
-  })),
+  AdapterConfigLoader: vi.fn().mockImplementation(function () {
+    return {
+      loadConfig: vi.fn().mockImplementation(async (ecosystem: Ecosystem) => {
+        if (ecosystem === 'midnight') {
+          return mockMidnightAdapterConfig;
+        }
+        // Return config without patchedDependencies for other ecosystems
+        return {
+          dependencies: {
+            runtime: { viem: '^2.0.0' },
+          },
+        };
+      }),
+    };
+  }),
 }));
 
 // Mock logger to avoid console output during tests

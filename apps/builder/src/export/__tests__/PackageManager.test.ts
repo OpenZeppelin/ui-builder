@@ -100,24 +100,26 @@ const mockStellarAdapterConfig: AdapterConfig = {
 
 // Mock AdapterConfigLoader to return test configs
 vi.mock('../AdapterConfigLoader', () => ({
-  AdapterConfigLoader: vi.fn().mockImplementation(() => ({
-    loadConfig: vi.fn().mockImplementation(async (ecosystem: Ecosystem) => {
-      switch (ecosystem) {
-        case 'midnight':
-          return mockMidnightAdapterConfig;
-        case 'evm':
-          return mockEvmAdapterConfig;
-        case 'polkadot':
-          return mockPolkadotAdapterConfig;
-        case 'solana':
-          return mockSolanaAdapterConfig;
-        case 'stellar':
-          return mockStellarAdapterConfig;
-        default:
-          return null;
-      }
-    }),
-  })),
+  AdapterConfigLoader: vi.fn().mockImplementation(function () {
+    return {
+      loadConfig: vi.fn().mockImplementation(async (ecosystem: Ecosystem) => {
+        switch (ecosystem) {
+          case 'midnight':
+            return mockMidnightAdapterConfig;
+          case 'evm':
+            return mockEvmAdapterConfig;
+          case 'polkadot':
+            return mockPolkadotAdapterConfig;
+          case 'solana':
+            return mockSolanaAdapterConfig;
+          case 'stellar':
+            return mockStellarAdapterConfig;
+          default:
+            return null;
+        }
+      }),
+    };
+  }),
 }));
 
 // Mock RendererConfig since we can't import it directly

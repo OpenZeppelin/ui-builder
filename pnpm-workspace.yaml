@@ -8,6 +8,52 @@ packages:
   - 'apps/*'
   # Exclude any node_modules directories
   - '!**/node_modules/**'
+minimumReleaseAge: 10080
+minimumReleaseAgeExclude:
+  - '@openzeppelin/*'
+  - 'vitest'
+  - '@vitest/*'
+overrides:
+  vite: 7.3.2
+  use-sync-external-store: ^1.2.0
+  valtio: ^1.13.2
+  '@paulmillr/qr': 'npm:qr@^0.5.0'
+  '@walletconnect/modal': '2.7.0'
+  '@types/react': ^19.2.14
+  '@types/node': 24.10.13
+  prettier: 3.6.2
+  prettier-plugin-tailwindcss: 0.6.14
+  '@ianvs/prettier-plugin-sort-imports': 4.5.1
+  '@wagmi/core': ^2.20.3
+  ua-parser-js: 1.0.41
+  glob: ^11.1.0
+  '@midnight-ntwrk/midnight-js-contracts': 2.0.2
+  '@midnight-ntwrk/midnight-js-http-client-proof-provider': 2.0.2
+  '@midnight-ntwrk/midnight-js-indexer-public-data-provider': 2.0.2
+  '@midnight-ntwrk/midnight-js-network-id': 2.0.2
+  '@midnight-ntwrk/midnight-js-types': 2.0.2
+  '@midnight-ntwrk/midnight-js-utils': 2.0.2
+  '@openzeppelin/ui-types': 3.1.1
+  '@openzeppelin/ui-utils': 3.0.1
+  '@openzeppelin/ui-components': 3.0.1
+  react-hook-form: 7.79.0
+  # Security overrides — see PR adding these for full advisory list
+  'axios@<1.16.0': ^1.16.0
+  'hono@<4.12.21': ^4.12.21
+  'protobufjs@<7.5.8': ^7.5.8
+  '@protobufjs/utf8@<1.1.1': ^1.1.1
+  'tmp@<0.2.6': ^0.2.6
+  'lodash@<4.18.0': ^4.18.0
+  'minimatch@<3.1.3': ^3.1.3
+  'minimatch@>=9.0.0 <9.0.7': ^9.0.7
+  'fast-uri@<=3.1.1': ^3.1.2
+  '@metamask/sdk@<0.33.1': ^0.33.1
+  '@metamask/sdk-communication-layer@<0.33.1': ^0.33.1
+  'ip-address@<=10.1.0': ^10.1.1
+  'picomatch@>=4.0.0 <4.0.4': ^4.0.4
+  'follow-redirects@<=1.15.11': ^1.16.0
+  'postcss@<8.5.10': ^8.5.10
+  'ws@>=8.0.0 <8.20.1': ^8.20.1
 allowBuilds:
   '@openzeppelin/adapter-stellar': true
   '@swc/core': true
