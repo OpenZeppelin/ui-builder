@@ -42,7 +42,7 @@ export function NetworkRow({
             ? 'border-muted-foreground/40 bg-card'
             : 'border-border bg-card'
       )}
-      aria-selected={isSelected}
+      aria-selected={isSelected && !disabled}
       aria-disabled={disabled}
       onClick={(e) => {
         e.stopPropagation();
