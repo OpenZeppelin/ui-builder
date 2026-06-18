@@ -1,4 +1,4 @@
-import { Settings, Wrench } from 'lucide-react';
+import { Database, Settings, Wrench } from 'lucide-react';
 
 import {
   DropdownMenu,
@@ -10,6 +10,8 @@ import {
   useNetworkErrors,
 } from '@openzeppelin/ui-components';
 import { useWalletState } from '@openzeppelin/ui-react';
+
+import { seedMockMainnetContractUIWithToast } from '../../dev/seedMockMainnetContractUI';
 
 /**
  * Developer tools dropdown component for testing and debugging features.
@@ -90,6 +92,12 @@ export const DevToolsDropdown = () => {
         <DropdownMenuItem onClick={triggerExplorerError}>
           <Settings className="mr-2 h-4 w-4" />
           Trigger Explorer Error
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuLabel>Mainnet Disable Testing</DropdownMenuLabel>
+        <DropdownMenuItem onClick={() => void seedMockMainnetContractUIWithToast()}>
+          <Database className="mr-2 h-4 w-4" />
+          Seed saved mainnet config
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

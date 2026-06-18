@@ -6,15 +6,6 @@ import { adapterPatchSourceDescriptions } from '../shared/adapterPackageSources'
 
 const LOG_SYSTEM = 'File Assembly (copyAdapterPatchFiles)';
 
-const siblingAdapterPatchModules = import.meta.glob<string>(
-  '../../../../../../openzeppelin-adapters/packages/adapter-*/patches/*.patch',
-  {
-    query: '?raw',
-    import: 'default',
-    eager: true,
-  }
-);
-
 const installedAdapterPatchModules = import.meta.glob<string>(
   '../../../../../node_modules/@openzeppelin/adapter-*/patches/*.patch',
   {
@@ -25,19 +16,13 @@ const installedAdapterPatchModules = import.meta.glob<string>(
 );
 
 /**
- * Pre-load patch files from all supported adapter-package locations.
- *
- * Resolution order matters:
- * 1. sibling `openzeppelin-adapters` checkout for local extraction work
- * 2. installed `node_modules/@openzeppelin/adapter-*` packages
- */
-const patchModuleSources = [siblingAdapterPatchModules, installedAdapterPatchModules] as const;
-
-/**
- * Pre-load all patch files from adapter packages using Vite's glob import.
+ * Pre-load patch files from installed adapter packages using Vite's glob import.
  * This is required because Vite needs static analysis of imports at build time.
+ *
+ * Patches are read from `node_modules/@openzeppelin/adapter-*`, which covers both
+ * published npm installs and `dev:adapters:local` linked checkouts.
  */
-const patchModules = patchModuleSources.flatMap((modules) => Object.entries(modules));
+const patchModules = Object.entries(installedAdapterPatchModules);
 
 /**
  * Copies patch files from the adapter package to the exported project.
