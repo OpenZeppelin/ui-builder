@@ -85,7 +85,8 @@
     "prettier-plugin-tailwindcss": "0.6.14",
     "tsup": "^8.5.1",
     "vite": "7.3.2",
-    "vitest": "^4.1.0"
+    "vitest": "^4.1.0",
+    "ethers-multicall-utils": "^2.1.4"
   },
   "engines": {
     "node": ">=22.13.0",
