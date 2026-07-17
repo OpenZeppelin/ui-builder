@@ -13,7 +13,12 @@ import ReactDOM from 'react-dom/client';
 
 import { NetworkErrorNotificationProvider, Toaster } from '@openzeppelin/ui-components';
 import { RuntimeProvider, WalletStateProvider } from '@openzeppelin/ui-react';
-import type { EcosystemRuntime, NativeConfigLoader, NetworkConfig } from '@openzeppelin/ui-types';
+import type {
+  CreateRuntimeOptions,
+  EcosystemRuntime,
+  NativeConfigLoader,
+  NetworkConfig,
+} from '@openzeppelin/ui-types';
 import { appConfigService, logger } from '@openzeppelin/ui-utils';
 
 // @ts-expect-error - this is a template file, so we don't have to worry about this import
@@ -31,6 +36,10 @@ import './styles.css';
 // The specific NetworkConfig for this exported form.
 const exportedNetworkConfig = NetworkConfigPlaceholder;
 
+const runtimeCreationOptions: CreateRuntimeOptions = {
+  nameResolution: { enableMainnetL1MissFallback: true },
+};
+
 /*------------TEMPLATE COMMENT START------------*/
 /**
  * `ecosystemDefinition` comes from the selected adapter package.
@@ -47,7 +56,8 @@ const resolveRuntime = async (nc: NetworkConfig): Promise<EcosystemRuntime> => {
 
     const runtime = ecosystemDefinition.createRuntime(
       'composer',
-      nc as typeof exportedNetworkConfig
+      nc as typeof exportedNetworkConfig,
+      runtimeCreationOptions
     );
     /*@@ADAPTER_BOOTSTRAP_CODE_INJECTION_POINT@@*/
     return runtime;

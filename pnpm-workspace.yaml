@@ -1,3 +1,4 @@
+shamefullyHoist: true
 # Workspace adapter folders under packages/adapter-* publish as @openzeppelin/adapter-*.
 packages:
   # Include all packages in the packages directory
@@ -9,10 +10,24 @@ packages:
   # Exclude any node_modules directories
   - '!**/node_modules/**'
 minimumReleaseAge: 10080
+resolutionMode: highest
 minimumReleaseAgeExclude:
   - '@openzeppelin/*'
   - 'vitest'
   - '@vitest/*'
+  - 'es-toolkit'
+  - 'eslint'
+  - 'debug'
+  - 'eventemitter3'
+# Migrated from the package.json "pnpm" field, which pnpm v11 no longer reads.
+patchedDependencies:
+  '@midnight-ntwrk/compact-runtime@0.9.0': patches/@midnight-ntwrk__compact-runtime@0.9.0.patch
+  '@midnight-ntwrk/midnight-js-contracts@2.0.2': patches/@midnight-ntwrk__midnight-js-contracts@2.0.2.patch
+  '@midnight-ntwrk/midnight-js-http-client-proof-provider@2.0.2': patches/@midnight-ntwrk__midnight-js-http-client-proof-provider@2.0.2.patch
+  '@midnight-ntwrk/midnight-js-indexer-public-data-provider@2.0.2': patches/@midnight-ntwrk__midnight-js-indexer-public-data-provider@2.0.2.patch
+  '@midnight-ntwrk/midnight-js-network-id@2.0.2': patches/@midnight-ntwrk__midnight-js-network-id@2.0.2.patch
+  '@midnight-ntwrk/midnight-js-types@2.0.2': patches/@midnight-ntwrk__midnight-js-types@2.0.2.patch
+  '@midnight-ntwrk/midnight-js-utils@2.0.2': patches/@midnight-ntwrk__midnight-js-utils@2.0.2.patch
 overrides:
   vite: 7.3.2
   use-sync-external-store: ^1.2.0
@@ -33,9 +48,11 @@ overrides:
   '@midnight-ntwrk/midnight-js-network-id': 2.0.2
   '@midnight-ntwrk/midnight-js-types': 2.0.2
   '@midnight-ntwrk/midnight-js-utils': 2.0.2
-  '@openzeppelin/ui-types': 3.1.1
-  '@openzeppelin/ui-utils': 3.0.1
-  '@openzeppelin/ui-components': 3.0.1
+  '@openzeppelin/ui-types': 3.3.0
+  '@openzeppelin/ui-utils': 3.3.0
+  '@openzeppelin/ui-components': 3.5.0
+  '@openzeppelin/ui-react': 3.2.0
+  '@openzeppelin/ui-renderer': 3.3.0
   react-hook-form: 7.79.0
   # Security overrides — see PR adding these for full advisory list
   'axios@<1.16.0': ^1.16.0

@@ -1,8 +1,8 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { Footer, NetworkErrorNotificationProvider, Toaster } from '@openzeppelin/ui-components';
 import { AnalyticsProvider, RuntimeProvider, WalletStateProvider } from '@openzeppelin/ui-react';
-import type { NativeConfigLoader } from '@openzeppelin/ui-types';
+import type { CreateRuntimeOptions, NativeConfigLoader } from '@openzeppelin/ui-types';
 
 import { Header } from './components/Common/Header';
 import { NetworkErrorHandler } from './components/Common/NetworkErrorHandler';
@@ -11,8 +11,9 @@ import { UIBuilder } from './components/UIBuilder';
 import { useUIBuilderState } from './components/UIBuilder/hooks';
 import { AliasLabelBridge } from './contexts/AliasLabelBridge';
 import { ContractUIStorageProvider } from './contexts/ContractUIStorageProvider';
+import { NameResolverBridge } from './contexts/NameResolverBridge';
 import { StorageOperationsProvider } from './contexts/StorageOperationsContext';
-import { getNetworkById, getRuntime } from './core/ecosystemManager';
+import { getNetworkById, getRuntime, RUNTIME_CREATION_OPTIONS } from './core/ecosystemManager';
 
 // Use Vite's import.meta.glob to find all potential kit config files.
 // Expecting them to be .ts files as per convention.
@@ -87,22 +88,32 @@ function App() {
     }
   }, []);
 
+  const runtimeCreationOptions = useMemo((): CreateRuntimeOptions => RUNTIME_CREATION_OPTIONS, []);
+
+  const resolveRuntime = useCallback(
+    (networkConfig: Parameters<typeof getRuntime>[0]) =>
+      getRuntime(networkConfig, runtimeCreationOptions),
+    [runtimeCreationOptions]
+  );
+
   return (
     <AnalyticsProvider tagId={import.meta.env.VITE_GA_TAG_ID} autoInit={true}>
       <NetworkErrorNotificationProvider>
         <StorageOperationsProvider>
           <ContractUIStorageProvider>
-            <RuntimeProvider resolveRuntime={getRuntime}>
+            <RuntimeProvider resolveRuntime={resolveRuntime}>
               <WalletStateProvider
                 initialNetworkId={null}
                 getNetworkConfigById={getNetworkById}
                 loadConfigModule={loadAppConfigModule}
               >
-                <AliasLabelBridge>
-                  <AppContent />
-                  {/* Global network error handler - always mounted to handle error toasts */}
-                  <NetworkErrorHandler />
-                </AliasLabelBridge>
+                <NameResolverBridge>
+                  <AliasLabelBridge>
+                    <AppContent />
+                    {/* Global network error handler - always mounted to handle error toasts */}
+                    <NetworkErrorHandler />
+                  </AliasLabelBridge>
+                </NameResolverBridge>
               </WalletStateProvider>
             </RuntimeProvider>
             <Toaster position="top-right" />

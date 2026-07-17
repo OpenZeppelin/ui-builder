@@ -24,6 +24,7 @@ export function generateViteConfig(options: ViteConfigGeneratorOptions): string 
 
   // Build imports section
   const imports = [
+    "import { createRequire } from 'node:module';",
     "import path from 'path';",
     "import tailwindcss from '@tailwindcss/vite';",
     "import react from '@vitejs/plugin-react';",
@@ -35,7 +36,23 @@ export function generateViteConfig(options: ViteConfigGeneratorOptions): string 
   }
 
   // Build config initialization
-  const configInit: string[] = [];
+  const configInit: string[] = [
+    '  const require = createRequire(import.meta.url);',
+    '  // eventemitter3@5 ESM wrapper default-imports CJS; alias + pre-bundle for Vite interop.',
+    '  let eventemitter3CjsEntry: string | undefined;',
+    '  try {',
+    "    eventemitter3CjsEntry = require.resolve('eventemitter3');",
+    '  } catch {',
+    '    try {',
+    "      eventemitter3CjsEntry = createRequire(require.resolve('@wagmi/core/package.json')).resolve(",
+    "        'eventemitter3'",
+    '      );',
+    '    } catch {',
+    '      eventemitter3CjsEntry = undefined;',
+    '    }',
+    '  }',
+    '',
+  ];
   if (viteConfig?.configInit) {
     configInit.push(
       '  // Import adapter Vite configuration',
@@ -55,15 +72,11 @@ export function generateViteConfig(options: ViteConfigGeneratorOptions): string 
   // Build resolve.dedupe config
   const dedupeConfig = viteConfig?.dedupe ? `    ${viteConfig.dedupe}` : '';
 
-  // Build optimizeDeps config
-  const optimizeDepsInclude = viteConfig?.optimizeDeps?.include
-    ? `    ${viteConfig.optimizeDeps.include}`
-    : '';
+  // Always pre-bundle eventemitter3 + debug (wallet CJS interop). Merge adapter includes.
+  const optimizeDepsInclude = buildOptimizeDepsInclude(viteConfig?.optimizeDeps?.include);
   const optimizeDepsExclude = viteConfig?.optimizeDeps?.exclude
     ? `    ${viteConfig.optimizeDeps.exclude}`
     : '';
-
-  const hasOptimizeDeps = optimizeDepsInclude || optimizeDepsExclude;
 
   return `${imports.join('\n')}
 
@@ -79,6 +92,7 @@ ${plugins.join('\n')}
         // Node.js polyfills for browser compatibility
         buffer: 'buffer/',
         events: 'events/',
+        ...(eventemitter3CjsEntry ? { eventemitter3: eventemitter3CjsEntry } : {}),
       },
 ${dedupeConfig}
     },
@@ -89,9 +103,7 @@ ${dedupeConfig}
       // can throw "ReferenceError: global is not defined" during runtime without this alias.
       // Mapping \`global\` to \`globalThis\` provides a safe browser shim for exported apps.
       global: 'globalThis',
-    },${
-      hasOptimizeDeps
-        ? `
+    },
     optimizeDeps: {
       esbuildOptions: {
         define: {
@@ -100,9 +112,7 @@ ${dedupeConfig}
       },
 ${optimizeDepsInclude}
 ${optimizeDepsExclude}
-    },`
-        : ''
-    }
+    },
     build: {
       outDir: 'dist',
       sourcemap: true,
@@ -116,4 +126,33 @@ ${optimizeDepsExclude}
   };
 });
 `;
+}
+
+/**
+ * Builds an `include: [...]` block that always lists eventemitter3 + debug, then
+ * appends any adapter-provided include entries (string fragment from ViteConfigInfo).
+ */
+function buildOptimizeDepsInclude(adapterInclude?: string): string {
+  const always = ["'eventemitter3'", "'debug'"];
+
+  if (!adapterInclude) {
+    return `      include: [${always.join(', ')}],`;
+  }
+
+  const raw = adapterInclude.trim();
+  // Expected shape: `include: [ ... ]` (possibly multiline)
+  if (raw.startsWith('include:')) {
+    const listStart = raw.indexOf('[');
+    const listEnd = raw.lastIndexOf(']');
+    if (listStart >= 0 && listEnd > listStart) {
+      const inner = raw.slice(listStart + 1, listEnd).trim();
+      if (!inner) {
+        return `      include: [${always.join(', ')}],`;
+      }
+      return `      include: [\n        ${always.join(',\n        ')},\n        ${inner}\n      ],`;
+    }
+  }
+
+  // Fallback: keep adapter snippet and prepend a second include is not valid — wrap defaults only
+  return `      include: [${always.join(', ')}],\n    ${raw}`;
 }

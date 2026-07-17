@@ -39,6 +39,19 @@ logger.warn = (msg, options) => {
 // https://vitejs.dev/config/
 const require = createRequire(import.meta.url);
 const bufferPolyfillPath = require.resolve('buffer/');
+// eventemitter3@5 ships an ESM wrapper (index.mjs) that default-imports its own
+// CJS build. Vite can serve that wrapper without CJS interop, so wallet deps fail
+// with "does not provide an export named 'default'". Alias to the CJS entry and
+// force pre-bundling so Vite synthesizes a proper default export.
+function resolveEventEmitter3CjsEntry(): string {
+  try {
+    return require.resolve('eventemitter3');
+  } catch {
+    const viaWagmiCore = createRequire(require.resolve('@wagmi/core/package.json'));
+    return viaWagmiCore.resolve('eventemitter3');
+  }
+}
+const eventemitter3CjsEntry = resolveEventEmitter3CjsEntry();
 const adapters = createOpenZeppelinAdapterIntegration({
   ecosystems: supportedAdapterEcosystems,
   pluginFactories: {
@@ -64,6 +77,7 @@ export default adapters.vite({
       // Node built-ins polyfills for browser using absolute paths
       buffer: bufferPolyfillPath,
       'buffer/': bufferPolyfillPath,
+      eventemitter3: eventemitter3CjsEntry,
     },
   },
   define: {
@@ -155,6 +169,8 @@ export default adapters.vite({
       '@wagmi/core',
       '@wagmi/connectors',
       '@rainbow-me/rainbowkit',
+      // WalletConnect / wagmi transitive — see eventemitter3CjsEntry note above
+      'eventemitter3',
 
       // Wallet libraries - Solana
       '@solana/web3.js',

@@ -10,6 +10,7 @@ import { ecosystemMetadata as stellarMetadata } from '@openzeppelin/adapter-stel
 import type {
   AdapterConfig,
   ComposerEcosystemRuntime,
+  CreateRuntimeOptions,
   Ecosystem,
   EcosystemExport,
   EcosystemMetadata,
@@ -218,9 +219,15 @@ export async function getAdapterConfig(ecosystem: Ecosystem): Promise<AdapterCon
 // Runtime Instantiation
 // =============================================================================
 
+/** Static 003 opt-in: resolve mainnet ENS names when connected to testnet/L2. */
+export const RUNTIME_CREATION_OPTIONS: CreateRuntimeOptions = {
+  nameResolution: { enableMainnetL1MissFallback: true },
+};
+
 function createComposerRuntime(
   def: EcosystemExport,
-  networkConfig: NetworkConfig
+  networkConfig: NetworkConfig,
+  options?: CreateRuntimeOptions
 ): ComposerEcosystemRuntime {
   if (typeof def.createRuntime !== 'function') {
     throw new Error(
@@ -228,10 +235,13 @@ function createComposerRuntime(
     );
   }
 
-  return def.createRuntime('composer', networkConfig) as ComposerEcosystemRuntime;
+  return def.createRuntime('composer', networkConfig, options) as ComposerEcosystemRuntime;
 }
 
-export async function getRuntime(networkConfig: NetworkConfig): Promise<ComposerEcosystemRuntime> {
+export async function getRuntime(
+  networkConfig: NetworkConfig,
+  options: CreateRuntimeOptions = RUNTIME_CREATION_OPTIONS
+): Promise<ComposerEcosystemRuntime> {
   const logSystem = 'EcosystemManager(getRuntime)';
   logger.info(
     logSystem,
@@ -239,7 +249,7 @@ export async function getRuntime(networkConfig: NetworkConfig): Promise<Composer
   );
 
   const def = await loadAdapterModule(networkConfig.ecosystem);
-  return createComposerRuntime(def, networkConfig);
+  return createComposerRuntime(def, networkConfig, options);
 }
 
 // =============================================================================

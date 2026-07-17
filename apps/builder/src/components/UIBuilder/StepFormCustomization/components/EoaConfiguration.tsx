@@ -39,7 +39,7 @@ export function EoaConfiguration({
             control={control}
             addressing={runtime?.addressing}
             validation={{ required: true }}
-            placeholder="Enter the required EOA address (e.g., 0x...)"
+            placeholder="Enter an address or ENS name (e.g. vitalik.eth)"
           />
         </div>
       )}

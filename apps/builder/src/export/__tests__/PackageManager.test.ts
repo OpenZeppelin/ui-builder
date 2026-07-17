@@ -624,10 +624,19 @@ describe('PackageManager', () => {
         );
         const result = JSON.parse(updated);
 
-        // External dependencies should remain unchanged
+        // External dependencies should remain unchanged (except known floors like viem)
         expect(result.dependencies['react']).toBe('^19.0.0');
         expect(result.dependencies['react-datepicker']).toBe('^4.14.0');
-        expect(result.dependencies['viem']).toBeTruthy(); // Should exist but version unchanged
+        // Mock adapter lists viem ^2.0.0; PackageManager elevates to ENS floor ^2.35.0
+        expect(result.dependencies['viem']).toBe('^2.35.0');
+        // Mocked versions.ts pins ui-types at 0.2.0 → caret applied for non-local envs
+        if (env === 'local') {
+          expect(result.dependencies['@openzeppelin/ui-types']).toMatch(
+            /^file:.*\/packages\/types$/
+          );
+        } else {
+          expect(result.dependencies['@openzeppelin/ui-types']).toBe('^0.2.0');
+        }
       }
     });
 

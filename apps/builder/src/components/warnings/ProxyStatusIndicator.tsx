@@ -2,6 +2,7 @@ import { ArrowRight, Network, RotateCcw } from 'lucide-react';
 import React from 'react';
 
 import { AddressDisplay, Button } from '@openzeppelin/ui-components';
+import { AddressNameResolutionProvider } from '@openzeppelin/ui-renderer';
 import type { ProxyInfo } from '@openzeppelin/ui-types';
 import { cn } from '@openzeppelin/ui-utils';
 
@@ -66,34 +67,40 @@ export const ProxyStatusIndicator: React.FC<ProxyStatusIndicatorProps> = ({
 
           <div className="flex items-center gap-2 text-blue-700">
             <span>Proxy:</span>
-            <AddressDisplay
-              address={proxyInfo.proxyAddress}
-              showCopyButton={true}
-              explorerUrl={proxyExplorerUrl}
-              className="bg-blue-100 text-blue-800"
-            />
+            <AddressNameResolutionProvider address={proxyInfo.proxyAddress}>
+              <AddressDisplay
+                address={proxyInfo.proxyAddress}
+                showCopyButton={true}
+                explorerUrl={proxyExplorerUrl}
+                className="bg-blue-100 text-blue-800"
+              />
+            </AddressNameResolutionProvider>
           </div>
 
           <div className="flex items-center gap-2 text-blue-700">
             <ArrowRight className="h-3 w-3 text-blue-500" />
             <span>Implementation:</span>
-            <AddressDisplay
-              address={proxyInfo.implementationAddress!}
-              showCopyButton={true}
-              explorerUrl={implementationExplorerUrl}
-              className="bg-blue-100 text-blue-800"
-            />
+            <AddressNameResolutionProvider address={proxyInfo.implementationAddress!}>
+              <AddressDisplay
+                address={proxyInfo.implementationAddress!}
+                showCopyButton={true}
+                explorerUrl={implementationExplorerUrl}
+                className="bg-blue-100 text-blue-800"
+              />
+            </AddressNameResolutionProvider>
           </div>
 
           {hasAdmin && (
             <div className="flex items-center gap-2 text-blue-700">
               <span>Admin:</span>
-              <AddressDisplay
-                address={proxyInfo.adminAddress!}
-                showCopyButton={true}
-                explorerUrl={adminExplorerUrl}
-                className="bg-blue-100 text-blue-800"
-              />
+              <AddressNameResolutionProvider address={proxyInfo.adminAddress!}>
+                <AddressDisplay
+                  address={proxyInfo.adminAddress!}
+                  showCopyButton={true}
+                  explorerUrl={adminExplorerUrl}
+                  className="bg-blue-100 text-blue-800"
+                />
+              </AddressNameResolutionProvider>
             </div>
           )}
 

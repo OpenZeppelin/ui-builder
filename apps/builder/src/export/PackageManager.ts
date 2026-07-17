@@ -43,6 +43,7 @@ import { adapterPackageMap } from '../core/ecosystemManager';
 import type { ExportOptions } from '../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../core/types/FormTypes';
 import { AdapterConfigLoader } from './AdapterConfigLoader';
+import { applyDependencyFloor } from './dependencyFloors';
 import { packageVersions } from './versions';
 
 /**
@@ -245,6 +246,13 @@ export class PackageManager {
       combined['@openzeppelin/ui-utils'] = 'workspace:*';
       combined['@openzeppelin/ui-renderer'] = 'workspace:*';
       combined['@openzeppelin/ui-react'] = 'workspace:*';
+    }
+
+    // Wallet stacks (wagmi / WalletConnect) need these as direct deps so Vite can
+    // pre-bundle them (CJS→ESM interop). Hoisting alone is not enough for optimizeDeps.
+    if (ecosystem === 'evm' || ecosystem === 'polkadot') {
+      combined['eventemitter3'] = combined['eventemitter3'] || '^5.0.1';
+      combined['debug'] = combined['debug'] || '^4.3.7';
     }
 
     return combined;
@@ -546,8 +554,8 @@ export class PackageManager {
           }
         }
       } else {
-        // External packages: use as-is
-        updatedDependencies[pkgName] = version;
+        // External packages: use as-is, but elevate known floors (e.g. viem for ENS).
+        updatedDependencies[pkgName] = applyDependencyFloor(pkgName, version);
       }
     }
     return updatedDependencies;
