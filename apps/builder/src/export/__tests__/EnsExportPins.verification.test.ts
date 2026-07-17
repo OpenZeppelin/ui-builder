@@ -47,6 +47,12 @@ describe('ENS export dependency pins (production)', () => {
     expect(files['vite.config.ts']).toContain('eventemitter3');
     expect(files['vite.config.ts']).toContain("'debug'");
 
+    const mainTsx = files['src/main.tsx'];
+    expect(mainTsx).toContain('enableMainnetL1MissFallback: true');
+    expect(mainTsx).toContain('NameResolverBridge');
+    expect(mainTsx).toContain('NameResolverProvider');
+    expect(mainTsx).toContain('useRuntimeNameResolver');
+
     // Materialize for install/boot verification (written under tmp for the follow-up shell step)
     const outDir = path.join(tmpdir(), `ui-builder-ens-export-${Date.now()}`);
     mkdirSync(outDir, { recursive: true });

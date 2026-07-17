@@ -11,8 +11,17 @@ import { ecosystemDefinition, NetworkConfigPlaceholder } from '@@adapter-package
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
-import { NetworkErrorNotificationProvider, Toaster } from '@openzeppelin/ui-components';
-import { RuntimeProvider, WalletStateProvider } from '@openzeppelin/ui-react';
+import {
+  NameResolverProvider,
+  NetworkErrorNotificationProvider,
+  Toaster,
+} from '@openzeppelin/ui-components';
+import {
+  RuntimeProvider,
+  useRuntimeNameResolver,
+  useWalletState,
+  WalletStateProvider,
+} from '@openzeppelin/ui-react';
 import type {
   CreateRuntimeOptions,
   EcosystemRuntime,
@@ -109,6 +118,22 @@ const loadAppConfigModule: NativeConfigLoader = async (relativePath: string) => 
   }
 };
 
+/* eslint-disable-next-line react-refresh/only-export-components */
+function NameResolverBridge({ children }: { children: React.ReactNode }) {
+  const resolver = useRuntimeNameResolver();
+  const { activeNetworkId, activeNetworkConfig } = useWalletState();
+
+  return (
+    <NameResolverProvider
+      {...resolver}
+      activeNetworkId={activeNetworkId ?? null}
+      activeNetworkName={activeNetworkConfig?.name}
+    >
+      {children}
+    </NameResolverProvider>
+  );
+}
+
 async function startApp() {
   // Initialize AppConfigService, attempting to load from app.config.json first,
   // then potentially from Vite env vars if the exported app is built with Vite and sets them.
@@ -127,7 +152,9 @@ async function startApp() {
             getNetworkConfigById={getNetworkConfigById}
             loadConfigModule={loadAppConfigModule}
           >
-            <App />
+            <NameResolverBridge>
+              <App />
+            </NameResolverBridge>
           </WalletStateProvider>
         </RuntimeProvider>
         <Toaster position="top-right" />
