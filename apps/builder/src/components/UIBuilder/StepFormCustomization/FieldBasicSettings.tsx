@@ -5,6 +5,7 @@ import { Banner, BooleanField, SelectGroupedField, TextField } from '@openzeppel
 import { DynamicFormField } from '@openzeppelin/ui-renderer';
 import { FormFieldType } from '@openzeppelin/ui-types';
 
+import { BlockchainAddressFieldWithRichPreview } from '@/components/fields/BlockchainAddressFieldWithRichPreview';
 import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 import { OptionGroup, shouldShowFieldTypeSelector } from './utils/fieldTypeUtils';
@@ -200,13 +201,26 @@ export function FieldBasicSettings({
               Ensure you understand the risks of exposing this value to your users.
             </Banner>
           )}
-          <DynamicFormField
-            key={`hardcoded-${field.id}-${fieldType}`}
-            field={hardcodedFieldConfig}
-            control={control}
-            addressing={runtime?.addressing}
-            typeMapping={runtime?.typeMapping}
-          />
+          {fieldType === 'blockchain-address' ? (
+            <BlockchainAddressFieldWithRichPreview
+              key={`hardcoded-${field.id}-${fieldType}`}
+              id={hardcodedFieldConfig.id}
+              label={hardcodedFieldConfig.label}
+              name="hardcodedValue"
+              control={control}
+              addressing={runtime?.addressing}
+              networkId={runtime?.networkConfig.id}
+              validation={hardcodedFieldConfig.validation}
+            />
+          ) : (
+            <DynamicFormField
+              key={`hardcoded-${field.id}-${fieldType}`}
+              field={hardcodedFieldConfig}
+              control={control}
+              addressing={runtime?.addressing}
+              typeMapping={runtime?.typeMapping}
+            />
+          )}
           <BooleanField
             id="is-read-only"
             name="readOnly"

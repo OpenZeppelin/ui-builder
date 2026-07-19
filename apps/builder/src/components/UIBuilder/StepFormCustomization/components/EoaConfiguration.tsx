@@ -1,6 +1,8 @@
 import React from 'react';
 
-import { AddressField, RadioField } from '@openzeppelin/ui-components';
+import { RadioField } from '@openzeppelin/ui-components';
+
+import { BlockchainAddressFieldWithRichPreview } from '@/components/fields/BlockchainAddressFieldWithRichPreview';
 
 import type { EoaConfigurationProps } from '../types';
 
@@ -32,12 +34,13 @@ export function EoaConfiguration({
       {/* Specific EOA Address Input - Rendered conditionally */}
       {watchedEoaOption === 'specific' && (
         <div className="pt-2">
-          <AddressField
+          <BlockchainAddressFieldWithRichPreview
             id="specific-eoa-address"
             label="Specific EOA Address"
             name="specificEoaAddress"
             control={control}
             addressing={runtime?.addressing}
+            networkId={runtime?.networkConfig.id}
             validation={{ required: true }}
             placeholder="Enter the required EOA address (e.g., 0x...)"
           />

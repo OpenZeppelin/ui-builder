@@ -14,6 +14,7 @@ import {
 } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
+import { BlockchainAddressFieldWithRichPreview } from '@/components/fields/BlockchainAddressFieldWithRichPreview';
 import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 import { useBuilderAnalytics } from '../../../../hooks/useBuilderAnalytics';
@@ -115,12 +116,26 @@ export function UiKitSettings({ runtime, onUpdateConfig, currentConfig }: UiKitS
         <div className="space-y-4">
           {selectedKit.configFields.map((field) => (
             <div key={field.id} className="pt-2">
-              <DynamicFormField
-                field={field}
-                control={control}
-                addressing={runtime?.addressing}
-                typeMapping={runtime?.typeMapping}
-              />
+              {field.type === 'blockchain-address' ? (
+                <BlockchainAddressFieldWithRichPreview
+                  id={field.id}
+                  label={field.label}
+                  placeholder={field.placeholder}
+                  helperText={field.helperText}
+                  name={field.name}
+                  control={control}
+                  addressing={runtime?.addressing}
+                  networkId={runtime?.networkConfig.id}
+                  validation={field.validation}
+                />
+              ) : (
+                <DynamicFormField
+                  field={field}
+                  control={control}
+                  addressing={runtime?.addressing}
+                  typeMapping={runtime?.typeMapping}
+                />
+              )}
             </div>
           ))}
         </div>
