@@ -33,9 +33,9 @@ describe('ENS export dependency pins (production)', () => {
     expect(deps['@openzeppelin/ui-types']).toBe('^3.3.0');
     expect(deps['viem']).toBe('^2.35.0');
     expect(deps['@openzeppelin/adapter-evm']).toBe('^2.3.0');
-    expect(deps['@openzeppelin/ui-components']).toBe('^3.7.0');
-    expect(deps['@openzeppelin/ui-renderer']).toBe('^3.3.1');
-    expect(deps['@openzeppelin/ui-react']).toBe('^3.2.0');
+    expect(deps['@openzeppelin/ui-components']).toBe('^3.8.0');
+    expect(deps['@openzeppelin/ui-renderer']).toBe('^3.4.0');
+    expect(deps['@openzeppelin/ui-react']).toBe('^3.3.0');
     expect(deps['eventemitter3']).toBe('^5.0.1');
     expect(deps['debug']).toBe('^4.3.7');
 

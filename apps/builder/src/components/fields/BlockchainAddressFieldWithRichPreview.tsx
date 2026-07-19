@@ -6,11 +6,18 @@ import {
   type AddressFieldProps,
 } from '@openzeppelin/ui-components';
 import { ResolvedAddressFieldPreviewWithNameResolution } from '@openzeppelin/ui-renderer';
-import type { AddressingCapability } from '@openzeppelin/ui-types';
+import type { AddressingCapability, NetworkConfig } from '@openzeppelin/ui-types';
 
 type BlockchainAddressFieldWithRichPreviewProps<TFieldValues extends FieldValues> =
   AddressFieldProps<TFieldValues> & {
+    /** Wallet-global network id (builder surfaces always use the active runtime). */
     networkId?: string;
+    /**
+     * When set, reverse preview resolves against this network's runtime instead of
+     * the wallet-global active network. Unused today — builder has no per-field
+     * network selector; reserved for future dialogs with their own network dropdown.
+     */
+    network?: NetworkConfig;
     addressing?: AddressingCapability;
   };
 
@@ -22,10 +29,12 @@ export function BlockchainAddressFieldWithRichPreview<TFieldValues extends Field
   control,
   name,
   networkId,
+  network,
   addressing,
   ...addressFieldProps
 }: BlockchainAddressFieldWithRichPreviewProps<TFieldValues>): React.ReactElement {
   const previewAddress = useWatch({ control, name }) as string | undefined;
+  const previewNetworkId = network?.id ?? networkId;
 
   return (
     <AddressFieldWithResolvedPreview<TFieldValues>
@@ -34,11 +43,12 @@ export function BlockchainAddressFieldWithRichPreview<TFieldValues extends Field
       name={name}
       addressing={addressing}
       previewAddress={previewAddress}
-      previewNetworkId={networkId}
+      previewNetworkId={previewNetworkId}
       preview={
         <ResolvedAddressFieldPreviewWithNameResolution
           address={previewAddress}
-          networkId={networkId}
+          networkId={previewNetworkId}
+          network={network}
           addressing={addressing}
         />
       }
