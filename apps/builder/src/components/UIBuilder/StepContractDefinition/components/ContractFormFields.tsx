@@ -4,6 +4,7 @@ import { Control } from 'react-hook-form';
 import { DynamicFormField } from '@openzeppelin/ui-renderer';
 import type { FormFieldType, FormValues } from '@openzeppelin/ui-types';
 
+import { BlockchainAddressFieldWithRichPreview } from '@/components/fields/BlockchainAddressFieldWithRichPreview';
 import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
 interface ContractFormFieldsProps {
@@ -26,15 +27,31 @@ export function ContractFormFields({
     <div className="space-y-6">
       {/* Form Fields */}
       <div className="space-y-4">
-        {contractDefinitionInputs.map((field) => (
-          <DynamicFormField
-            key={field.id}
-            field={field}
-            control={control}
-            addressing={runtime?.addressing}
-            typeMapping={runtime?.typeMapping}
-          />
-        ))}
+        {contractDefinitionInputs.map((field) =>
+          field.type === 'blockchain-address' ? (
+            <BlockchainAddressFieldWithRichPreview
+              key={field.id}
+              id={field.id}
+              label={field.label}
+              placeholder={field.placeholder}
+              helperText={field.helperText}
+              name={field.name}
+              control={control}
+              addressing={runtime?.addressing}
+              networkId={runtime?.networkConfig.id}
+              validation={field.validation}
+              readOnly={field.readOnly}
+            />
+          ) : (
+            <DynamicFormField
+              key={field.id}
+              field={field}
+              control={control}
+              addressing={runtime?.addressing}
+              typeMapping={runtime?.typeMapping}
+            />
+          )
+        )}
       </div>
 
       {/* Enhanced Loading Indicator */}

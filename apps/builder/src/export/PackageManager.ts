@@ -43,6 +43,7 @@ import { adapterPackageMap } from '../core/ecosystemManager';
 import type { ExportOptions } from '../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../core/types/FormTypes';
 import { AdapterConfigLoader } from './AdapterConfigLoader';
+import { applyDependencyFloor } from './dependencyFloors';
 import { packageVersions } from './versions';
 
 /**
@@ -246,6 +247,10 @@ export class PackageManager {
       combined['@openzeppelin/ui-renderer'] = 'workspace:*';
       combined['@openzeppelin/ui-react'] = 'workspace:*';
     }
+
+    // Wallet stacks (wagmi / WalletConnect): eventemitter3 is aliased + pre-bundled in
+    // generated vite.config.ts. Transitive wallet deps (eventemitter3, debug, …) are
+    // hoisted via export .npmrc public-hoist-pattern (role-manager uses shamefullyHoist).
 
     return combined;
   }
@@ -546,8 +551,8 @@ export class PackageManager {
           }
         }
       } else {
-        // External packages: use as-is
-        updatedDependencies[pkgName] = version;
+        // External packages: use as-is, but elevate known floors (e.g. viem for ENS).
+        updatedDependencies[pkgName] = applyDependencyFloor(pkgName, version);
       }
     }
     return updatedDependencies;

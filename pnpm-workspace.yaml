@@ -1,4 +1,5 @@
 # Workspace adapter folders under packages/adapter-* publish as @openzeppelin/adapter-*.
+shamefullyHoist: true
 packages:
   # Include all packages in the packages directory
   - 'packages/*'
@@ -33,9 +34,11 @@ overrides:
   '@midnight-ntwrk/midnight-js-network-id': 2.0.2
   '@midnight-ntwrk/midnight-js-types': 2.0.2
   '@midnight-ntwrk/midnight-js-utils': 2.0.2
-  '@openzeppelin/ui-types': 3.1.1
-  '@openzeppelin/ui-utils': 3.0.1
-  '@openzeppelin/ui-components': 3.0.1
+  '@openzeppelin/ui-types': 3.3.0
+  '@openzeppelin/ui-utils': 3.3.0
+  '@openzeppelin/ui-components': 3.8.0
+  '@openzeppelin/ui-react': 3.3.0
+  '@openzeppelin/ui-renderer': 3.4.0
   react-hook-form: 7.79.0
   # Security overrides — see PR adding these for full advisory list
   'axios@<1.16.0': ^1.16.0

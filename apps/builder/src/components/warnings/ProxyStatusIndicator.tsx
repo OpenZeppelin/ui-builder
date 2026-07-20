@@ -2,12 +2,15 @@ import { ArrowRight, Network, RotateCcw } from 'lucide-react';
 import React from 'react';
 
 import { AddressDisplay, Button } from '@openzeppelin/ui-components';
+import { AddressNameResolutionProvider } from '@openzeppelin/ui-renderer';
 import type { ProxyInfo } from '@openzeppelin/ui-types';
 import { cn } from '@openzeppelin/ui-utils';
 
 export interface ProxyStatusIndicatorProps {
   /** Chain-agnostic proxy information */
   proxyInfo: ProxyInfo;
+  /** Network ID for reverse ENS scope gating on address displays */
+  networkId?: string;
   /** Pre-generated explorer URL for the proxy address (optional) */
   proxyExplorerUrl?: string;
   /** Pre-generated explorer URL for the implementation address (optional) */
@@ -26,6 +29,7 @@ export interface ProxyStatusIndicatorProps {
  */
 export const ProxyStatusIndicator: React.FC<ProxyStatusIndicatorProps> = ({
   proxyInfo,
+  networkId,
   proxyExplorerUrl,
   implementationExplorerUrl,
   adminExplorerUrl,
@@ -66,34 +70,49 @@ export const ProxyStatusIndicator: React.FC<ProxyStatusIndicatorProps> = ({
 
           <div className="flex items-center gap-2 text-blue-700">
             <span>Proxy:</span>
-            <AddressDisplay
-              address={proxyInfo.proxyAddress}
-              showCopyButton={true}
-              explorerUrl={proxyExplorerUrl}
-              className="bg-blue-100 text-blue-800"
-            />
+            <AddressNameResolutionProvider address={proxyInfo.proxyAddress} networkId={networkId}>
+              <AddressDisplay
+                address={proxyInfo.proxyAddress}
+                networkId={networkId}
+                showCopyButton={true}
+                explorerUrl={proxyExplorerUrl}
+                className="bg-blue-100 text-blue-800"
+              />
+            </AddressNameResolutionProvider>
           </div>
 
           <div className="flex items-center gap-2 text-blue-700">
             <ArrowRight className="h-3 w-3 text-blue-500" />
             <span>Implementation:</span>
-            <AddressDisplay
+            <AddressNameResolutionProvider
               address={proxyInfo.implementationAddress!}
-              showCopyButton={true}
-              explorerUrl={implementationExplorerUrl}
-              className="bg-blue-100 text-blue-800"
-            />
+              networkId={networkId}
+            >
+              <AddressDisplay
+                address={proxyInfo.implementationAddress!}
+                networkId={networkId}
+                showCopyButton={true}
+                explorerUrl={implementationExplorerUrl}
+                className="bg-blue-100 text-blue-800"
+              />
+            </AddressNameResolutionProvider>
           </div>
 
           {hasAdmin && (
             <div className="flex items-center gap-2 text-blue-700">
               <span>Admin:</span>
-              <AddressDisplay
+              <AddressNameResolutionProvider
                 address={proxyInfo.adminAddress!}
-                showCopyButton={true}
-                explorerUrl={adminExplorerUrl}
-                className="bg-blue-100 text-blue-800"
-              />
+                networkId={networkId}
+              >
+                <AddressDisplay
+                  address={proxyInfo.adminAddress!}
+                  networkId={networkId}
+                  showCopyButton={true}
+                  explorerUrl={adminExplorerUrl}
+                  className="bg-blue-100 text-blue-800"
+                />
+              </AddressNameResolutionProvider>
             </div>
           )}
 

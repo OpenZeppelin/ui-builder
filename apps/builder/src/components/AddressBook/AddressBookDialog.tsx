@@ -131,6 +131,7 @@ export function AddressBookDialog({ open, onOpenChange }: AddressBookDialogProps
           currentNetworkId={activeNetworkConfig?.id}
           filterNetworkIds={filterNetworkIds}
           onFilterNetworkIdsChange={setFilterNetworkIds}
+          enableNameResolution
         />
       </DialogContent>
     </Dialog>

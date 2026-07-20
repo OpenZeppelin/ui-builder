@@ -171,6 +171,7 @@ export function ContractSuccessStatus({
       {proxyInfo?.isProxy && !ignoreProxy && (
         <ProxyStatusIndicator
           proxyInfo={proxyInfo}
+          networkId={runtime.networkConfig.id}
           proxyExplorerUrl={proxyExplorerUrl}
           implementationExplorerUrl={implementationExplorerUrl}
           adminExplorerUrl={adminExplorerUrl}
