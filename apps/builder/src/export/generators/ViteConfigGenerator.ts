@@ -12,6 +12,11 @@ export interface ViteConfigGeneratorOptions {
   adapterConfig?: AdapterConfig;
 }
 
+/** Ecosystems whose exported apps ship wagmi / WalletConnect wallet stacks. */
+export function ecosystemUsesWalletInterop(ecosystem: Ecosystem): boolean {
+  return ecosystem === 'evm' || ecosystem === 'polkadot';
+}
+
 /**
  * Generates a vite.config.ts file tailored to the exported application's ecosystem
  *
@@ -19,8 +24,9 @@ export interface ViteConfigGeneratorOptions {
  * @returns The complete vite.config.ts file content as a string
  */
 export function generateViteConfig(options: ViteConfigGeneratorOptions): string {
-  const { adapterConfig } = options;
+  const { ecosystem, adapterConfig } = options;
   const viteConfig = adapterConfig?.viteConfig;
+  const usesWalletInterop = ecosystemUsesWalletInterop(ecosystem);
 
   // Build imports section
   const imports = [
@@ -36,23 +42,27 @@ export function generateViteConfig(options: ViteConfigGeneratorOptions): string 
   }
 
   // Build config initialization
-  const configInit: string[] = [
-    '  const require = createRequire(import.meta.url);',
-    '  // eventemitter3@5 ESM wrapper default-imports CJS; alias + pre-bundle for Vite interop.',
-    '  let eventemitter3CjsEntry: string | undefined;',
-    '  try {',
-    "    eventemitter3CjsEntry = require.resolve('eventemitter3');",
-    '  } catch {',
-    '    try {',
-    "      eventemitter3CjsEntry = createRequire(require.resolve('@wagmi/core/package.json')).resolve(",
-    "        'eventemitter3'",
-    '      );',
-    '    } catch {',
-    '      eventemitter3CjsEntry = undefined;',
-    '    }',
-    '  }',
-    '',
-  ];
+  const configInit: string[] = [];
+  if (usesWalletInterop) {
+    configInit.push(
+      '  const require = createRequire(import.meta.url);',
+      '  // eventemitter3@5 ESM wrapper default-imports CJS; alias + pre-bundle for Vite interop.',
+      '  // `debug` is intentionally NOT aliased or listed in optimizeDeps — see role-manager pattern.',
+      '  let eventemitter3CjsEntry: string | undefined;',
+      '  try {',
+      "    eventemitter3CjsEntry = require.resolve('eventemitter3');",
+      '  } catch {',
+      '    try {',
+      "      eventemitter3CjsEntry = createRequire(require.resolve('@wagmi/core/package.json')).resolve(",
+      "        'eventemitter3'",
+      '      );',
+      '    } catch {',
+      '      eventemitter3CjsEntry = undefined;',
+      '    }',
+      '  }',
+      ''
+    );
+  }
   if (viteConfig?.configInit) {
     configInit.push(
       '  // Import adapter Vite configuration',
@@ -72,8 +82,14 @@ export function generateViteConfig(options: ViteConfigGeneratorOptions): string 
   // Build resolve.dedupe config
   const dedupeConfig = viteConfig?.dedupe ? `    ${viteConfig.dedupe}` : '';
 
-  // Always pre-bundle eventemitter3 + debug (wallet CJS interop). Merge adapter includes.
-  const optimizeDepsInclude = buildOptimizeDepsInclude(viteConfig?.optimizeDeps?.include);
+  const eventemitter3Alias = usesWalletInterop
+    ? '        ...(eventemitter3CjsEntry ? { eventemitter3: eventemitter3CjsEntry } : {}),'
+    : '';
+
+  const optimizeDepsInclude = buildOptimizeDepsInclude(
+    usesWalletInterop,
+    viteConfig?.optimizeDeps?.include
+  );
   const optimizeDepsExclude = viteConfig?.optimizeDeps?.exclude
     ? `    ${viteConfig.optimizeDeps.exclude}`
     : '';
@@ -92,7 +108,7 @@ ${plugins.join('\n')}
         // Node.js polyfills for browser compatibility
         buffer: 'buffer/',
         events: 'events/',
-        ...(eventemitter3CjsEntry ? { eventemitter3: eventemitter3CjsEntry } : {}),
+${eventemitter3Alias}
       },
 ${dedupeConfig}
     },
@@ -129,14 +145,17 @@ ${optimizeDepsExclude}
 }
 
 /**
- * Builds an `include: [...]` block that always lists eventemitter3 + debug, then
- * appends any adapter-provided include entries (string fragment from ViteConfigInfo).
+ * Builds an `include: [...]` block. Wallet ecosystems (evm/polkadot) pre-bundle
+ * eventemitter3 only; other transitive wallet deps rely on .npmrc hoist patterns.
  */
-function buildOptimizeDepsInclude(adapterInclude?: string): string {
-  const always = ["'eventemitter3'", "'debug'"];
+function buildOptimizeDepsInclude(usesWalletInterop: boolean, adapterInclude?: string): string {
+  const walletInterop = usesWalletInterop ? ["'eventemitter3'"] : [];
 
   if (!adapterInclude) {
-    return `      include: [${always.join(', ')}],`;
+    if (walletInterop.length === 0) {
+      return '';
+    }
+    return `      include: [${walletInterop.join(', ')}],`;
   }
 
   const raw = adapterInclude.trim();
@@ -147,12 +166,20 @@ function buildOptimizeDepsInclude(adapterInclude?: string): string {
     if (listStart >= 0 && listEnd > listStart) {
       const inner = raw.slice(listStart + 1, listEnd).trim();
       if (!inner) {
-        return `      include: [${always.join(', ')}],`;
+        if (walletInterop.length === 0) {
+          return `      ${raw},`;
+        }
+        return `      include: [${walletInterop.join(', ')}],`;
       }
-      return `      include: [\n        ${always.join(',\n        ')},\n        ${inner}\n      ],`;
+      if (walletInterop.length === 0) {
+        return `      ${raw},`;
+      }
+      return `      include: [\n        ${walletInterop.join(',\n        ')},\n        ${inner}\n      ],`;
     }
   }
 
-  // Fallback: keep adapter snippet and prepend a second include is not valid — wrap defaults only
-  return `      include: [${always.join(', ')}],\n    ${raw}`;
+  if (walletInterop.length === 0) {
+    return `    ${raw}`;
+  }
+  return `      include: [${walletInterop.join(', ')}],\n    ${raw}`;
 }

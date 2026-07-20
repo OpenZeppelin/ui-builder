@@ -8,6 +8,10 @@ import { defineConfig } from 'vite';
 // can serve that without interop, so wallet deps fail with
 // "does not provide an export named 'default'". Alias to the CJS entry +
 // pre-bundle so Vite synthesizes a proper default export.
+//
+// `debug` is intentionally NOT aliased or pre-bundled: forcing its resolved entry
+// bypasses the package browser field (role-manager / ui-builder builder pattern).
+// Transitive wallet deps are hoisted via export .npmrc public-hoist-pattern.
 const require = createRequire(import.meta.url);
 function resolveEventEmitter3CjsEntry(): string | undefined {
   try {
@@ -46,7 +50,7 @@ export default defineConfig(({ mode }) => ({
         global: 'globalThis',
       },
     },
-    include: ['eventemitter3', 'debug'],
+    include: ['eventemitter3'],
   },
   build: {
     outDir: 'dist',

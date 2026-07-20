@@ -33,11 +33,9 @@ describe('ENS export dependency pins (production)', () => {
     expect(deps['@openzeppelin/ui-types']).toBe('^3.3.0');
     expect(deps['viem']).toBe('^2.35.0');
     expect(deps['@openzeppelin/adapter-evm']).toBe('^2.3.0');
-    expect(deps['@openzeppelin/ui-components']).toBe('^3.8.0');
+    expect(deps['@openzeppelin/ui-components']).toBe('^3.8.1');
     expect(deps['@openzeppelin/ui-renderer']).toBe('^3.4.0');
     expect(deps['@openzeppelin/ui-react']).toBe('^3.3.0');
-    expect(deps['eventemitter3']).toBe('^5.0.1');
-    expect(deps['debug']).toBe('^4.3.7');
 
     expect(files['.npmrc']).toBeDefined();
     expect(files['.npmrc']).toContain('public-hoist-pattern[]=eventemitter3');
@@ -45,7 +43,7 @@ describe('ENS export dependency pins (production)', () => {
     expect(files['.npmrc']).toContain('public-hoist-pattern[]=@wagmi/connectors');
 
     expect(files['vite.config.ts']).toContain('eventemitter3');
-    expect(files['vite.config.ts']).toContain("'debug'");
+    expect(files['vite.config.ts']).not.toContain("'debug'");
 
     const mainTsx = files['src/main.tsx'];
     expect(mainTsx).toContain('enableMainnetL1MissFallback: true');

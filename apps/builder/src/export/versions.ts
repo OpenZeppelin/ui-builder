@@ -15,7 +15,7 @@ export const packageVersions = {
   '@openzeppelin/ui-renderer': '3.4.0',
   '@openzeppelin/ui-storage': '1.2.3',
   '@openzeppelin/ui-types': '3.3.0',
-  '@openzeppelin/ui-components': '3.8.0',
+  '@openzeppelin/ui-components': '3.8.1',
   '@openzeppelin/ui-utils': '3.3.0',
   '@openzeppelin/ui-styles': '1.1.0',
 };

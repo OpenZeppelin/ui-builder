@@ -2,7 +2,7 @@
  * Minimum version floors for external packages that adapter export configs may
  * under-pin relative to the published adapter peerDependencies.
  *
- * Example: adapter-evm@2.2.0 peers require viem ^2.35.0 (ENS v2), but its
+ * Example: adapter-evm@2.3.0 peers require viem ^2.35.0 (ENS v2), but its
  * AdapterConfig still advertises viem ^2.28.0 for exported apps. PackageManager
  * elevates any listed dependency to at least these floors.
  */

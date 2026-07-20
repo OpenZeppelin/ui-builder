@@ -248,12 +248,9 @@ export class PackageManager {
       combined['@openzeppelin/ui-react'] = 'workspace:*';
     }
 
-    // Wallet stacks (wagmi / WalletConnect) need these as direct deps so Vite can
-    // pre-bundle them (CJS→ESM interop). Hoisting alone is not enough for optimizeDeps.
-    if (ecosystem === 'evm' || ecosystem === 'polkadot') {
-      combined['eventemitter3'] = combined['eventemitter3'] || '^5.0.1';
-      combined['debug'] = combined['debug'] || '^4.3.7';
-    }
+    // Wallet stacks (wagmi / WalletConnect): eventemitter3 is aliased + pre-bundled in
+    // generated vite.config.ts. Transitive wallet deps (eventemitter3, debug, …) are
+    // hoisted via export .npmrc public-hoist-pattern (role-manager uses shamefullyHoist).
 
     return combined;
   }
