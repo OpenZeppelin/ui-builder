@@ -14,6 +14,8 @@ minimumReleaseAgeExclude:
   - '@openzeppelin/*'
   - 'vitest'
   - '@vitest/*'
+  # Renovate security update: pnpm@11.8.0
+  - pnpm@11.8.0
 overrides:
   vite: 7.3.2
   use-sync-external-store: ^1.2.0
