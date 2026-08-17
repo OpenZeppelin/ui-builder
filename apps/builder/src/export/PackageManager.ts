@@ -458,7 +458,7 @@ export class PackageManager {
    *
    * For @openzeppelin/adapter-* packages (published from openzeppelin-adapters):
    * - 'local': Uses workspace:* for monorepo development
-   * - 'staging': Uses RC versions or the npm `rc` dist-tag when versions.ts has stable semver
+   * - 'staging': Preserves managed RC versions; otherwise uses the managed stable caret range
    * - 'production': Uses stable published versions (^x.y.z) from versions.ts
    *
    * @param dependencies Original dependencies object

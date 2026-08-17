@@ -9,7 +9,7 @@ import { createMinimalContractSchema, createMinimalFormConfig } from '../utils/t
 import { extractFilesFromZip } from '../utils/zipInspector';
 
 describe('ENS export dependency pins (production)', () => {
-  it('pins ui-types ^3.3.0, viem ^2.35.0, adapter-evm ^2.3.0 and ships .npmrc + vite interop', async () => {
+  it('pins ui-types ^3.5.0, viem ^2.35.0, adapter-evm ^2.7.0 and ships .npmrc + vite interop', async () => {
     const networks = await getNetworksByEcosystem('evm');
     const networkConfig = networks.find((n) => n.id === 'ethereum-mainnet') ?? networks[0];
     expect(networkConfig).toBeDefined();
@@ -30,9 +30,9 @@ describe('ENS export dependency pins (production)', () => {
     const packageJson = JSON.parse(files['package.json']);
     const deps = packageJson.dependencies as Record<string, string>;
 
-    expect(deps['@openzeppelin/ui-types']).toBe('^3.3.0');
+    expect(deps['@openzeppelin/ui-types']).toBe('^3.5.0');
     expect(deps['viem']).toBe('^2.35.0');
-    expect(deps['@openzeppelin/adapter-evm']).toBe('^2.3.0');
+    expect(deps['@openzeppelin/adapter-evm']).toBe('^2.7.0');
     expect(deps['@openzeppelin/ui-components']).toBe('^3.8.1');
     expect(deps['@openzeppelin/ui-renderer']).toBe('^3.4.0');
     expect(deps['@openzeppelin/ui-react']).toBe('^3.3.0');
