@@ -458,7 +458,7 @@ export class PackageManager {
    *
    * For @openzeppelin/adapter-* packages (published from openzeppelin-adapters):
    * - 'local': Uses workspace:* for monorepo development
-   * - 'staging': Uses RC versions or the npm `rc` dist-tag when versions.ts has stable semver
+   * - 'staging': Preserves managed RC versions; otherwise uses the managed stable caret range
    * - 'production': Uses stable published versions (^x.y.z) from versions.ts
    *
    * @param dependencies Original dependencies object
@@ -527,13 +527,15 @@ export class PackageManager {
           updatedDependencies[pkgName] = 'workspace:*';
         } else if (env === 'staging') {
           // Staging: Use RC versions for testing latest features
-          // If managedVersion is already an RC version (e.g., 0.0.0-rc-20250915124300), use it
-          // Otherwise, fall back to using the 'rc' dist-tag so consumers pull the latest RC snapshot
+          // If managedVersion is an RC version (e.g., 0.0.0-rc-20250915124300), use it directly.
+          // Otherwise, use the managed stable version — the 'rc' dist-tag can be stale and
+          // resolve to a build that predates features shipped in stable releases.
           if (managedVersion.includes('-rc')) {
             updatedDependencies[pkgName] = managedVersion;
           } else {
-            // Using the dist-tag ensures alignment with snapshot format 0.0.0-rc-YYYYMMDDHHMMSS
-            updatedDependencies[pkgName] = 'rc';
+            updatedDependencies[pkgName] = managedVersion.startsWith('^')
+              ? managedVersion
+              : `^${managedVersion}`;
           }
         } else {
           // Production: Use stable published versions

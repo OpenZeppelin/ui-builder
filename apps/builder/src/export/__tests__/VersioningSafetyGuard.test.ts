@@ -205,7 +205,7 @@ describe('Versioning Safety Guard', () => {
   });
 
   describe('Builder release-channel resolution (published adapters)', () => {
-    it('uses npm rc dist-tag for staging when versions.ts holds a stable semver', async () => {
+    it('uses a caret range for staging when versions.ts holds a stable semver', async () => {
       const versionsModule = await import('../versions');
       const original = { ...versionsModule.packageVersions };
       const testAdapter = adapterPackageMap['evm'];
@@ -221,7 +221,7 @@ describe('Versioning Safety Guard', () => {
           { env: 'staging' }
         );
         const deps = JSON.parse(updated).dependencies || {};
-        expect(deps[testAdapter]).toBe('rc');
+        expect(deps[testAdapter]).toBe('^1.2.3');
       } finally {
         Object.assign(versionsModule.packageVersions, original);
       }
@@ -252,7 +252,7 @@ describe('Versioning Safety Guard', () => {
 
   describe('no workspace:* in staging exports', () => {
     it.each(DEVELOPED_ECOSYSTEMS)(
-      'should resolve %s adapter dependency to RC version in staging',
+      'should resolve %s adapter dependency to a publishable version in staging',
       async (ecosystem) => {
         const packageManager = new PackageManager(mockRendererConfig);
 
@@ -274,11 +274,11 @@ describe('Versioning Safety Guard', () => {
             `Must not be "workspace:*" — this will break end users.`
         ).not.toBe('workspace:*');
 
-        const rcVersionOrTag = /^(rc|\d+\.\d+\.\d+-rc(?:[-.]\d+)?)$/;
+        const stableRangeOrRc = /^(\^\d+\.\d+\.\d+|\d+\.\d+\.\d+-rc(?:[-.]\d+)?)$/;
         expect(
           deps[expectedAdapter],
-          `Staging: ${ecosystem} adapter "${expectedAdapter}" should be RC version or dist-tag`
-        ).toMatch(rcVersionOrTag);
+          `Staging: ${ecosystem} adapter "${expectedAdapter}" should be a stable range or managed RC`
+        ).toMatch(stableRangeOrRc);
 
         for (const [pkg, version] of Object.entries(deps)) {
           expect(

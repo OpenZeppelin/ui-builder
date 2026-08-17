@@ -16,7 +16,7 @@ vi.mock('../versions', async () => {
       '@openzeppelin/adapter-midnight': '0.0.4',
       '@openzeppelin/adapter-polkadot': '0.2.0',
       '@openzeppelin/adapter-solana': '0.0.3',
-      '@openzeppelin/adapter-stellar': '0.0.3',
+      '@openzeppelin/adapter-stellar': '0.0.3-rc.123',
       '@openzeppelin/ui-react': '0.1.3',
       '@openzeppelin/ui-renderer': '0.1.4',
       '@openzeppelin/ui-types': '0.2.0',
@@ -440,9 +440,8 @@ describe('PackageManager', () => {
       expect(result.dependencies['@openzeppelin/ui-renderer']).toMatch(/^\^/);
       expect(result.dependencies['@openzeppelin/ui-types']).toMatch(/^\^/);
 
-      // Adapter packages use RC versions for staging: accept 'rc' tag or timestamped RC
-      const rcVersionOrTag = /^(rc|\d+\.\d+\.\d+-rc(?:[-.]\d+)?)$/;
-      expect(result.dependencies['@openzeppelin/adapter-evm']).toMatch(rcVersionOrTag);
+      // Stable managed adapter versions use a caret range instead of the potentially stale rc tag.
+      expect(result.dependencies['@openzeppelin/adapter-evm']).toMatch(/^\^\d+\.\d+\.\d+$/);
 
       // Verify external deps don't get -rc treatment
       expect(result.dependencies['react']).not.toMatch(/-rc$/);
@@ -473,8 +472,7 @@ describe('PackageManager', () => {
         { env: 'staging' }
       );
       const result = JSON.parse(updated);
-      const rcVersionOrTag = /^(rc|\d+\.\d+\.\d+-rc(?:[-.]\d+)?)$/;
-      expect(result.dependencies['@openzeppelin/adapter-polkadot']).toMatch(rcVersionOrTag);
+      expect(result.dependencies['@openzeppelin/adapter-polkadot']).toMatch(/^\^\d+\.\d+\.\d+$/);
       expect(result.dependencies['@openzeppelin/adapter-polkadot']).not.toBe('workspace:*');
     });
 
@@ -487,7 +485,7 @@ describe('PackageManager', () => {
       const updated = await packageManager.updatePackageJson(
         basePackageJson,
         formConfig,
-        'evm',
+        'stellar',
         'testFunction',
         { env: 'staging' }
       );
@@ -497,9 +495,8 @@ describe('PackageManager', () => {
       expect(result.dependencies['@openzeppelin/ui-renderer']).toMatch(/^\^/);
       expect(result.dependencies['@openzeppelin/ui-types']).toMatch(/^\^/);
 
-      // Adapter packages resolve to RC format (either dist-tag 'rc' or timestamped RC)
-      const rcVersionOrTag = /^(rc|\d+\.\d+\.\d+-rc(?:[-.]\d+)?)$/;
-      expect(result.dependencies['@openzeppelin/adapter-evm']).toMatch(rcVersionOrTag);
+      // An actual managed RC snapshot is preserved exactly.
+      expect(result.dependencies['@openzeppelin/adapter-stellar']).toBe('0.0.3-rc.123');
     });
 
     it('should verify RC detection logic works correctly', async () => {
@@ -520,9 +517,8 @@ describe('PackageManager', () => {
       // UI packages use stable versions in staging (no RC pipeline for openzeppelin-ui)
       expect(stagingResult.dependencies['@openzeppelin/ui-renderer']).toMatch(/^\^/);
 
-      // Adapter packages use RC versions in staging
-      const rcVersionOrTag = /^(rc|\d+\.\d+\.\d+-rc(?:[-.]\d+)?)$/;
-      expect(stagingResult.dependencies['@openzeppelin/adapter-evm']).toMatch(rcVersionOrTag);
+      // Stable managed adapter versions use a caret range in staging.
+      expect(stagingResult.dependencies['@openzeppelin/adapter-evm']).toMatch(/^\^\d+\.\d+\.\d+$/);
 
       // Test that production doesn't get -rc
       const prodUpdated = await packageManager.updatePackageJson(
@@ -586,10 +582,8 @@ describe('PackageManager', () => {
       const stagingResult = JSON.parse(stagingUpdated);
       // UI packages use stable versions (no RC pipeline)
       expect(stagingResult.dependencies['@openzeppelin/ui-renderer']).toMatch(/^\^/);
-      // Adapter packages use RC versions
-      expect(stagingResult.dependencies['@openzeppelin/adapter-evm']).toMatch(
-        /^(rc|\d+\.\d+\.\d+-rc(?:[-.]\d+)?)$/
-      );
+      // Stable managed adapter versions use a caret range.
+      expect(stagingResult.dependencies['@openzeppelin/adapter-evm']).toMatch(/^\^\d+\.\d+\.\d+$/);
 
       // Test production environment
       const prodUpdated = await packageManager.updatePackageJson(

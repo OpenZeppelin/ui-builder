@@ -6,7 +6,7 @@
  */
 
 export const packageVersions = {
-  '@openzeppelin/adapter-evm': '2.3.0',
+  '@openzeppelin/adapter-evm': '2.7.0',
   '@openzeppelin/adapter-midnight': '2.2.0',
   '@openzeppelin/adapter-polkadot': '2.2.0',
   '@openzeppelin/adapter-solana': '2.2.0',
@@ -14,7 +14,7 @@ export const packageVersions = {
   '@openzeppelin/ui-react': '3.3.0',
   '@openzeppelin/ui-renderer': '3.4.0',
   '@openzeppelin/ui-storage': '1.2.3',
-  '@openzeppelin/ui-types': '3.3.0',
+  '@openzeppelin/ui-types': '3.5.0',
   '@openzeppelin/ui-components': '3.8.1',
   '@openzeppelin/ui-utils': '3.3.0',
   '@openzeppelin/ui-styles': '1.1.0',
