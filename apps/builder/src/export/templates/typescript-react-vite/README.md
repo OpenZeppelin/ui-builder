@@ -114,9 +114,9 @@ To configure your application:
     }
   },
   "globalServiceConfigs": {
-    "walletconnect": {
-      "projectId": "YOUR_WALLETCONNECT_PROJECT_ID_HERE",
-      "_comment": "WalletConnect Project ID, required if WalletConnect is used."
+    "walletui": {
+      "_comment": "Wallet UI config, keyed by ecosystem. Supported kitNames: rainbowkit, stellar-wallets-kit, custom.",
+      "evm": { "kitName": "rainbowkit", "kitConfig": {} }
     }
   },
   "rpcEndpoints": {

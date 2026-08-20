@@ -34,6 +34,15 @@ export default defineConfig(({ mode }) => ({
     alias: {
       '@': path.resolve(__dirname, './src'),
       ...(eventemitter3CjsEntry ? { eventemitter3: eventemitter3CjsEntry } : {}),
+      // WalletConnect support was removed and .pnpmfile.cjs strips its provider
+      // from the install tree. @wagmi/connectors still ships an unreachable
+      // walletConnect module that dynamically imports it, and Rollup resolves
+      // dynamic imports at build time even when unreachable, so point it at a
+      // stub. See src/shims/walletconnect-removed.ts.
+      '@walletconnect/ethereum-provider': path.resolve(
+        __dirname,
+        './src/shims/walletconnect-removed.ts'
+      ),
     },
   },
   define: {
