@@ -86,6 +86,20 @@ export function generateViteConfig(options: ViteConfigGeneratorOptions): string 
     ? '        ...(eventemitter3CjsEntry ? { eventemitter3: eventemitter3CjsEntry } : {}),'
     : '';
 
+  // WalletConnect support was removed and the exported .pnpmfile.cjs strips its
+  // provider from the install tree. @wagmi/connectors still re-exports an
+  // unreachable walletConnect module that dynamically imports it, and Rollup
+  // resolves dynamic imports at build time even when the call site is
+  // unreachable -- so without this alias the exported app cannot build.
+  const walletConnectStubAlias = usesWalletInterop
+    ? [
+        "        '@walletconnect/ethereum-provider': path.resolve(",
+        '          __dirname,',
+        "          './src/shims/walletconnect-removed.ts'",
+        '        ),',
+      ].join('\n')
+    : '';
+
   const optimizeDepsInclude = buildOptimizeDepsInclude(
     usesWalletInterop,
     viteConfig?.optimizeDeps?.include
@@ -109,6 +123,7 @@ ${plugins.join('\n')}
         buffer: 'buffer/',
         events: 'events/',
 ${eventemitter3Alias}
+${walletConnectStubAlias}
       },
 ${dedupeConfig}
     },

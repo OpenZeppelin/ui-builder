@@ -48,6 +48,17 @@ describe('exported app excludes the T-RSL Trezor stack', () => {
     expect(hook).toContain('function readPackage(pkg, context)');
     expect(hook).toContain('stripTrezorDependencies(pkg, context)');
 
+    // The same hook must also strip the WalletConnect provider, which drags in
+    // @reown/appkit (Reown Community License from 1.8.3).
+    expect(hook).toContain("'@wagmi/connectors'");
+    expect(hook).toContain('@walletconnect/ethereum-provider');
+    expect(hook).toContain('stripWalletConnectDependencies(pkg, context)');
+
+    // And the bundler needs the stub, or the generated app cannot build.
+    expect(files['src/shims/walletconnect-removed.ts']).toBeDefined();
+    expect(files['vite.config.ts']).toContain('@walletconnect/ethereum-provider');
+    expect(files['.npmrc']).not.toContain('@walletconnect');
+
     // No Trezor package may ever be a declared dependency of an exported app.
     const packageJson = JSON.parse(files['package.json']);
     const allDeps = {
@@ -55,5 +66,7 @@ describe('exported app excludes the T-RSL Trezor stack', () => {
       ...((packageJson.devDependencies ?? {}) as Record<string, string>),
     };
     expect(Object.keys(allDeps).filter((name) => name.startsWith('@trezor/'))).toEqual([]);
+    expect(Object.keys(allDeps).filter((name) => name.startsWith('@walletconnect/'))).toEqual([]);
+    expect(Object.keys(allDeps).filter((name) => name.startsWith('@reown/'))).toEqual([]);
   });
 });
