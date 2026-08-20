@@ -5,11 +5,13 @@ import { describe, expect, it } from 'vitest';
 
 import { getNetworksByEcosystem } from '../../core/ecosystemManager';
 import { AppExportSystem } from '../AppExportSystem';
+import { EXTERNAL_DEPENDENCY_FLOORS } from '../dependencyFloors';
 import { createMinimalContractSchema, createMinimalFormConfig } from '../utils/testConfig';
 import { extractFilesFromZip } from '../utils/zipInspector';
+import { packageVersions } from '../versions';
 
 describe('ENS export dependency pins (production)', () => {
-  it('pins ui-types ^3.3.0, viem ^2.35.0, adapter-evm ^2.3.0 and ships .npmrc + vite interop', async () => {
+  it('pins the declared package versions and ships .npmrc + vite interop', async () => {
     const networks = await getNetworksByEcosystem('evm');
     const networkConfig = networks.find((n) => n.id === 'ethereum-mainnet') ?? networks[0];
     expect(networkConfig).toBeDefined();
@@ -30,12 +32,22 @@ describe('ENS export dependency pins (production)', () => {
     const packageJson = JSON.parse(files['package.json']);
     const deps = packageJson.dependencies as Record<string, string>;
 
-    expect(deps['@openzeppelin/ui-types']).toBe('^3.3.0');
-    expect(deps['viem']).toBe('^2.35.0');
-    expect(deps['@openzeppelin/adapter-evm']).toBe('^2.3.0');
-    expect(deps['@openzeppelin/ui-components']).toBe('^3.8.1');
-    expect(deps['@openzeppelin/ui-renderer']).toBe('^3.4.0');
-    expect(deps['@openzeppelin/ui-react']).toBe('^3.3.0');
+    // Assert against the declared sources of truth rather than duplicating the
+    // version literals here. `packageVersions` is maintained by
+    // `pnpm run update-export-versions`, so hardcoding them made every release
+    // fail this test and, in turn, block that script's own snapshot refresh.
+    for (const name of [
+      '@openzeppelin/ui-types',
+      '@openzeppelin/adapter-evm',
+      '@openzeppelin/ui-components',
+      '@openzeppelin/ui-renderer',
+      '@openzeppelin/ui-react',
+    ] as const) {
+      expect(deps[name], name).toBe(`^${packageVersions[name]}`);
+    }
+
+    // viem is a floor rather than a published-version pin.
+    expect(deps['viem']).toBe(EXTERNAL_DEPENDENCY_FLOORS.viem);
 
     expect(files['.npmrc']).toBeDefined();
     expect(files['.npmrc']).toContain('public-hoist-pattern[]=eventemitter3');
