@@ -52,6 +52,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Adapter peer version check
+        # The adapters enforce their @openzeppelin/ui-* minimums at runtime only, so a
+        # stale pin builds, typechecks and tests clean and then fails in the browser
+        # with the network runtime stuck failed. Nothing else in this job catches it.
+        run: pnpm exec oz-ui-dev check-peers --project "$PWD"
+
       - name: Build all packages
         run: pnpm -r build
         env:
