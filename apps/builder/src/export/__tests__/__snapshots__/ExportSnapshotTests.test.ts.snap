@@ -341,7 +341,7 @@ export default function GeneratedForm({ adapter, isWalletConnected }: GeneratedF
 exports[`Export Snapshot Tests > evm Export Snapshots > should match snapshot for package.json structure > package-json-evm 1`] = `
 {
   "dependencies": {
-    "@openzeppelin/adapter-evm": "^3.0.0",
+    "@openzeppelin/adapter-evm": "^4.0.0",
     "@openzeppelin/ui-components": "^3.8.2",
     "@openzeppelin/ui-react": "^3.3.1",
     "@openzeppelin/ui-renderer": "^3.4.1",
