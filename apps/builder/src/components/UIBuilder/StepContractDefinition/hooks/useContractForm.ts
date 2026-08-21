@@ -5,8 +5,8 @@ import type { FormValues } from '@openzeppelin/ui-types';
 
 import type { BuilderRuntime } from '@/core/runtimeAdapter';
 
-import { useDebounce } from '../../hooks';
 import { uiBuilderStore } from '../../hooks/uiBuilderStore';
+import { useDebounce } from '../../hooks/useDebounce';
 
 interface UseContractFormProps {
   runtime: BuilderRuntime | null;
