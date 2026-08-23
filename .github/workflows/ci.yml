@@ -44,6 +44,11 @@ jobs:
         run: |
           echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
 
+      - name: Dependency licence guard
+        # Invoked directly rather than through pnpm: it is lockfile-only and needs
+        # no node_modules, so this fails fast before the install.
+        run: node scripts/check-dependency-licenses.cjs
+
       - name: Install dependencies
         run: pnpm install
 

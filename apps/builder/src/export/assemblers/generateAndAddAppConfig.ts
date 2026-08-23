@@ -117,10 +117,6 @@ function _buildWalletUiServiceConfig(): WalletUiServiceConfig {
 function _generateGlobalServiceConfigPlaceholders(): GlobalServiceConfigs {
   return {
     walletui: _buildWalletUiServiceConfig(),
-    walletconnect: {
-      projectId: 'YOUR_WALLETCONNECT_PROJECT_ID_HERE',
-      _comment: 'WalletConnect Project ID, required if you intend to use WalletConnect.',
-    },
   };
 }
 

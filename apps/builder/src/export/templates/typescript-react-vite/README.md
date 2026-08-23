@@ -9,12 +9,20 @@ This project was generated using the [OpenZeppelin UI Builder](https://builder.o
 1. Install dependencies:
 
    ```bash
+   pnpm install
+   # or
    npm install
    # or
    yarn install
-   # or
-   pnpm install
    ```
+
+   > **pnpm is recommended.** This project ships a `.pnpmfile.cjs` that removes two
+   > Trezor packages which `@creit.tech/stellar-wallets-kit` declares as hard
+   > dependencies. They are licensed under the Trezor Reference Source License, which
+   > does not permit redistribution, and nothing in this app uses them -- Trezor is not
+   > one of the offered wallets. The hook is honoured by pnpm only, so installing with
+   > npm or yarn leaves those packages in `node_modules` (unused, but present).
+   > The `.npmrc` hoist patterns this project relies on are also pnpm-specific.
 
 2. Build the project (required for Tailwind CSS compilation):
 
@@ -106,9 +114,9 @@ To configure your application:
     }
   },
   "globalServiceConfigs": {
-    "walletconnect": {
-      "projectId": "YOUR_WALLETCONNECT_PROJECT_ID_HERE",
-      "_comment": "WalletConnect Project ID, required if WalletConnect is used."
+    "walletui": {
+      "_comment": "Wallet UI config, keyed by ecosystem. Supported kitNames: rainbowkit, stellar-wallets-kit, custom.",
+      "evm": { "kitName": "rainbowkit", "kitConfig": {} }
     }
   },
   "rpcEndpoints": {

@@ -255,11 +255,13 @@ describe('generateAndAddAppConfig', () => {
       expect(exampleConfig._readme.length).toBeGreaterThan(0);
       expect(exampleConfig._readme[0]).toContain('example configuration file');
 
-      // Check WalletConnect configuration
-      expect(exampleConfig.globalServiceConfigs.walletconnect).toMatchObject({
-        projectId: 'YOUR_WALLETCONNECT_PROJECT_ID_HERE',
-        _comment: expect.stringContaining('WalletConnect Project ID'),
-      });
+      // WalletConnect support was removed, so nothing should invite the user to
+      // configure it.
+      expect(exampleConfig.globalServiceConfigs.walletconnect).toBeUndefined();
+      expect(projectFiles['public/app.config.json.example']).not.toContain('walletconnect');
+
+      // The wallet UI section is what globalServiceConfigs actually carries now.
+      expect(exampleConfig.globalServiceConfigs).toHaveProperty('walletui');
     });
 
     it('should handle different ecosystem naming in generated configs', async () => {

@@ -85,6 +85,14 @@ export default adapters.vite({
       buffer: bufferPolyfillPath,
       'buffer/': bufferPolyfillPath,
       eventemitter3: eventemitter3CjsEntry,
+      // WalletConnect was removed and its provider is stripped from the install
+      // tree, but @wagmi/connectors still ships an unreachable walletConnect
+      // module that dynamically imports it. Rollup resolves dynamic imports even
+      // when unreachable, so point it at a stub.
+      '@walletconnect/ethereum-provider': path.resolve(
+        __dirname,
+        './src/shims/walletconnect-removed.ts'
+      ),
     },
   },
   define: {

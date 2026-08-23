@@ -242,7 +242,84 @@ function allowAdapterPrereleases(pkg) {
   }
 }
 
+// --- License compliance: strip the Trezor (T-RSL) stack --------------------
+// @creit.tech/stellar-wallets-kit hard-depends on @trezor/connect-web and
+// @trezor/connect-plugin-stellar, which together pull in 22 @trezor/* packages
+// licensed under the Trezor Reference Source License (T-RSL). T-RSL grants
+// "reference use" within the company only and excludes the right to distribute
+// the software outside the company.
+//
+// Nothing we ship reaches that code: the kit's barrel does not re-export
+// modules/trezor.module, allowAllModules() returns only the eight non-Trezor
+// modules, and trezor.module is an isolated leaf that nothing else in the kit
+// imports. Dropping both deps leaves bundle output byte-identical.
+//
+// Done here rather than through pnpm.patchedDependencies so it is not pinned to
+// one kit version, and so it applies however deep the kit is pulled in (e.g.
+// via @openzeppelin/adapter-stellar rather than a direct dependency).
+const TREZOR_DEP_HOST = '@creit.tech/stellar-wallets-kit';
+const TREZOR_DEPS = ['@trezor/connect-web', '@trezor/connect-plugin-stellar'];
+const TREZOR_DEP_FIELDS = ['dependencies', 'optionalDependencies', 'peerDependencies'];
+
+function stripTrezorDependencies(pkg, context) {
+  if (pkg.name !== TREZOR_DEP_HOST) {
+    return;
+  }
+
+  for (const field of TREZOR_DEP_FIELDS) {
+    for (const dep of TREZOR_DEPS) {
+      if (pkg[field] && dep in pkg[field]) {
+        delete pkg[field][dep];
+        context.log(`[license] stripped ${dep} from ${pkg.name}@${pkg.version} (T-RSL)`);
+      }
+    }
+  }
+}
+
+// --- License compliance: strip the WalletConnect / Reown stack ---------------
+// We no longer register a WalletConnect connector in any ecosystem, so these
+// dependencies are dead weight -- and the EVM one drags in @reown/appkit.
+//
+// Reown moved AppKit to the Reown Community License at 1.8.3 (commercial fees
+// above 500 monthly active users, a mandatory-gateway clause and a
+// confidentiality clause). The wagmi team have themselves deprecated their
+// walletConnect connector over that relicence, noting they cannot patch a known
+// downstream vulnerability (pino@7.11.0) because of it.
+//
+// Both host packages reach WalletConnect through a single isolated module that
+// nothing else imports:
+//   - @wagmi/connectors                -> walletConnect.js (dynamic import, unused)
+//   - @creit.tech/stellar-wallets-kit   -> modules/walletconnect.module (not in the
+//     barrel, not in allowAllModules())
+// @wagmi/connectors@8+ makes its WalletConnect dependency an optional peer; until
+// we move to wagmi 3 this hook achieves the same on the version we pin.
+const WALLETCONNECT_STRIP = {
+  '@wagmi/connectors': ['@walletconnect/ethereum-provider'],
+  '@creit.tech/stellar-wallets-kit': ['@walletconnect/modal', '@walletconnect/sign-client'],
+};
+const WALLETCONNECT_DEP_FIELDS = ['dependencies', 'optionalDependencies', 'peerDependencies'];
+
+function stripWalletConnectDependencies(pkg, context) {
+  const deps = WALLETCONNECT_STRIP[pkg.name];
+  if (!deps) {
+    return;
+  }
+
+  for (const field of WALLETCONNECT_DEP_FIELDS) {
+    for (const dep of deps) {
+      if (pkg[field] && dep in pkg[field]) {
+        delete pkg[field][dep];
+        context.log(`[license] stripped ${dep} from ${pkg.name}@${pkg.version} (WalletConnect)`);
+      }
+    }
+  }
+}
+
 function readPackage(pkg, context) {
+  stripWalletConnectDependencies(pkg, context);
+
+  stripTrezorDependencies(pkg, context);
+
   if (isAnyLocalFamilyEnabled()) {
     const workspaceRoot = __dirname;
     const projectConfig = readProjectConfig(workspaceRoot);
