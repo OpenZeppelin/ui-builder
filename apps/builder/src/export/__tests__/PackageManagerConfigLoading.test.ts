@@ -107,8 +107,7 @@ const createMinimalFormConfig = (fieldTypes: string[] = ['text']): BuilderFormCo
 });
 
 describe('PackageManager configuration loading', () => {
-  // Accept either the 'rc' dist-tag or timestamped RC variants like "0.0.0-rc-20250813180014"
-  const rcVersionOrTag = /^(rc|\d+\.\d+\.\d+-rc(?:[-.]\d+)?)$/;
+  const stableRangeOrRc = /^(\^\d+\.\d+\.\d+|\d+\.\d+\.\d+-rc(?:[-.]\d+)?)$/;
   /**
    * This test suite focuses on testing the PackageManager with configurations
    * passed directly to the constructor, bypassing the dynamic loading mechanism.
@@ -184,8 +183,8 @@ describe('PackageManager configuration loading', () => {
       const result = JSON.parse(updated);
       // UI packages from openzeppelin-ui use stable versions (no RC pipeline)
       expect(result.dependencies['@openzeppelin/ui-types']).toMatch(/^\^/);
-      // Adapter packages use RC versions for staging
-      expect(result.dependencies['@openzeppelin/adapter-evm']).toMatch(rcVersionOrTag);
+      // Stable adapter metadata becomes a caret range; managed RC snapshots remain exact.
+      expect(result.dependencies['@openzeppelin/adapter-evm']).toMatch(stableRangeOrRc);
 
       // External dependencies should remain unchanged
       expect(result.dependencies['react']).toBe('^19.0.0');
@@ -238,9 +237,9 @@ describe('PackageManager configuration loading', () => {
       expect(stagingResult.dependencies['@openzeppelin/ui-types']).toMatch(/^\^/);
       expect(prodResult.dependencies['@openzeppelin/ui-types']).toMatch(/^\^/);
 
-      // Adapters (published from openzeppelin-adapters): workspace:* local, rc staging, ^stable prod
+      // Adapters: workspace:* local, stable range or managed RC staging, ^stable prod.
       expect(localResult.dependencies['@openzeppelin/adapter-evm']).toBe('workspace:*');
-      expect(stagingResult.dependencies['@openzeppelin/adapter-evm']).toMatch(rcVersionOrTag);
+      expect(stagingResult.dependencies['@openzeppelin/adapter-evm']).toMatch(stableRangeOrRc);
       expect(prodResult.dependencies['@openzeppelin/adapter-evm']).toMatch(/^\^/);
 
       // All should have same external dependencies
