@@ -49,7 +49,8 @@
     "export-app": "node apps/builder/src/export/cli/export-app.cjs",
     "preinstall": "npx only-allow pnpm",
     "install-pnpm": "npm install -g pnpm",
-    "check-licenses": "node scripts/check-dependency-licenses.cjs"
+    "check-licenses": "node scripts/check-dependency-licenses.cjs",
+    "check-adapter-peers": "oz-ui-dev check-peers --project \"$PWD\""
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,cjs,mjs}": "pnpm fix-all"
