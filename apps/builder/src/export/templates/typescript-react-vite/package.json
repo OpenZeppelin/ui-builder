@@ -12,11 +12,11 @@
     "check-deps": "npm outdated"
   },
   "dependencies": {
-    "@openzeppelin/ui-components": "^3.8.0",
-    "@openzeppelin/ui-react": "^3.3.0",
-    "@openzeppelin/ui-renderer": "^3.4.0",
-    "@openzeppelin/ui-types": "^3.3.0",
-    "@openzeppelin/ui-utils": "^3.3.0",
+    "@openzeppelin/ui-components": "^3.8.3",
+    "@openzeppelin/ui-react": "^3.3.2",
+    "@openzeppelin/ui-renderer": "^3.4.2",
+    "@openzeppelin/ui-types": "^3.5.2",
+    "@openzeppelin/ui-utils": "^4.0.1",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "react-hook-form": "^7.60.0"

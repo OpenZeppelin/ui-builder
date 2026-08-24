@@ -78,10 +78,46 @@ function stripWalletConnectDependencies(pkg, context) {
   }
 }
 
+// --- License compliance: strip the MetaMask SDK -----------------------------
+// @metamask/sdk ships a proprietary ConsenSys licence, not an open-source one:
+// "Copyright ConsenSys Software Inc. 2022. All rights reserved", granting only a
+// licence for Non-Commercial Use, and requiring any derivative to carry that same
+// restriction forward. The OpenZeppelin adapters are AGPL-3.0, which forbids
+// conveying the work under added restrictions, so the two cannot both be
+// satisfied. No published version declares a `license` field at all.
+//
+// @wagmi/connectors declares it as a hard dependency, not an optional peer, so it
+// installs whether or not a metaMask() connector is registered.
+//
+// Scoped to this one name on purpose: most of @metamask/* is MIT or ISC and is
+// legitimately needed, so a scope-wide strip would break far more than it fixes.
+const METAMASK_STRIP = {
+  '@wagmi/connectors': ['@metamask/sdk'],
+};
+const METAMASK_DEP_FIELDS = ['dependencies', 'optionalDependencies', 'peerDependencies'];
+
+function stripMetaMaskDependencies(pkg, context) {
+  const deps = METAMASK_STRIP[pkg.name];
+  if (!deps) {
+    return;
+  }
+
+  for (const field of METAMASK_DEP_FIELDS) {
+    for (const dep of deps) {
+      if (pkg[field] && dep in pkg[field]) {
+        delete pkg[field][dep];
+        context.log(`[license] stripped ${dep} from ${pkg.name}@${pkg.version} (MetaMask SDK)`);
+      }
+    }
+  }
+}
+
 function readPackage(pkg, context) {
   stripWalletConnectDependencies(pkg, context);
 
   stripTrezorDependencies(pkg, context);
+
+  stripMetaMaskDependencies(pkg, context);
 
   return pkg;
 }

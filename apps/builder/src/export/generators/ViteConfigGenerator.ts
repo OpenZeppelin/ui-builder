@@ -100,6 +100,18 @@ export function generateViteConfig(options: ViteConfigGeneratorOptions): string 
       ].join('\n')
     : '';
 
+  // The MetaMask SDK is stripped for licence reasons (proprietary, Non-Commercial
+  // Use only) and needs the same treatment: @wagmi/connectors re-exports an
+  // unreachable metaMask module that dynamically imports it.
+  const metaMaskStubAlias = usesWalletInterop
+    ? [
+        "        '@metamask/sdk': path.resolve(",
+        '          __dirname,',
+        "          './src/shims/metamask-removed.ts'",
+        '        ),',
+      ].join('\n')
+    : '';
+
   const optimizeDepsInclude = buildOptimizeDepsInclude(
     usesWalletInterop,
     viteConfig?.optimizeDeps?.include
@@ -124,6 +136,7 @@ ${plugins.join('\n')}
         events: 'events/',
 ${eventemitter3Alias}
 ${walletConnectStubAlias}
+${metaMaskStubAlias}
       },
 ${dedupeConfig}
     },
