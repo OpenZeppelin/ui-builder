@@ -6,9 +6,9 @@
  */
 
 export const packageVersions = {
-  '@openzeppelin/adapter-evm': '4.0.2',
+  '@openzeppelin/adapter-evm': '5.0.0',
   '@openzeppelin/adapter-midnight': '4.0.1',
-  '@openzeppelin/adapter-polkadot': '4.0.2',
+  '@openzeppelin/adapter-polkadot': '5.0.0',
   '@openzeppelin/adapter-solana': '4.0.1',
   '@openzeppelin/adapter-stellar': '4.0.1',
   '@openzeppelin/ui-react': '3.3.2',
