@@ -43,6 +43,11 @@ export default defineConfig(({ mode }) => ({
         __dirname,
         './src/shims/walletconnect-removed.ts'
       ),
+      // The MetaMask SDK is stripped from the install tree for licence reasons
+      // (proprietary, Non-Commercial Use only). @wagmi/connectors still ships an
+      // unreachable metaMask module that dynamically imports it, so point it at a
+      // stub. See src/shims/metamask-removed.ts.
+      '@metamask/sdk': path.resolve(__dirname, './src/shims/metamask-removed.ts'),
     },
   },
   define: {

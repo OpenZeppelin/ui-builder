@@ -15,7 +15,7 @@
 
 function walletConnectRemoved(): never {
   throw new Error(
-    'WalletConnect support was removed from this application. Use an injected wallet, MetaMask or Safe.'
+    'WalletConnect support was removed from this application. Use an injected wallet (the MetaMask extension included) or Safe.'
   );
 }
 

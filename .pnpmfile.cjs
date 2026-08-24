@@ -315,10 +315,55 @@ function stripWalletConnectDependencies(pkg, context) {
   }
 }
 
+// --- License compliance: strip the MetaMask SDK -----------------------------
+// @metamask/sdk ships a proprietary ConsenSys licence, not an open-source one:
+// "Copyright ConsenSys Software Inc. 2022. All rights reserved", granting only a
+// non-exclusive, non-transferable licence for Non-Commercial Use -- and clause 2
+// requires any Resulting Program to carry that same Non-Commercial restriction
+// forward.
+//
+// The OpenZeppelin adapters are AGPL-3.0, which forbids conveying the work under
+// added restrictions. A non-commercial-only restriction is exactly such a
+// restriction, so the two licences cannot both be satisfied. The conflict is
+// structural: it does not depend on a monthly-active-user count, and there is no
+// clean version to pin (no published version declares a `license` field at all).
+//
+// The same 2715-byte licence file ships in @metamask/sdk,
+// @metamask/sdk-communication-layer and @metamask/sdk-install-modal-web.
+//
+// Scoped to those three package names on purpose. Most of @metamask/* is MIT or
+// ISC (utils, providers, json-rpc-engine, rpc-errors, superstruct, ...) and is
+// legitimately needed; a scope-wide strip would break far more than it fixes.
+//
+// @wagmi/connectors declares @metamask/sdk as a hard dependency, not an optional
+// peer, so it installs whether or not a metaMask() connector is registered.
+const METAMASK_STRIP = {
+  '@wagmi/connectors': ['@metamask/sdk'],
+};
+const METAMASK_DEP_FIELDS = ['dependencies', 'optionalDependencies', 'peerDependencies'];
+
+function stripMetaMaskDependencies(pkg, context) {
+  const deps = METAMASK_STRIP[pkg.name];
+  if (!deps) {
+    return;
+  }
+
+  for (const field of METAMASK_DEP_FIELDS) {
+    for (const dep of deps) {
+      if (pkg[field] && dep in pkg[field]) {
+        delete pkg[field][dep];
+        context.log(`[license] stripped ${dep} from ${pkg.name}@${pkg.version} (MetaMask SDK)`);
+      }
+    }
+  }
+}
+
 function readPackage(pkg, context) {
   stripWalletConnectDependencies(pkg, context);
 
   stripTrezorDependencies(pkg, context);
+
+  stripMetaMaskDependencies(pkg, context);
 
   if (isAnyLocalFamilyEnabled()) {
     const workspaceRoot = __dirname;

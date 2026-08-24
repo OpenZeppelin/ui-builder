@@ -17,7 +17,16 @@
  *   dependency. `@walletconnect/*` itself is Apache-2.0, but it is the only route
  *   Reown takes into the tree, so it is banned too.
  *
- * Both are removed by `readPackage` hooks in `.pnpmfile.cjs`. This guard checks the
+ * - `@metamask/sdk` (plus `-communication-layer` and `-install-modal-web`, which ship
+ *   the same 2715-byte file) is under a proprietary ConsenSys licence limited to
+ *   Non-Commercial Use, whose clause 2 requires any derivative to carry that same
+ *   restriction forward. The OpenZeppelin adapters are AGPL-3.0, which forbids
+ *   conveying the work under added restrictions, so the two cannot both be satisfied.
+ *   It arrives via `@wagmi/connectors`, which declares it as a hard dependency. These
+ *   are banned by exact name, NOT by scope: most of `@metamask/*` is MIT or ISC and is
+ *   legitimately needed.
+ *
+ * All are removed by `readPackage` hooks in `.pnpmfile.cjs`. This guard checks the
  * outcome (nothing in the lockfile) *and* the mechanism (the hooks are still
  * wired), so deleting a hook fails loudly even if the committed lockfile happens to
  * be clean.
@@ -47,7 +56,46 @@ const BANNED_SCOPES = [
   },
 ];
 
-const REQUIRED_HOOKS = ['stripTrezorDependencies', 'stripWalletConnectDependencies'];
+// Banned by exact name rather than by scope. `@metamask/sdk` as a substring would
+// also match `@metamask/sdk-analytics` (MIT) and `@metamask/sdk-communication-layer`,
+// so each name is matched only where the lockfile ends it -- either `name@version`
+// or a quoted dependency reference.
+const BANNED_PACKAGES = [
+  {
+    name: '@metamask/sdk',
+    licence: 'proprietary ConsenSys licence, Non-Commercial Use only',
+    arrivesVia: '@wagmi/connectors',
+  },
+  {
+    name: '@metamask/sdk-communication-layer',
+    licence: 'proprietary ConsenSys licence, Non-Commercial Use only',
+    arrivesVia: '@metamask/sdk',
+  },
+  {
+    name: '@metamask/sdk-install-modal-web',
+    licence: 'proprietary ConsenSys licence, Non-Commercial Use only',
+    arrivesVia: '@metamask/sdk',
+  },
+];
+
+const REQUIRED_HOOKS = [
+  'stripTrezorDependencies',
+  'stripWalletConnectDependencies',
+  'stripMetaMaskDependencies',
+];
+
+/**
+ * Matches a package name only at a lockfile name boundary, so a banned name never
+ * catches a longer sibling that merely starts with it.
+ *
+ * Covers the two forms pnpm writes:
+ *   '@metamask/sdk@0.33.1':      -> name followed by the version separator
+ *   '@metamask/sdk': 0.33.1      -> name followed by the closing quote
+ */
+function bannedPackageMatcher(name) {
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`['"]${escaped}(?:@|['"])`);
+}
 
 const repoRoot = path.resolve(__dirname, '..');
 const lockfilePath = path.join(repoRoot, 'pnpm-lock.yaml');
@@ -72,6 +120,29 @@ if (!fs.existsSync(lockfilePath)) {
     if (hits.length > 0) {
       problems.push(
         `${hits.length} lockfile reference(s) to ${scope}*\n` +
+          `    licence: ${licence}\n` +
+          `    usually arrives via: ${arrivesVia}\n` +
+          hits
+            .slice(0, 5)
+            .map((hit) => `    pnpm-lock.yaml:${hit.line}: ${hit.text.slice(0, 100)}`)
+            .join('\n') +
+          (hits.length > 5 ? `\n    ... and ${hits.length - 5} more` : '')
+      );
+    }
+  }
+
+  for (const { name, licence, arrivesVia } of BANNED_PACKAGES) {
+    const matcher = bannedPackageMatcher(name);
+    const hits = [];
+    lines.forEach((line, index) => {
+      if (matcher.test(line)) {
+        hits.push({ line: index + 1, text: line.trim() });
+      }
+    });
+
+    if (hits.length > 0) {
+      problems.push(
+        `${hits.length} lockfile reference(s) to ${name}\n` +
           `    licence: ${licence}\n` +
           `    usually arrives via: ${arrivesVia}\n` +
           hits
@@ -118,4 +189,6 @@ if (problems.length > 0) {
   process.exit(1);
 }
 
-console.log('✓ Dependency licence check passed (no @trezor/*, @reown/* or @walletconnect/*)');
+console.log(
+  '✓ Dependency licence check passed (no @trezor/*, @reown/*, @walletconnect/* or MetaMask SDK)'
+);
