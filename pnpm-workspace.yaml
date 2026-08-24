@@ -15,6 +15,13 @@ minimumReleaseAgeExclude:
   - 'vitest'
   - '@vitest/*'
 overrides:
+  # @metamask/eth-json-rpc-provider published no `license` field (and no LICENSE
+  # file) for 1.0.0-2.1.0; 2.2.0 onwards are ISC and ship the licence text.
+  # eth-block-tracker@7 declares ^1.0.0, but it imports only the
+  # `SafeEventEmitterProvider` *type* -- there is no runtime reference in any of its
+  # dist/*.js -- and 2.2.0 still exports that type, so crossing the major here is
+  # type-only. Reached via @coinbase/wallet-sdk from @wagmi/connectors.
+  '@metamask/eth-json-rpc-provider': ^2.2.0
   vite: 7.3.2
   use-sync-external-store: ^1.2.0
   valtio: ^1.13.2
