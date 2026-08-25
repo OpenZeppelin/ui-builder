@@ -13,6 +13,7 @@ import { SidebarButton } from '@openzeppelin/ui-components';
 import { useContractUIStorage } from '../../../contexts/useContractUIStorage';
 import { useBuilderAnalytics } from '../../../hooks/useBuilderAnalytics';
 import { AddressBookDialog } from '../../AddressBook/AddressBookDialog';
+import { useUIBuilderStore } from '../../UIBuilder/hooks/useUIBuilderStore';
 import { recordHasMeaningfulContent } from '../../UIBuilder/utils/meaningfulContent';
 
 interface MainActionsProps {
@@ -31,17 +32,21 @@ export default function MainActions({
 }: MainActionsProps) {
   const { exportContractUIs, contractUIs } = useContractUIStorage();
   const { trackSidebarInteraction } = useBuilderAnalytics();
+  const analyticsContext = useUIBuilderStore((s) => ({
+    networkId: s.selectedNetworkConfigId,
+    ecosystem: s.selectedEcosystem,
+  }));
 
   const handleExport = async () => {
     // Track sidebar export interaction
-    trackSidebarInteraction('export');
+    trackSidebarInteraction('export', analyticsContext);
 
     await exportContractUIs(); // Export all configurations
   };
 
   const handleImport = () => {
     // Track sidebar import interaction
-    trackSidebarInteraction('import');
+    trackSidebarInteraction('import', analyticsContext);
 
     onShowImportDialog();
   };

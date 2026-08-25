@@ -309,6 +309,10 @@ export function UIBuilder() {
             isWidgetExpanded={state.isWidgetVisible}
             currentStepIndex={state.currentStepIndex}
             onStepChange={handleStepChange}
+            analyticsContext={{
+              networkId: state.selectedNetworkConfigId,
+              ecosystem: state.selectedEcosystem,
+            }}
           />
         </div>
       </div>

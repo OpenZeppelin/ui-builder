@@ -77,7 +77,11 @@ export function useCompleteStepState() {
         );
 
         // Track successful export action
-        trackExportAction('react-vite'); // Default export type - could be made dynamic based on template choice
+        // Default export type - could be made dynamic based on template choice
+        trackExportAction('react-vite', {
+          networkId: networkConfig.id,
+          ecosystem: networkConfig.ecosystem,
+        });
 
         if (result.data instanceof Blob) {
           downloadBlob(result.data, result.fileName);

@@ -4,6 +4,7 @@ import React, { ReactNode } from 'react';
 import { Button } from '@openzeppelin/ui-components';
 import { cn } from '@openzeppelin/ui-utils';
 
+import type { AnalyticsNetworkContext } from '../../hooks/useBuilderAnalytics';
 import { useBuilderAnalytics } from '../../hooks/useBuilderAnalytics';
 
 export interface WizardStep {
@@ -20,6 +21,8 @@ interface WizardLayoutProps {
   isWidgetExpanded?: boolean;
   currentStepIndex: number;
   onStepChange: (index: number) => void;
+  /** Network context attached to `wizard_step` analytics events. */
+  analyticsContext?: AnalyticsNetworkContext;
 }
 
 export function WizardLayout({
@@ -29,6 +32,7 @@ export function WizardLayout({
   isWidgetExpanded = false,
   currentStepIndex,
   onStepChange,
+  analyticsContext,
 }: WizardLayoutProps) {
   const isFirstStep = currentStepIndex === 0;
   const isLastStep = currentStepIndex === steps.length - 1;
@@ -43,7 +47,7 @@ export function WizardLayout({
     const nextStep = steps[nextStepIndex];
 
     // Track wizard step progression
-    trackWizardStep(nextStepIndex + 1, nextStep.id); // Step numbers are 1-indexed for analytics
+    trackWizardStep(nextStepIndex + 1, nextStep.id, analyticsContext); // Step numbers are 1-indexed for analytics
 
     onStepChange(nextStepIndex);
   };
@@ -54,7 +58,7 @@ export function WizardLayout({
       const prevStep = steps[prevStepIndex];
 
       // Track wizard step progression (going backwards)
-      trackWizardStep(prevStepIndex + 1, prevStep.id); // Step numbers are 1-indexed for analytics
+      trackWizardStep(prevStepIndex + 1, prevStep.id, analyticsContext); // Step numbers are 1-indexed for analytics
 
       onStepChange(prevStepIndex);
     }
