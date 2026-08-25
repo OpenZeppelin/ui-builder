@@ -93,13 +93,29 @@ The analytics feature flag controls:
 
 ### Tracked Events
 
-When analytics is enabled, the following user interactions **within the UI Builder** are tracked:
+When analytics is enabled, the following GA4 events are sent from **within the UI Builder**. All
+events are fired from `src/hooks/useBuilderAnalytics.ts` (builder-specific) or the shared
+`useAnalytics` hook from `@openzeppelin/ui-react` (`page_view`, `network_selected`).
 
-- **Ecosystem Selection**: When users select blockchain ecosystems (EVM, Solana, etc.) in the builder
-- **Network Selection**: When users choose specific networks within ecosystems in the builder
-- **Export Actions**: When users click the "Export" button to generate standalone applications
-- **Wizard Progress**: Each step progression through the form builder wizard interface
-- **Sidebar Interactions**: Import/Export button clicks in the storage sidebar of the builder
+Every string parameter is normalised to `"unknown"` when the value is missing or empty, so GA4
+event-scoped custom dimensions are never dropped for lack of a value.
+
+| Event                        | Parameters                                                        | Fires when                                                                                | Call site                                                         |
+| ---------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `page_view`                  | `page_title`, `page_location` (GA defaults)                       | Once on initial load, automatically by `gtag('config')`. No manual `trackPageView` calls. | `AnalyticsProvider` in `App.tsx`                                  |
+| `ecosystem_selected`         | `ecosystem`                                                       | User picks an ecosystem in the chain selector, or a deep link changes the ecosystem       | `ChainSelector.tsx`, `useBuilderLifecycle.ts`                     |
+| `network_selected`           | `network_id`, `ecosystem`                                         | User picks a network, or a deep link resolves a network                                   | `ChainSelector.tsx`, `useBuilderLifecycle.ts`                     |
+| `wizard_step`                | `step_number` (1-indexed), `step_name`, `network_id`, `ecosystem` | Once per Next/Back click; describes the step being entered                                | `Common/WizardLayout.tsx`                                         |
+| `export_clicked`             | `export_type`, `network_id`, `ecosystem`                          | Once after an app export succeeds                                                         | `UIBuilder/hooks/useCompleteStepState.ts`                         |
+| `sidebar_interaction`        | `action` (`import` \| `export`), `network_id`, `ecosystem`        | Once per sidebar Import/Export click                                                      | `Sidebar/AppSidebar/MainActions.tsx`                              |
+| `transaction_executed`       | `network_id`, `ecosystem`, `execution_method`                     | A transaction succeeds from the form preview                                              | `StepFormCustomization/FormPreview.tsx`                           |
+| `contract_ui_created`        | `network_id`, `ecosystem`, `total_records`                        | Once when a new Contract UI record is first persisted by auto-save                        | `UIBuilder/hooks/builder/useAutoSave.ts`                          |
+| `relayer_service_configured` | `network_id`, `ecosystem`                                         | Once per mount when relayer URL, API key and relayer selection are all set                | `StepFormCustomization/components/RelayerConfiguration/index.tsx` |
+| `uikit_changed`              | `network_id`, `ecosystem`, `uikit_name`                           | User selects a UI kit in builder settings                                                 | `StepFormCustomization/components/UiKitSettings.tsx`              |
+| `address_book_opened`        | `network_id`, `ecosystem`                                         | Once when the address book dialog opens (not on network changes while open)               | `AddressBook/AddressBookDialog.tsx`                               |
+
+GA4 event-scoped custom dimensions to register: `ecosystem`, `network_id`, `step_name`,
+`step_number`, `export_type`, `action`, `execution_method`, `uikit_name`, `total_records`.
 
 **Important:** These analytics only track user behavior within the builder tool itself. The standalone applications that users export do not contain any analytics tracking.
 

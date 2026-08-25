@@ -83,24 +83,61 @@ describe('useBuilderAnalytics', () => {
   });
 
   describe('trackExportAction', () => {
-    it('should track export action event', () => {
+    it('should track export action event with network context', () => {
+      const { result } = renderHook(() => useBuilderAnalytics());
+
+      result.current.trackExportAction('react-vite', {
+        networkId: 'ethereum-mainnet',
+        ecosystem: 'evm',
+      });
+
+      expect(mockTrackEvent).toHaveBeenCalledWith('export_clicked', {
+        export_type: 'react-vite',
+        network_id: 'ethereum-mainnet',
+        ecosystem: 'evm',
+      });
+    });
+
+    it('should fall back to unknown when context is missing', () => {
       const { result } = renderHook(() => useBuilderAnalytics());
 
       result.current.trackExportAction('react-vite');
 
-      expect(mockTrackEvent).toHaveBeenCalledWith('export_clicked', { export_type: 'react-vite' });
+      expect(mockTrackEvent).toHaveBeenCalledWith('export_clicked', {
+        export_type: 'react-vite',
+        network_id: 'unknown',
+        ecosystem: 'unknown',
+      });
     });
   });
 
   describe('trackWizardStep', () => {
-    it('should track wizard step progression', () => {
+    it('should track wizard step progression with network context', () => {
       const { result } = renderHook(() => useBuilderAnalytics());
 
-      result.current.trackWizardStep(2, 'configure');
+      result.current.trackWizardStep(2, 'configure', {
+        networkId: 'stellar-testnet',
+        ecosystem: 'stellar',
+      });
 
       expect(mockTrackEvent).toHaveBeenCalledWith('wizard_step', {
         step_number: 2,
         step_name: 'configure',
+        network_id: 'stellar-testnet',
+        ecosystem: 'stellar',
+      });
+    });
+
+    it('should normalise null/empty context values to unknown', () => {
+      const { result } = renderHook(() => useBuilderAnalytics());
+
+      result.current.trackWizardStep(1, 'select-chain', { networkId: null, ecosystem: '' });
+
+      expect(mockTrackEvent).toHaveBeenCalledWith('wizard_step', {
+        step_number: 1,
+        step_name: 'select-chain',
+        network_id: 'unknown',
+        ecosystem: 'unknown',
       });
     });
 
@@ -116,12 +153,31 @@ describe('useBuilderAnalytics', () => {
   });
 
   describe('trackSidebarInteraction', () => {
-    it('should track sidebar interaction event', () => {
+    it('should track sidebar interaction event with network context', () => {
       const { result } = renderHook(() => useBuilderAnalytics());
 
-      result.current.trackSidebarInteraction('import');
+      result.current.trackSidebarInteraction('import', {
+        networkId: 'polygon-mainnet',
+        ecosystem: 'evm',
+      });
 
-      expect(mockTrackEvent).toHaveBeenCalledWith('sidebar_interaction', { action: 'import' });
+      expect(mockTrackEvent).toHaveBeenCalledWith('sidebar_interaction', {
+        action: 'import',
+        network_id: 'polygon-mainnet',
+        ecosystem: 'evm',
+      });
+    });
+
+    it('should fall back to unknown when context is missing', () => {
+      const { result } = renderHook(() => useBuilderAnalytics());
+
+      result.current.trackSidebarInteraction('export');
+
+      expect(mockTrackEvent).toHaveBeenCalledWith('sidebar_interaction', {
+        action: 'export',
+        network_id: 'unknown',
+        ecosystem: 'unknown',
+      });
     });
 
     it('should track different actions', () => {
@@ -186,6 +242,30 @@ describe('useBuilderAnalytics', () => {
         network_id: 'ethereum-mainnet',
         ecosystem: 'evm',
         uikit_name: 'rainbowkit',
+      });
+    });
+  });
+
+  describe('unknown fallbacks', () => {
+    it('should never emit empty string dimensions', () => {
+      const { result } = renderHook(() => useBuilderAnalytics());
+
+      result.current.trackEcosystemSelection('');
+      result.current.trackTransactionExecuted('', '', '');
+      result.current.trackUiKitChanged('', 'evm', '');
+
+      expect(mockTrackEvent).toHaveBeenNthCalledWith(1, 'ecosystem_selected', {
+        ecosystem: 'unknown',
+      });
+      expect(mockTrackEvent).toHaveBeenNthCalledWith(2, 'transaction_executed', {
+        network_id: 'unknown',
+        ecosystem: 'unknown',
+        execution_method: 'unknown',
+      });
+      expect(mockTrackEvent).toHaveBeenNthCalledWith(3, 'uikit_changed', {
+        network_id: 'unknown',
+        ecosystem: 'evm',
+        uikit_name: 'unknown',
       });
     });
   });
