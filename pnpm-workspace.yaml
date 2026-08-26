@@ -1,4 +1,3 @@
-# Workspace adapter folders under packages/adapter-* publish as @openzeppelin/adapter-*.
 shamefullyHoist: true
 packages:
   # Include all packages in the packages directory
@@ -14,6 +13,8 @@ minimumReleaseAgeExclude:
   - '@openzeppelin/*'
   - 'vitest'
   - '@vitest/*'
+  # Renovate security update: vite@7.3.5
+  - vite@7.3.5
 overrides:
   # @metamask/eth-json-rpc-provider published no `license` field (and no LICENSE
   # file) for 1.0.0-2.1.0; 2.2.0 onwards are ISC and ship the licence text.
@@ -22,7 +23,7 @@ overrides:
   # dist/*.js -- and 2.2.0 still exports that type, so crossing the major here is
   # type-only. Reached via @coinbase/wallet-sdk from @wagmi/connectors.
   '@metamask/eth-json-rpc-provider': ^2.2.0
-  vite: 7.3.2
+  vite: 7.3.5
   use-sync-external-store: ^1.2.0
   valtio: ^1.13.2
   '@paulmillr/qr': 'npm:qr@^0.5.0'
