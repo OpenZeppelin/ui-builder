@@ -73,6 +73,8 @@ pnpm dev
 - `pnpm storybook` - Start Storybook development server
 - `pnpm build-storybook` - Build Storybook for production
 - `pnpm commit` - Interactive commit message builder (Commitizen)
+- `pnpm format` - Format all packages using the shared Prettier configuration
+- `pnpm fix-all` - Format all packages and automatically fix lint issues
 
 ## Coding Standards
 
