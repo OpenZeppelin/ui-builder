@@ -14,6 +14,8 @@ minimumReleaseAgeExclude:
   - '@openzeppelin/*'
   - 'vitest'
   - '@vitest/*'
+  # Renovate security update: pnpm@11.11.0
+  - pnpm@11.11.0
 overrides:
   # @metamask/eth-json-rpc-provider published no `license` field (and no LICENSE
   # file) for 1.0.0-2.1.0; 2.2.0 onwards are ISC and ship the licence text.
