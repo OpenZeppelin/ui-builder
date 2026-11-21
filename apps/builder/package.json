@@ -77,7 +77,7 @@
     "use-deep-compare-effect": "^1.8.1",
     "viem": "^2.47.10",
     "wagmi": "^2.19.5",
-    "zod": "^3.25.76",
+    "zod": "^4.0.0",
     "zustand": "^5.0.12"
   },
   "devDependencies": {
